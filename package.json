@@ -1,0 +1,17 @@
+{
+  "name": "mbt-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "type-check": "tsc --noEmit -p tsconfig.base.json",
+    "clean": "rimraf packages/*/dist"
+  },
+  "pnpm": {
+    "overrides": {}
+  }
+}
