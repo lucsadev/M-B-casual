@@ -4,15 +4,15 @@ Monorepo para la tienda online **M&B Trend** — indumentaria y accesorios.
 
 ## Stack
 
-| Capa | Tecnología |
-|------|-----------|
-| **Monorepo** | pnpm workspaces |
-| **Lenguaje** | TypeScript 5.x |
-| **Web** | React 18+ / Vite 5+ / Tailwind CSS v4 |
-| **Mobile** | React Native / Expo SDK 52+ / NativeWind v5 |
-| **Backend** | Supabase (Postgres, Auth, Storage, Edge Functions) |
-| **Cache** | TanStack Query |
-| **Validación** | Zod |
+| Capa           | Tecnología                                         |
+| -------------- | -------------------------------------------------- |
+| **Monorepo**   | pnpm workspaces                                    |
+| **Lenguaje**   | TypeScript 5.x                                     |
+| **Web**        | React 18+ / Vite 5+ / Tailwind CSS v4              |
+| **Mobile**     | React Native / Expo SDK 52+ / NativeWind v5        |
+| **Backend**    | Supabase (Postgres, Auth, Storage, Edge Functions) |
+| **Cache**      | TanStack Query                                     |
+| **Validación** | Zod                                                |
 
 ## Inicio rápido
 
@@ -41,9 +41,9 @@ m&b/
 
 ## Scripts
 
-| Comando | Descripción |
-|---------|-----------|
-| `pnpm lint` | Ejecutar ESLint |
-| `pnpm format` | Formatear con Prettier |
+| Comando           | Descripción                |
+| ----------------- | -------------------------- |
+| `pnpm lint`       | Ejecutar ESLint            |
+| `pnpm format`     | Formatear con Prettier     |
 | `pnpm type-check` | Verificar tipos TypeScript |
-| `pnpm clean` | Limpiar directorios dist |
+| `pnpm clean`      | Limpiar directorios dist   |

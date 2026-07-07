@@ -1,0 +1,49 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Proyecto greenfield: tienda M&B Trend (indumentaria y accesorios).
+  Stack: React Native (Expo SDK 52+) + React 18+ (Vite 5+) + Supabase.
+  Monorepo con pnpm workspaces. Arquitectura limpia, RLS-first.
+  Web: Tailwind CSS v4, shadcn/ui. Mobile: NativeWind v5, Expo Router.
+  Cache: TanStack Query. Persistencia mobile: MMKV.
+  Plan de 7 fases definido en PLAN_ARQUITECTURA.md.
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    - tdd: false
+    - test_command: ''
+  verify:
+    test_command: ''
+    build_command: ''
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+
+testing:
+  strict_tdd: false
+  test_runner: null
+  layers:
+    unit: false
+    integration: false
+    e2e: false
+  coverage: false
+  quality:
+    linter: false
+    type_checker: false
+    formatter: false
+  note: >
+    Strict TDD disabled because no test runner is installed.
+    Project is greenfield — configure Vitest/Jest at subproject init.
