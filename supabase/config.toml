@@ -1,0 +1,49 @@
+# Supabase Project Configuration
+# Generated for M&B Trend — Fase 0 Foundation
+# Region: sa-east-1 (São Paulo, closest to Argentina)
+
+[project]
+project_id = "mbt-trend"
+name = "M&B Trend"
+platform = "sa-east-1"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "auth", "storage"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+enabled = true
+port = 54322
+# Shadow database for migrations diffing
+shadow_port = 54320
+major_version = 15
+
+[auth]
+enabled = true
+# Default provider: email/password
+# Additional providers (SMS, OAuth) configured later per Phase 3
+sites = ["http://localhost:5173", "http://localhost:3000"]
+additional_redirect_urls = []
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enabled = true
+# Double confirmation disabled for MVP — enable in production
+double_confirm_changes = false
+enable_confirmations = false
+# Secure minimum password length
+min_password_length = 8
+
+# Rate limiting (Supabase defaults)
+[auth.sessions]
+timebox = 86400  # 24 hours
+
+[storage]
+enabled = true
+file_size_limit = 5242880  # 5MB
+# Allowed MIME types for product images
+mime_types = ["image/jpeg", "image/png", "image/webp", "image/avif"]
