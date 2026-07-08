@@ -5,3 +5,10 @@ export type { Customer } from './customer.js';
 export type { Purchase, PurchaseItem } from './purchase.js';
 export type { Expense } from './expense.js';
 export type { CashMovement, CashMovementType } from './finance.js';
+export type {
+  CatalogFilters,
+  CatalogSort,
+  PaginationParams,
+  PaginatedResponse,
+} from './catalog.js';
+export type { CartItem, ShippingAddress, CartSummary } from './cart.js';

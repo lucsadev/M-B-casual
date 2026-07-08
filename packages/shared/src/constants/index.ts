@@ -8,3 +8,7 @@ export { ORDER_STATUS } from './order-status.js';
 export type { OrderStatusConstant } from './order-status.js';
 export { PAYMENT_METHODS } from './payment-methods.js';
 export type { PaymentMethodConstant } from './payment-methods.js';
+export { SORT_OPTIONS } from './sort-options.js';
+export type { SortOption } from './sort-options.js';
+export { SHIPPING_COST, FREE_SHIPPING_MIN, calculateTotal } from './shipping.js';
+export * from './payment.js';

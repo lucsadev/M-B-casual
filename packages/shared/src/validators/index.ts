@@ -5,3 +5,5 @@ export { customerSchema, customerCreateSchema } from './customer.js';
 export { purchaseSchema, purchaseItemSchema } from './purchase.js';
 export { expenseSchema, expenseCreateSchema } from './expense.js';
 export { cashMovementSchema } from './finance.js';
+export { cartItemSchema, shippingAddressSchema, checkoutSchema } from './cart.js';
+export type { CartItemInput, ShippingAddressInput, CheckoutInput } from './cart.js';
