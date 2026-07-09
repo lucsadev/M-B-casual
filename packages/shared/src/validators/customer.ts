@@ -44,7 +44,7 @@ export const profileUpdateSchema = z.object({
     .min(7, 'El teléfono debe tener al menos 7 dígitos')
     .optional()
     .nullable(),
-  address: z.record(z.unknown()).optional().nullable(),
+  address: z.record(z.string(), z.unknown()).optional().nullable(),
 });
 
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;

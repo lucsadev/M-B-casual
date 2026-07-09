@@ -24,7 +24,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLLIElement>(null);
 
   // Close dropdown on outside click
   useEffect(() => {

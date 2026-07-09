@@ -73,15 +73,15 @@ export async function updateProfile(
   userId: string,
   input: ProfileUpdateInput,
 ): Promise<void> {
-  const updateData: Record<string, unknown> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateData: any = {};
 
   if (input.firstName !== undefined) updateData.first_name = input.firstName;
   if (input.lastName !== undefined) updateData.last_name = input.lastName;
   if (input.phone !== undefined) updateData.phone = input.phone;
   if (input.address !== undefined) updateData.address = input.address;
 
-  const { error } = await supabase
-    .from('customers')
+  const { error } = await (supabase.from('customers') as any)
     .update(updateData)
     .eq('user_id', userId);
 
