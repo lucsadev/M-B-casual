@@ -42,7 +42,6 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
     setLoggingOut(true);
     try {
       await logout();
-      toast.success('Sesión cerrada');
       navigate('/');
     } catch {
       toast.error('Error al cerrar sesión');
@@ -53,16 +52,27 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
     }
   };
 
+  // Admin check
+  const isAdmin = user?.app_metadata?.role === 'admin';
+
   // Compute display name from profile or fall back to metadata
   const displayName = !profileLoading && profile
     ? `${profile.firstName}${profile.lastName ? ` ${profile.lastName.charAt(0)}.` : ''}`
     : user?.user_metadata?.nombre ?? null;
 
   return (
-    <header className="border-b border-[#E8E4D9] bg-[#FFFFF7]">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        <Link to="/" className="text-xl font-bold text-[#1A1A1A]">
-          M&B Trend
+    <header className="border-b border-[#E2E2DC] bg-[#FFFFFF]">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
+        <Link to="/" className="flex flex-col items-start leading-tight text-[#1A1A1A] hover:opacity-80 transition-opacity" aria-label="M&B Casual - Inicio">
+          <div className="flex items-baseline gap-2">
+            <span className="font-brand text-4xl font-bold">
+              M
+              <span className="text-2xl relative top-[-0.1em] mx-1">&</span>
+              B
+            </span>
+            <span className="font-casual font-light text-sm tracking-widest uppercase">Casual</span>
+          </div>
+          <span className="font-tagline text-2xl opacity-70 mt-0.5 hidden sm:inline">Estilo casual para todos tus d&iacute;as</span>
         </Link>
 
         {/* Desktop nav */}
@@ -70,7 +80,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
           <li>
             <Link
               to="/catalogo"
-              className="text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
+              className="text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
             >
               Catálogo
             </Link>
@@ -80,7 +90,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
             <li className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((prev) => !prev)}
-                className="flex items-center gap-1 text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
+                className="flex items-center gap-1 text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
               >
                 <span>{displayName ?? 'Mi perfil'}</span>
                 <svg
@@ -98,22 +108,34 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-[#E8E4D9] bg-[#FFFFF7] py-1 shadow-lg">
-                  <Link
-                    to="/perfil"
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E8E4D9]/30"
-                  >
-                    Perfil
-                  </Link>
-                  <Link
-                    to="/perfil#ordenes"
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E8E4D9]/30"
-                  >
-                    Mis órdenes
-                  </Link>
-                  <hr className="my-1 border-[#E8E4D9]" />
+                <div className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-[#E2E2DC] bg-[#FFFFFF] py-1 shadow-lg">
+                  {isAdmin ? (
+                    <Link
+                      to="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-4 py-2 text-sm font-medium text-[#E8836B] transition-colors hover:bg-[#E2E2DC]/30"
+                    >
+                      Administración
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        to="/perfil"
+                        onClick={() => setMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
+                      >
+                        Perfil
+                      </Link>
+                      <Link
+                        to="/perfil#ordenes"
+                        onClick={() => setMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
+                      >
+                        Mis órdenes
+                      </Link>
+                    </>
+                  )}
+                  <hr className="my-1 border-[#E2E2DC]" />
                   <button
                     onClick={handleLogout}
                     disabled={loggingOut}
@@ -129,7 +151,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
               <li>
                 <Link
                   to="/login"
-                  className="text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
+                  className="text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
                 >
                   Ingresar
                 </Link>
@@ -137,7 +159,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
               <li>
                 <Link
                   to="/register"
-                  className="rounded-md bg-[#D4A853] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#D4A853]/90"
+                  className="rounded-md bg-[#E8836B] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#E8836B]/90"
                 >
                   Crear cuenta
                 </Link>
@@ -186,13 +208,13 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-[#E8E4D9] bg-[#FFFFF7] px-4 pb-4 md:hidden">
+        <div className="border-t border-[#E2E2DC] bg-[#FFFFFF] px-4 pb-4 md:hidden">
           <ul className="flex flex-col gap-3 pt-3">
             <li>
               <Link
                 to="/catalogo"
                 onClick={() => setMobileOpen(false)}
-                className="block text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
+                className="block text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
               >
                 Catálogo
               </Link>
@@ -200,29 +222,43 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
 
             {authLoading ? null : user ? (
               <>
-                <li className="border-t border-[#E8E4D9]/50 pt-3">
+                <li className="border-t border-[#E2E2DC]/50 pt-3">
                   <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#1A1A1A]/50">
                     {displayName ?? 'Mi cuenta'}
                   </p>
                 </li>
-                <li>
-                  <Link
-                    to="/perfil"
-                    onClick={() => setMobileOpen(false)}
-                    className="block text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
-                  >
-                    Perfil
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/perfil#ordenes"
-                    onClick={() => setMobileOpen(false)}
-                    className="block text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
-                  >
-                    Mis órdenes
-                  </Link>
-                </li>
+                {isAdmin ? (
+                  <li>
+                    <Link
+                      to="/admin"
+                      onClick={() => setMobileOpen(false)}
+                      className="block font-medium text-[#E8836B] transition-colors hover:text-[#E8836B]/80"
+                    >
+                      Administración
+                    </Link>
+                  </li>
+                ) : (
+                  <>
+                    <li>
+                      <Link
+                        to="/perfil"
+                        onClick={() => setMobileOpen(false)}
+                        className="block text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+                      >
+                        Perfil
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/perfil#ordenes"
+                        onClick={() => setMobileOpen(false)}
+                        className="block text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+                      >
+                        Mis órdenes
+                      </Link>
+                    </li>
+                  </>
+                )}
                 <li>
                   <button
                     onClick={handleLogout}
@@ -235,11 +271,11 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
               </>
             ) : (
               <>
-                <li className="border-t border-[#E8E4D9]/50 pt-3">
+                <li className="border-t border-[#E2E2DC]/50 pt-3">
                   <Link
                     to="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
+                    className="block text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
                   >
                     Ingresar
                   </Link>
@@ -248,7 +284,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
                   <Link
                     to="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-[#1A1A1A] transition-colors hover:text-[#D4A853]"
+                    className="block text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
                   >
                     Crear cuenta
                   </Link>
@@ -277,7 +313,7 @@ export function RootLayout() {
     <AuthProvider>
       <CartProvider>
         <SEO
-          title="M&B Trend — Moda y Accesorios"
+          title="M & B Casual — Moda y Accesorios"
           description="Tienda online de indumentaria y accesorios. Descubrí nuestra colección de moda urbana con personalidad única."
           path={location.pathname}
         />
@@ -288,8 +324,8 @@ export function RootLayout() {
             <Outlet />
           </main>
 
-          <footer className="border-t border-[#E8E4D9] bg-[#FFFFF7] py-6 text-center text-sm text-[#1A1A1A]">
-            <p>&copy; {new Date().getFullYear()} M&B Trend. Todos los derechos reservados.</p>
+          <footer className="border-t border-[#E2E2DC] bg-[#FFFFFF] py-6 text-center text-sm text-[#1A1A1A]">
+            <p>&copy; {new Date().getFullYear()} M & B Casual. Todos los derechos reservados.</p>
           </footer>
 
           {/* Cart sidebar */}

@@ -123,14 +123,14 @@ export function OptimizedImage({
     >
       {/* Skeleton placeholder while loading */}
       {status === 'loading' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#F5F5F0]">
+        <div className="absolute inset-0 flex items-center justify-center bg-[#F0F0EC]">
           <ImagePlaceholderIcon />
         </div>
       )}
 
       {/* Error fallback */}
       {status === 'error' ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#F5F5F0]">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#F0F0EC]">
           <ImageErrorIcon />
           <span className="text-xs text-[#1A1A1A]/40">Sin imagen</span>
         </div>

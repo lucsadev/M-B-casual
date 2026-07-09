@@ -46,7 +46,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="full_name"
           type="text"
           {...register('full_name')}
-          className="w-full rounded-md border border-[#E8E4D9] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#D4A853] focus:outline-none focus:ring-1 focus:ring-[#D4A853]"
+          className="w-full rounded-md border border-[#E2E2DC] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#E8836B] focus:outline-none focus:ring-1 focus:ring-[#E8836B]"
           placeholder="Juan Pérez"
         />
         {errors.full_name && (
@@ -66,7 +66,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="street"
           type="text"
           {...register('street')}
-          className="w-full rounded-md border border-[#E8E4D9] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#D4A853] focus:outline-none focus:ring-1 focus:ring-[#D4A853]"
+          className="w-full rounded-md border border-[#E2E2DC] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#E8836B] focus:outline-none focus:ring-1 focus:ring-[#E8836B]"
           placeholder="Calle y número"
         />
         {errors.street && (
@@ -87,7 +87,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="city"
             type="text"
             {...register('city')}
-            className="w-full rounded-md border border-[#E8E4D9] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#D4A853] focus:outline-none focus:ring-1 focus:ring-[#D4A853]"
+            className="w-full rounded-md border border-[#E2E2DC] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#E8836B] focus:outline-none focus:ring-1 focus:ring-[#E8836B]"
             placeholder="Buenos Aires"
           />
           {errors.city && (
@@ -105,7 +105,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="state"
             type="text"
             {...register('state')}
-            className="w-full rounded-md border border-[#E8E4D9] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#D4A853] focus:outline-none focus:ring-1 focus:ring-[#D4A853]"
+            className="w-full rounded-md border border-[#E2E2DC] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#E8836B] focus:outline-none focus:ring-1 focus:ring-[#E8836B]"
             placeholder="CABA"
           />
           {errors.state && (
@@ -127,7 +127,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="zip_code"
             type="text"
             {...register('zip_code')}
-            className="w-full rounded-md border border-[#E8E4D9] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#D4A853] focus:outline-none focus:ring-1 focus:ring-[#D4A853]"
+            className="w-full rounded-md border border-[#E2E2DC] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#E8836B] focus:outline-none focus:ring-1 focus:ring-[#E8836B]"
             placeholder="1000"
           />
           {errors.zip_code && (
@@ -145,7 +145,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="phone"
             type="tel"
             {...register('phone')}
-            className="w-full rounded-md border border-[#E8E4D9] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#D4A853] focus:outline-none focus:ring-1 focus:ring-[#D4A853]"
+            className="w-full rounded-md border border-[#E2E2DC] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#E8836B] focus:outline-none focus:ring-1 focus:ring-[#E8836B]"
             placeholder="+54 11 1234 5678"
           />
           {errors.phone && (
@@ -166,7 +166,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="notes"
           rows={2}
           {...register('notes')}
-          className="w-full rounded-md border border-[#E8E4D9] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#D4A853] focus:outline-none focus:ring-1 focus:ring-[#D4A853] resize-none"
+          className="w-full rounded-md border border-[#E2E2DC] bg-white px-3 py-2 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:border-[#E8836B] focus:outline-none focus:ring-1 focus:ring-[#E8836B] resize-none"
           placeholder="Indicaciones para el envío"
         />
       </div>

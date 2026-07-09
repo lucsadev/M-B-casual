@@ -96,7 +96,7 @@ function SortableHeader({ column, sort, onSort }: SortableHeaderProps) {
       <span className="inline-flex items-center gap-1">
         {column.label}
         {isActive && (
-          <span className="text-[#D4A853]">
+          <span className="text-[#E8836B]">
             {sort.direction === 'asc' ? '↑' : '↓'}
           </span>
         )}
@@ -167,7 +167,7 @@ export function ProfitabilityTable({ data, loading }: ProfitabilityTableProps) {
   }, [data, sort]);
 
   return (
-    <div className="rounded-lg border border-[#E8E4D9] bg-white">
+    <div className="rounded-lg border border-[#E2E2DC] bg-white">
       {loading ? (
         <div className="p-6">
           <Skeleton className="mb-4 h-5 w-48" />
@@ -181,7 +181,7 @@ export function ProfitabilityTable({ data, loading }: ProfitabilityTableProps) {
         </div>
       ) : (
         <>
-          <div className="border-b border-[#E8E4D9] px-6 py-4">
+          <div className="border-b border-[#E2E2DC] px-6 py-4">
             <h3 className="text-lg font-semibold text-[#1A1A1A]">
               Rentabilidad por producto
             </h3>
@@ -189,7 +189,7 @@ export function ProfitabilityTable({ data, loading }: ProfitabilityTableProps) {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-[#F5F5F0]">
+                <TableRow className="bg-[#F0F0EC]">
                   {COLUMNS.map((col) => (
                     <SortableHeader
                       key={col.field}

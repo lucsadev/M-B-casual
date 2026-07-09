@@ -17,24 +17,31 @@ import { supabase } from '@/lib/supabase';
  * Map Supabase Auth API error messages to user-facing Spanish strings.
  */
 function parseAuthError(error: unknown): string {
+  if (!error) return 'Ocurrió un error inesperado';
+
   const message =
-    error instanceof Error ? error.message : 'Ocurrió un error inesperado';
+    (error as any)?.message ||
+    (error as any)?.error_description ||
+    (error as any)?.msg ||
+    (error instanceof Error ? error.message : '');
 
-  // Known Supabase error patterns
-  if (message.includes('Invalid login credentials')) {
-    return 'Email o contraseña incorrectos';
-  }
-  if (message.includes('Email not confirmed')) {
-    return 'Debés confirmar tu email antes de iniciar sesión';
-  }
-  if (message.includes('User not found')) {
-    return 'No existe una cuenta con este email';
-  }
-  if (message.includes('rate_limit')) {
-    return 'Demasiados intentos. Esperá unos minutos y volvé a intentar.';
+  if (message) {
+    if (message.includes('Invalid login credentials')) {
+      return 'Email o contraseña incorrectos';
+    }
+    if (message.includes('Email not confirmed')) {
+      return 'Debés confirmar tu email antes de iniciar sesión';
+    }
+    if (message.includes('User not found')) {
+      return 'No existe una cuenta con este email';
+    }
+    if (message.includes('rate_limit')) {
+      return 'Demasiados intentos. Esperá unos minutos y volvé a intentar.';
+    }
+    return message;
   }
 
-  return message;
+  return 'Error al iniciar sesión. Probá de nuevo más tarde.';
 }
 
 // ---------------------------------------------------------------------------

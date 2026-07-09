@@ -1,8 +1,21 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "jsx": "react-jsx",
     "outDir": "./dist",
-    "rootDir": "./src"
+    "declaration": false,
+    "declarationMap": false,
+    "composite": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@mbt/shared": ["../shared/src"]
+    }
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "*.ts",
+    "*.tsx"
+  ]
 }

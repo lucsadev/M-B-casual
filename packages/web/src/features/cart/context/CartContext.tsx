@@ -12,6 +12,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 import type { CartItem, CartSummary } from '@mbt/shared';
@@ -80,7 +81,7 @@ export function CartProvider({ children }: CartProviderProps) {
   const isError = isAuthenticated ? serverCart.isError : false;
 
   // Compute summary for anonymous cart (server cart already has summary)
-  const anonymousSummary: CartSummary = (() => {
+  const anonymousSummary = useMemo<CartSummary>(() => {
     const subtotal = anonymousCart.subtotal;
     const { shipping, total } = calculateTotal(subtotal);
     return {
@@ -90,7 +91,7 @@ export function CartProvider({ children }: CartProviderProps) {
       total,
       item_count: totalItems,
     };
-  })();
+  }, [anonymousCart.subtotal, totalItems]);
 
   const summary = isAuthenticated ? serverCart.summary : anonymousSummary;
 
@@ -126,19 +127,28 @@ export function CartProvider({ children }: CartProviderProps) {
     // No-op for anonymous (already reactive)
   }, [isAuthenticated, serverCart]);
 
+  const contextValue = useMemo<CartContextValue>(() => ({
+    items,
+    totalItems,
+    summary,
+    isLoading,
+    isError,
+    addToCart,
+    isAddingToCart,
+    refetchCart,
+  }), [
+    items,
+    totalItems,
+    summary,
+    isLoading,
+    isError,
+    addToCart,
+    isAddingToCart,
+    refetchCart,
+  ]);
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        totalItems,
-        summary,
-        isLoading,
-        isError,
-        addToCart,
-        isAddingToCart,
-        refetchCart,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

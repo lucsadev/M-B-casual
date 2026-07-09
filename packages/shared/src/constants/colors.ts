@@ -1,5 +1,5 @@
 /**
- * Brand color palette for M&B Trend.
+ * Brand color palette for M & B Casual.
  * Used for UI theme, product variant swatches, and design tokens.
  */
 export interface ColorConstant {

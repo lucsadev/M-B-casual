@@ -88,7 +88,7 @@ export function CartPage() {
         </p>
         <Link
           to="/catalogo"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#D4A853] px-6 text-sm font-medium text-white transition-colors hover:bg-[#D4A853]/90"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#E8836B] px-6 text-sm font-medium text-white transition-colors hover:bg-[#E8836B]/90"
         >
           Explorar catálogo
         </Link>
@@ -111,10 +111,10 @@ export function CartPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Items list */}
         <div className="lg:col-span-2">
-          <div className="rounded-lg border border-[#E8E4D9] bg-white">
+          <div className="rounded-lg border border-[#E2E2DC] bg-white">
             {/* Table header — visible on md+ */}
             <div className={cn(
-              'hidden border-b border-[#E8E4D9] px-4 py-3 md:grid md:grid-cols-12',
+              'hidden border-b border-[#E2E2DC] px-4 py-3 md:grid md:grid-cols-12',
               'text-xs font-medium uppercase tracking-wide text-[#1A1A1A]/50',
             )}>
               <div className="col-span-6">Producto</div>
@@ -123,7 +123,7 @@ export function CartPage() {
               <div className="col-span-2 text-right">Subtotal</div>
             </div>
 
-            <div className="divide-y divide-[#E8E4D9] px-4">
+            <div className="divide-y divide-[#E2E2DC] px-4">
               {items.map((item) => (
                 <CartItemRow
                   key={item.id}
@@ -141,7 +141,7 @@ export function CartPage() {
 
         {/* Summary sidebar */}
         <div className="lg:col-span-1">
-          <div className="sticky top-8 rounded-lg border border-[#E8E4D9] bg-white p-6">
+          <div className="sticky top-8 rounded-lg border border-[#E2E2DC] bg-white p-6">
             <h2 className="mb-4 text-lg font-bold text-[#1A1A1A]">
               Resumen
             </h2>
@@ -172,7 +172,7 @@ export function CartPage() {
               )}
 
               {/* Divider */}
-              <div className="border-t border-[#E8E4D9]" />
+              <div className="border-t border-[#E2E2DC]" />
 
               {/* Total */}
               <div className="flex justify-between text-base font-bold text-[#1A1A1A]">
@@ -184,7 +184,7 @@ export function CartPage() {
             {/* Checkout CTA */}
             <Link
               to="/checkout"
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-[#D4A853] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#D4A853]/90"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-[#E8836B] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#E8836B]/90"
             >
               Iniciar checkout
             </Link>

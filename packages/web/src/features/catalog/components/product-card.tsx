@@ -38,12 +38,12 @@ export function ProductCard({ product }: ProductCardProps) {
     <Link
       to={`/producto/${product.slug}`}
       className={cn(
-        'group flex flex-col overflow-hidden rounded-lg border border-[#E8E4D9] bg-white transition-all',
+        'group flex flex-col overflow-hidden rounded-lg border border-[#E2E2DC] bg-white transition-all',
         'hover:-translate-y-0.5 hover:shadow-lg',
       )}
     >
       {/* Image container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#F5F5F0]">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#F0F0EC]">
         <OptimizedImage
           src={thumbnailUrl}
           alt={product.name}
@@ -53,7 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Tags overlay */}
         <div className="absolute left-2 top-2 flex flex-col gap-1">
           {product.tags.includes('nuevo') && (
-            <Badge variant="default" className="bg-[#D4A853] text-white">
+            <Badge variant="default" className="bg-[#E8836B] text-white">
               Nuevo
             </Badge>
           )}

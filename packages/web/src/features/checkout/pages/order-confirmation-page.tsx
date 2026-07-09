@@ -129,7 +129,7 @@ export function OrderConfirmationPage() {
         </p>
         <Link
           to="/catalogo"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#D4A853] px-6 text-sm font-medium text-white transition-colors hover:bg-[#D4A853]/90"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#E8836B] px-6 text-sm font-medium text-white transition-colors hover:bg-[#E8836B]/90"
         >
           Volver al catálogo
         </Link>
@@ -176,7 +176,7 @@ export function OrderConfirmationPage() {
       </div>
 
       {/* Order number + status */}
-      <div className="mb-8 rounded-lg border border-[#E8E4D9] bg-white p-6">
+      <div className="mb-8 rounded-lg border border-[#E2E2DC] bg-white p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-[#1A1A1A]/50">
@@ -202,15 +202,15 @@ export function OrderConfirmationPage() {
       </div>
 
       {/* Purchased items */}
-      <div className="mb-8 rounded-lg border border-[#E8E4D9] bg-white p-6">
+      <div className="mb-8 rounded-lg border border-[#E2E2DC] bg-white p-6">
         <h2 className="mb-4 text-base font-bold text-[#1A1A1A]">
           Productos comprados
         </h2>
 
-        <div className="divide-y divide-[#E8E4D9]">
+        <div className="divide-y divide-[#E2E2DC]">
           {items.map((item: OrderItemRow & { product?: { name: string; images: string[] } }) => (
             <div key={item.id} className="flex items-start gap-3 py-3">
-              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-[#F5F5F0]">
+              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-[#F0F0EC]">
                 <img
                   src={item.product?.images?.[0] ?? '/placeholder-product.svg'}
                   alt={item.product?.name ?? 'Producto'}
@@ -236,7 +236,7 @@ export function OrderConfirmationPage() {
       </div>
 
       {/* Totals summary */}
-      <div className="mb-8 rounded-lg border border-[#E8E4D9] bg-white p-6">
+      <div className="mb-8 rounded-lg border border-[#E2E2DC] bg-white p-6">
         <h2 className="mb-4 text-base font-bold text-[#1A1A1A]">
           Resumen
         </h2>
@@ -259,14 +259,14 @@ export function OrderConfirmationPage() {
               <span>-{formatPrice(order.discount)}</span>
             </div>
           )}
-          <div className="flex justify-between border-t border-[#E8E4D9] pt-2 text-base font-bold text-[#1A1A1A]">
+          <div className="flex justify-between border-t border-[#E2E2DC] pt-2 text-base font-bold text-[#1A1A1A]">
             <span>Total</span>
             <span>{formatPrice(orderTotal)}</span>
           </div>
         </div>
 
         {/* Payment method */}
-        <div className="mt-4 border-t border-[#E8E4D9] pt-4">
+        <div className="mt-4 border-t border-[#E2E2DC] pt-4">
           <div className="flex justify-between text-sm">
             <span className="text-[#1A1A1A]/60">Método de pago</span>
             <span className="font-medium text-[#1A1A1A]">
@@ -280,7 +280,7 @@ export function OrderConfirmationPage() {
       <div className="text-center">
         <Link
           to="/catalogo"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#D4A853] px-6 text-sm font-medium text-white transition-colors hover:bg-[#D4A853]/90"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#E8836B] px-6 text-sm font-medium text-white transition-colors hover:bg-[#E8836B]/90"
         >
           Volver al catálogo
         </Link>

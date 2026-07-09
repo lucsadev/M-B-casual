@@ -140,7 +140,7 @@ const CARDS: CardConfig[] = [
 
 function CardSkeleton() {
   return (
-    <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+    <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
       <div className="flex items-center justify-between">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-5 w-5 rounded" />
@@ -164,10 +164,10 @@ interface KpiCardProps {
 
 function KpiCard({ label, value, icon, valueClassName }: KpiCardProps) {
   return (
-    <div className="rounded-lg border border-[#E8E4D9] bg-white p-6 transition-shadow hover:shadow-sm">
+    <div className="rounded-lg border border-[#E2E2DC] bg-white p-6 transition-shadow hover:shadow-sm">
       <div className="flex items-center justify-between">
         <p className="text-sm text-[#1A1A1A]/60">{label}</p>
-        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#F5F5F0]">
+        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#F0F0EC]">
           {icon}
         </div>
       </div>

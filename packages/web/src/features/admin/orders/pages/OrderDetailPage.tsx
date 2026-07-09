@@ -60,7 +60,7 @@ export function OrderDetailPage() {
     return (
       <div className="py-12 text-center">
         <p className="text-lg text-[#1A1A1A]/60">Orden no encontrada</p>
-        <Link to="/admin/ordenes" className="mt-2 inline-block text-sm text-[#D4A853] hover:underline">
+        <Link to="/admin/ordenes" className="mt-2 inline-block text-sm text-[#E8836B] hover:underline">
           Volver a órdenes
         </Link>
       </div>
@@ -82,7 +82,7 @@ export function OrderDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/admin/ordenes" className="text-sm text-[#D4A853] hover:underline">
+          <Link to="/admin/ordenes" className="text-sm text-[#E8836B] hover:underline">
             ← Volver a órdenes
           </Link>
           <h1 className="mt-1 text-3xl font-bold text-[#1A1A1A]">
@@ -96,12 +96,12 @@ export function OrderDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Items */}
-        <div className="lg:col-span-2 rounded-lg border border-[#E8E4D9] bg-white p-6">
+        <div className="lg:col-span-2 rounded-lg border border-[#E2E2DC] bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-[#1A1A1A]">Items</h2>
           {order.items.length === 0 ? (
             <p className="text-sm text-[#1A1A1A]/40">Sin items</p>
           ) : (
-            <div className="divide-y divide-[#E8E4D9]">
+            <div className="divide-y divide-[#E2E2DC]">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between py-3">
                   <div>
@@ -115,7 +115,7 @@ export function OrderDetailPage() {
               ))}
             </div>
           )}
-          <div className="mt-4 flex justify-between border-t border-[#E8E4D9] pt-4">
+          <div className="mt-4 flex justify-between border-t border-[#E2E2DC] pt-4">
             <span className="text-lg font-bold text-[#1A1A1A]">Total</span>
             <span className="text-lg font-bold">{formatPrice(order.total)}</span>
           </div>
@@ -124,7 +124,7 @@ export function OrderDetailPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Estado */}
-          <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+          <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
             <h2 className="mb-4 text-lg font-semibold text-[#1A1A1A]">Estado</h2>
             <div className="space-y-3">
               <Select
@@ -144,14 +144,14 @@ export function OrderDetailPage() {
           </div>
 
           {/* Pago */}
-          <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+          <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
             <h2 className="mb-4 text-lg font-semibold text-[#1A1A1A]">Pago</h2>
             <div className="space-y-3">
-              <div className="flex justify-between border-b border-[#E8E4D9] pb-2">
+              <div className="flex justify-between border-b border-[#E2E2DC] pb-2">
                 <span className="text-sm text-[#1A1A1A]/60">Método</span>
                 <span className="text-sm font-medium capitalize">{order.payment_method ?? '—'}</span>
               </div>
-              <div className="flex justify-between border-b border-[#E8E4D9] pb-2">
+              <div className="flex justify-between border-b border-[#E2E2DC] pb-2">
                 <span className="text-sm text-[#1A1A1A]/60">Estado pago</span>
                 <Badge variant={order.payment_status === 'paid' ? 'success' : 'secondary'}>
                   {order.payment_status === 'paid' ? 'Pagado' : 'Pendiente'}
@@ -165,7 +165,7 @@ export function OrderDetailPage() {
           </div>
 
           {/* Cliente */}
-          <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+          <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
             <h2 className="mb-4 text-lg font-semibold text-[#1A1A1A]">Cliente</h2>
             <p className="text-sm text-[#1A1A1A]/60 break-all">{order.customer_id}</p>
             <p className="mt-2 text-xs text-[#1A1A1A]/40">
@@ -175,7 +175,7 @@ export function OrderDetailPage() {
 
           {/* Notas */}
           {order.notes && (
-            <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+            <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
               <h2 className="mb-2 text-lg font-semibold text-[#1A1A1A]">Notas</h2>
               <p className="text-sm text-[#1A1A1A]/60">{order.notes}</p>
             </div>

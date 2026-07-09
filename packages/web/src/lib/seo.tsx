@@ -6,7 +6,7 @@
  *
  * @example
  * <SEO
- *   title="Catálogo — M&B Trend"
+ *   title="Catálogo — M & B Casual"
  *   description="Explorá nuestra colección de indumentaria y accesorios."
  *   path="/catalogo"
  * />
@@ -14,7 +14,7 @@
 import { Helmet } from 'react-helmet-async';
 
 interface SEOProps {
-  /** Page title (suffix " — M&B Trend" is auto-appended when not present) */
+  /** Page title (suffix " — M & B Casual" is auto-appended when not present) */
   title?: string;
   /** Meta description */
   description?: string;
@@ -26,7 +26,7 @@ interface SEOProps {
   path?: string;
 }
 
-const SITE_NAME = 'M&B Trend';
+const SITE_NAME = 'M & B Casual';
 const SITE_URL = 'https://mbtrend.vercel.app';
 const DEFAULT_DESCRIPTION = 'Tienda online de indumentaria y accesorios. Moda urbana con personalidad única.';
 const DEFAULT_OG_IMAGE = '/og-default.jpg';

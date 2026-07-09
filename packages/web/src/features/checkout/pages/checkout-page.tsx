@@ -76,7 +76,7 @@ export function CheckoutPage() {
         </p>
         <Link
           to="/carrito"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#D4A853] px-6 text-sm font-medium text-white transition-colors hover:bg-[#D4A853]/90"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#E8836B] px-6 text-sm font-medium text-white transition-colors hover:bg-[#E8836B]/90"
         >
           Ir al carrito
         </Link>
@@ -98,7 +98,7 @@ export function CheckoutPage() {
         {/* Left column: form */}
         <div className="space-y-8 lg:col-span-3">
           {/* Shipping form */}
-          <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+          <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
             <h2 className="mb-4 text-lg font-bold text-[#1A1A1A]">
               Datos de envío
             </h2>
@@ -106,7 +106,7 @@ export function CheckoutPage() {
           </div>
 
           {/* Payment method selector */}
-          <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+          <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
             <PaymentMethodSelector
               value={paymentMethod}
               onChange={setPaymentMethod}
@@ -131,7 +131,7 @@ export function CheckoutPage() {
               size="lg"
               onClick={handleConfirmOrder}
               disabled={isCheckingOut || !shippingData}
-              className="w-full bg-[#D4A853] text-white hover:bg-[#D4A853]/90 disabled:opacity-50"
+              className="w-full bg-[#E8836B] text-white hover:bg-[#E8836B]/90 disabled:opacity-50"
             >
               {isCheckingOut ? (
                 <span className="flex items-center gap-2">

@@ -1,12 +1,12 @@
 /**
- * HomePage — Landing page for M&B Trend.
+ * HomePage — Landing page for M & B Casual.
  *
  * Route: /
  * Features:
  * - Hero section with call-to-action
  * - Featured products grid (uses useProducts hook)
  * - Category cards navigation
- * - SEO title: "M&B Trend — Indumentaria y Accesorios"
+ * - SEO title: "M & B Casual — Indumentaria y Accesorios"
  */
 import { Link } from 'react-router-dom';
 import { useProducts } from '../hooks/use-products';
@@ -33,7 +33,7 @@ export function HomePage() {
   return (
     <div>
       <SEO
-        title="M&B Trend — Moda y Accesorios"
+        title="M & B Casual — Moda y Accesorios"
         description="Descubrí nuestra colección de indumentaria y accesorios. Moda urbana con personalidad única."
         path="/"
       />
@@ -44,7 +44,7 @@ export function HomePage() {
             <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
               Estilo que
               <br />
-              <span className="text-[#D4A853]">habla por vos</span>
+              <span className="text-[#E8836B]">habla por vos</span>
             </h1>
             <p className="mt-4 text-lg text-white/70 md:text-xl">
               Descubrí nuestra colección de indumentaria y accesorios.
@@ -53,7 +53,7 @@ export function HomePage() {
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 to="/catalogo"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#D4A853] px-8 text-sm font-medium text-white shadow transition-colors hover:bg-[#D4A853]/90"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#E8836B] px-8 text-sm font-medium text-white shadow transition-colors hover:bg-[#E8836B]/90"
               >
                 Ver catálogo
               </Link>
@@ -81,7 +81,7 @@ export function HomePage() {
           </div>
           <Link
             to="/catalogo"
-            className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#D4A853] transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#E8836B] transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             Ver todos →
           </Link>
@@ -90,7 +90,7 @@ export function HomePage() {
         {featuredLoading ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-lg border border-[#E8E4D9]">
+              <div key={i} className="overflow-hidden rounded-lg border border-[#E2E2DC]">
                 <Skeleton className="aspect-[3/4] w-full rounded-none" />
                 <div className="space-y-2 p-3">
                   <Skeleton className="h-4 w-3/4" />
@@ -113,7 +113,7 @@ export function HomePage() {
       </section>
 
       {/* Category cards */}
-      <section className="bg-[#F5F5F0] py-16">
+      <section className="bg-[#F0F0EC] py-16">
         <div className="mx-auto max-w-7xl px-4">
           <h2 className="mb-8 text-center text-2xl font-bold text-[#1A1A1A] md:text-3xl">
             Categorías

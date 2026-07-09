@@ -8,7 +8,8 @@
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
-    "type-check": "tsc --noEmit -p tsconfig.base.json",
+    "type-check": "pnpm -r --if-present type-check",
+    "deploy:vercel": "pnpm --filter web build && vercel --prod",
     "clean": "rimraf packages/*/dist"
   },
   "pnpm": {
@@ -19,6 +20,7 @@
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.7.0",
+    "pg": "^8.22.0",
     "prettier": "^3.9.4",
     "typescript-eslint": "^8.63.0"
   }

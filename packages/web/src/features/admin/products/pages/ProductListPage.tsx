@@ -57,7 +57,7 @@ async function fetchAdminProducts(
   const pagination = buildPagination(page, PAGE_SIZE);
   let query = supabase
     .from('products')
-    .select('*', { count: 'exact' });
+    .select('*, category:categories(name)', { count: 'exact' });
 
   if (search) {
     query = query.ilike('name', `%${search}%`);
@@ -87,9 +87,10 @@ async function fetchAdminProducts(
     }, {});
   }
 
-  const enrichedProducts: AdminProductRow[] = (products ?? []).map((p: ProductRow) => ({
+  const enrichedProducts: AdminProductRow[] = (products ?? []).map((p: any) => ({
     ...p,
     total_stock: stockMap[p.id] ?? 0,
+    category_name: p.category?.name ?? '—',
   }));
 
   return {
@@ -169,7 +170,7 @@ export function ProductListPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border border-[#E8E4D9]">
+      <div className="rounded-md border border-[#E2E2DC]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -218,14 +219,14 @@ export function ProductListPage() {
                       className="h-10 w-10 rounded-md"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#E8E4D9] text-xs text-[#1A1A1A]/40">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#E2E2DC] text-xs text-[#1A1A1A]/40">
                       -
                     </div>
                   )}
                 </TableCell>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell className="text-[#1A1A1A]/60">
-                  {product.category_id?.slice(0, 8)}...
+                  {product.category_name ?? '—'}
                 </TableCell>
                 <TableCell>{formatPrice(product.price)}</TableCell>
                 <TableCell>{product.total_stock}</TableCell>

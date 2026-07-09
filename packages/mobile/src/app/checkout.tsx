@@ -3,13 +3,14 @@
  *
  * Route: /checkout
  * Features:
+ * - Auth guard: redirects to /login with returnUrl if not authenticated
  * - Shipping form (react-hook-form + Zod)
  * - Payment method selector
  * - Order summary (read-only)
  * - "Confirmar orden" button with loading state
  * - Error handling
  */
-import { useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,6 +22,7 @@ import {
 import { Stack, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PAYMENT_METHODS, type PaymentMethodId, type ShippingAddressInput } from '@mbt/shared';
+import { useAuth } from '../features/auth/context/AuthContext';
 import { useCart } from '../features/cart/hooks/use-cart';
 import { useCheckout } from '../features/checkout/hooks/useCheckout';
 import { ShippingForm } from '../features/checkout/components/shipping-form';
@@ -28,7 +30,26 @@ import { OrderSummary } from '../features/checkout/components/order-summary';
 
 export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
-  const { items, summary, isLoading } = useCart();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const { items, summary, isLoading: isCartLoading } = useCart();
+
+  // Auth guard: redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.replace(`/login?returnUrl=/checkout`);
+    }
+  }, [user, isAuthLoading]);
+
+  if (isAuthLoading || !user) {
+    return (
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
+        <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#D4A853" />
+        </View>
+      </View>
+    );
+  }
   const { mutate: checkout, isPending: isCheckingOut } = useCheckout();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>('transferencia');
@@ -51,9 +72,9 @@ export default function CheckoutScreen() {
   }, [shippingData, paymentMethod, checkout]);
 
   // Loading
-  if (isLoading) {
+  if (isCartLoading) {
     return (
-      <View className="flex-1 bg-[#FFFFF7]" style={{ paddingTop: insets.top }}>
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
         <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#D4A853" />
@@ -65,7 +86,7 @@ export default function CheckoutScreen() {
   // Empty cart
   if (items.length === 0) {
     return (
-      <View className="flex-1 bg-[#FFFFF7]" style={{ paddingTop: insets.top }}>
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
         <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
         <View className="flex-1 items-center justify-center px-4">
           <Text className="text-xl font-bold text-[#1A1A1A] mb-2">
@@ -88,7 +109,7 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#FFFFF7]" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
       <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
 
       <ScrollView

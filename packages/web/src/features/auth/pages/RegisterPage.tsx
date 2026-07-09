@@ -288,7 +288,7 @@ export function RegisterPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full bg-[#D4A853] text-white hover:bg-[#D4A853]/90 disabled:opacity-50"
+            className="w-full bg-[#E8836B] text-white hover:bg-[#E8836B]/90 disabled:opacity-50"
             size="lg"
           >
             {isPending ? (
@@ -326,7 +326,7 @@ export function RegisterPage() {
           ¿Ya tenés cuenta?{' '}
           <Link
             to="/login"
-            className="font-medium text-[#D4A853] hover:text-[#D4A853]/80"
+            className="font-medium text-[#E8836B] hover:text-[#E8836B]/80"
           >
             Iniciar sesión
           </Link>

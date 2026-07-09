@@ -13,20 +13,34 @@ import { supabase } from '@/lib/supabase';
 // ---------------------------------------------------------------------------
 
 function parseRegisterError(error: unknown): string {
+  if (!error) return 'Ocurrió un error inesperado';
+
+  // Try extracting a message from various error shapes
   const message =
-    error instanceof Error ? error.message : 'Ocurrió un error inesperado';
+    (error as any)?.message ||
+    (error as any)?.error_description ||
+    (error as any)?.msg ||
+    '';
 
-  if (message.includes('already registered') || message.includes('already exists')) {
-    return 'Este email ya está registrado';
-  }
-  if (message.includes('rate_limit')) {
-    return 'Demasiados intentos. Esperá unos minutos y volvé a intentar.';
-  }
-  if (message.includes('password')) {
-    return 'La contraseña debe tener al menos 6 caracteres';
+  if (message) {
+    if (message.includes('already registered') || message.includes('already exists')) {
+      return 'Este email ya está registrado';
+    }
+    if (message.includes('rate_limit')) {
+      return 'Demasiados intentos. Esperá unos minutos y volvé a intentar.';
+    }
+    if (message.includes('password')) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
+    return message;
   }
 
-  return message;
+  // If no useful message extracted, check if it's an Error instance
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Error al crear la cuenta. Probá de nuevo más tarde.';
 }
 
 // ---------------------------------------------------------------------------

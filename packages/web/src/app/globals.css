@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+/* =============================================================
+ * M & B Casual — Design Tokens & Theme
+ * Tailwind CSS v4 with CSS variables for shadcn/ui theming
+ * =============================================================
+ *
+ * Palette:
+ *   Base:      White (#FFF), Light Gray (#F0F0EC..N)
+ *   Secondary: Light Blue (#C5D9E8), Mint (#B5E2C8)
+ *   Accent:    Coral (#E8836B), Deep Coral (#D46B54)
+ *   Text:      Near Black (#1A1A1A)
+ */
+
+@theme {
+  /* Brand palette — use with text-brand-* / bg-brand-* */
+  --color-brand-black: #1A1A1A;
+  --color-brand-white: #FFFFFF;
+  --color-brand-gray-50: #F8F8F6;
+  --color-brand-gray-100: #F0F0EC;
+  --color-brand-gray-200: #E2E2DC;
+  --color-brand-gray-300: #C8C8C0;
+  --color-brand-blue: #C5D9E8;
+  --color-brand-blue-soft: #E5EFF6;
+  --color-brand-mint: #B5E2C8;
+  --color-brand-mint-soft: #E0F5E8;
+  --color-brand-coral: #E8836B;
+  --color-brand-coral-deep: #D46B54;
+  --color-brand-coral-soft: #FCE8E4;
+  --color-brand-gold: #D4A853;
+
+  /* shadcn/ui theme tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand font */
+  --font-brand: "Cormorant Garamond", serif;
+  --font-casual: "Montserrat", sans-serif;
+  --font-tagline: "Allura", cursive;
+
+  --color-sidebar-background: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius: 0.5rem;
+}
+
+/* Light theme (default) */
+:root {
+  /* Base */
+  --background: #FFFFFF;
+  --foreground: #1A1A1A;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1A;
+
+  /* Primary — near black, clean */
+  --primary: #1A1A1A;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary — light blue */
+  --secondary: #C5D9E8;
+  --secondary-foreground: #1A1A1A;
+
+  /* Muted — light gray */
+  --muted: #F0F0EC;
+  --muted-foreground: #6B6B6B;
+
+  /* Accent — coral */
+  --accent: #E8836B;
+  --accent-foreground: #FFFFFF;
+
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #FFFFFF;
+
+  /* Borders & inputs */
+  --border: #E2E2DC;
+  --input: #E2E2DC;
+  --ring: #E8836B;
+
+  /* Sidebar — light gray base */
+  --sidebar-background: #F8F8F6;
+  --sidebar-foreground: #1A1A1A;
+  --sidebar-primary: #1A1A1A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E5EFF6;
+  --sidebar-accent-foreground: #1A1A1A;
+  --sidebar-border: #E2E2DC;
+  --sidebar-ring: #E8836B;
+}
+
+/* Base reset */
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}

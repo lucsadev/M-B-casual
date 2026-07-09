@@ -1,106 +1,110 @@
 -- =============================================================
--- M&B Trend — Seed Data
--- File: seed.sql
--- Description: Storage buckets and initial seed data
--- Usage: Execute after migration via Supabase CLI or Dashboard SQL
---   supabase db seed  (local)
---   OR paste into Dashboard SQL Editor
+-- M&B Trend — Storage Seed Data
+-- Description: Creates storage buckets and RLS policies for
+--              product images and expense receipts.
+-- NOTE: This file is executed AFTER migrations via seed.sql.
+-- Storage bucket creation cannot be done in migrations because
+-- the storage schema is managed separately by Supabase.
 -- =============================================================
 
 -- =============================================================
--- 1. STORAGE BUCKETS
+-- 1. BUCKETS
 -- =============================================================
 
--- 1.1  product-images — Public bucket for product photos
---      Path pattern: products/{productId}/{fileName}
---      Public SELECT: anyone can view product images
---      INSERT/UPDATE: admin only
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'product-images',
-  'product-images',
-  true,
-  5242880,  -- 5MB
-  array['image/jpeg', 'image/png', 'image/webp', 'image/avif']
-)
-on conflict (id) do nothing;
+-- Create product-images bucket (public read, admin write)
+insert into storage.buckets (id, name, public, created_at)
+values ('product-images', 'product-images', true, now())
+  on conflict (id) do nothing;
 
--- 1.2  receipts — Private bucket for expense receipts
---      Path pattern: receipts/{expenseId}/{fileName}
---      All operations: admin only
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'receipts',
-  'receipts',
-  false,
-  5242880,  -- 5MB
-  array['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
-)
-on conflict (id) do nothing;
+-- Create receipts bucket (admin only)
+insert into storage.buckets (id, name, public, created_at)
+values ('receipts', 'receipts', false, now())
+  on conflict (id) do nothing;
 
 -- =============================================================
 -- 2. STORAGE RLS POLICIES
 -- =============================================================
 
--- 2.1  product-images: public read, admin write
-create policy "Anyone can view product images"
+-- 2.1  Product Images — Public bucket
+--      Anyone can view product images
+--      Only admin can upload, update, or delete
+
+create policy "product-images-public-select"
   on storage.objects for select
   using (bucket_id = 'product-images');
 
-create policy "Admin can upload product images"
+create policy "product-images-admin-insert"
   on storage.objects for insert
   with check (
     bucket_id = 'product-images'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   );
 
-create policy "Admin can update product images"
+create policy "product-images-admin-update"
   on storage.objects for update
   using (
     bucket_id = 'product-images'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   )
   with check (
     bucket_id = 'product-images'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   );
 
-create policy "Admin can delete product images"
+create policy "product-images-admin-delete"
   on storage.objects for delete
   using (
     bucket_id = 'product-images'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   );
 
--- 2.2  receipts: admin only (all operations)
-create policy "Admin can view receipts"
+-- 2.2  Receipts — Private bucket
+--      Only admin can view, upload, update, or delete
+
+create policy "receipts-admin-select"
   on storage.objects for select
   using (
     bucket_id = 'receipts'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   );
 
-create policy "Admin can upload receipts"
+create policy "receipts-admin-insert"
   on storage.objects for insert
   with check (
     bucket_id = 'receipts'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   );
 
-create policy "Admin can update receipts"
+create policy "receipts-admin-update"
   on storage.objects for update
   using (
     bucket_id = 'receipts'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   )
   with check (
     bucket_id = 'receipts'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   );
 
-create policy "Admin can delete receipts"
+create policy "receipts-admin-delete"
   on storage.objects for delete
   using (
     bucket_id = 'receipts'
-    and auth.jwt() ->> 'role' = 'admin'
+    and auth.role() = 'authenticated'
+    and (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin')
   );
+
+-- =============================================================
+-- 3. VERIFICATION (quiet — no output expected)
+-- =============================================================
+-- Run these manually to verify:
+-- select id, name, public from storage.buckets;
+-- select * from storage.policies;

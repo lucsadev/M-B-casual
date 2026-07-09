@@ -39,13 +39,13 @@ Chain strategy: pending
 - [x] 2.3 `features/finance/components/profitability-table.tsx` — sortable table: product, revenue, COGS, margin%, gross profit + color badges
 - [x] 2.4 `features/finance/components/date-range-filter.tsx` — date from/to inputs, 5 quick presets, apply button
 - [x] 2.5 `features/finance/index.ts` — barrel exports for all components, hooks, queries, and types
-- [ ] 2.6 `features/finance/pages/dashboard-page.tsx` — `/admin/finanzas` with KPI cards + chart + profitability table + recent movements
-- [ ] 2.7 Added `getMonthlyChartData` + `getProductProfitability` queries + `useMonthlyChart` + `useProductProfitability` hooks
+- [x] 2.6 `features/finance/pages/dashboard-page.tsx` — `/admin/finanzas` with KPI cards + chart + profitability table + recent movements
+- [x] 2.7 Added `getMonthlyChartData` + `getProductProfitability` queries + `useMonthlyChart` + `useProductProfitability` hooks
 
 ## Phase 3: Integration — Existing Page Updates
 
-- [ ] 3.1 `app/pages/finance-admin.tsx` — add running balance column to cash movements table, integrate `cash_movements_running_balance` view
-- [ ] 3.2 `app/pages/expenses-admin.tsx` — add date range filter (from/to) + `useUpdateExpense` edit capability
-- [ ] 3.3 `app/pages/purchases-admin.tsx` — add supplier name partial match filter + date range filter
-- [ ] 3.4 `app/router.tsx` — update `/admin/finanzas` route to render dashboard-page
-- [ ] 3.5 `app/layouts/admin-layout.tsx` — update sidebar "Caja" label to "Finanzas"
+- [x] 3.1 `features/finance/pages/cash-movements-page.tsx` — new cash movements page at `/admin/caja` with type + date filters, balance summary, and timeline
+- [x] 3.2 `features/finance/pages/expenses-page.tsx` — new expenses CRUD page at `/admin/gastos` with date range filter, edit capability, delete confirmation
+- [x] 3.3 `features/finance/pages/purchases-page.tsx` — new purchases page at `/admin/compras` with supplier + date range filters, line items, confirm button
+- [x] 3.4 `app/router.tsx` — update routes: `/admin/finanzas` → DashboardPage, `/admin/gastos` → ExpensesPage, `/admin/compras` → PurchasesPage, `/admin/caja` → CashMovementsPage
+- [x] 3.5 `app/layouts/admin-layout.tsx` — update sidebar with SVG icons, responsive mobile toggle, breadcrumb header, add "Caja" and "Finanzas" entries

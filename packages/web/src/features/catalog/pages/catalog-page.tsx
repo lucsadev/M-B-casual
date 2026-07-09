@@ -3,7 +3,7 @@
  *
  * Route: /catalogo
  * Reads initial state from URL ?category=...&q=... params.
- * SEO title: "Catálogo — M&B Trend"
+ * SEO title: "Catálogo — M & B Casual"
  */
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { SearchBar } from '../components/search-bar';
@@ -17,7 +17,7 @@ export function CatalogPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8">
       <SEO
-        title="Catálogo — M&B Trend"
+        title="Catálogo — M & B Casual"
         description="Explorá nuestra colección de indumentaria y accesorios. Encontrá el estilo que habla por vos."
         path="/catalogo"
       />
@@ -44,7 +44,7 @@ export function CatalogPage() {
       />
 
       {/* Divider */}
-      <hr className="my-6 border-[#E8E4D9]" />
+      <hr className="my-6 border-[#E2E2DC]" />
 
       {/* Product grid */}
       <ProductGrid category={category} search={search} />

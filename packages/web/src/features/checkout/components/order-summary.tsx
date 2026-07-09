@@ -15,17 +15,17 @@ interface OrderSummaryProps {
 
 export function OrderSummary({ items, summary }: OrderSummaryProps) {
   return (
-    <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+    <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
       <h2 className="mb-4 text-lg font-bold text-[#1A1A1A]">
         Resumen del pedido
       </h2>
 
       {/* Items list */}
-      <div className="divide-y divide-[#E8E4D9]">
+      <div className="divide-y divide-[#E2E2DC]">
         {items.map((item) => (
           <div key={item.id} className="flex items-start gap-3 py-3">
             {/* Thumbnail */}
-            <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-[#F5F5F0]">
+            <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-[#F0F0EC]">
               <img
                 src={item.product_image ?? '/placeholder-product.svg'}
                 alt={item.product_name}
@@ -57,7 +57,7 @@ export function OrderSummary({ items, summary }: OrderSummaryProps) {
       </div>
 
       {/* Totals */}
-      <div className="mt-4 space-y-2 border-t border-[#E8E4D9] pt-4 text-sm">
+      <div className="mt-4 space-y-2 border-t border-[#E2E2DC] pt-4 text-sm">
         <div className="flex justify-between text-[#1A1A1A]/60">
           <span>Subtotal ({summary.item_count} productos)</span>
           <span>{formatPrice(summary.subtotal)}</span>
@@ -76,7 +76,7 @@ export function OrderSummary({ items, summary }: OrderSummaryProps) {
             <span>-{formatPrice(summary.discount)}</span>
           </div>
         )}
-        <div className="flex justify-between border-t border-[#E8E4D9] pt-2 text-base font-bold text-[#1A1A1A]">
+        <div className="flex justify-between border-t border-[#E2E2DC] pt-2 text-base font-bold text-[#1A1A1A]">
           <span>Total</span>
           <span>{formatPrice(summary.total)}</span>
         </div>

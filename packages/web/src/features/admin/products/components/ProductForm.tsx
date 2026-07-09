@@ -274,13 +274,13 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
             type="checkbox"
             id="isActive"
             {...register('isActive')}
-            className="h-4 w-4 rounded border-[#E8E4D9] accent-[#1A1A1A]"
+            className="h-4 w-4 rounded border-[#E2E2DC] accent-[#1A1A1A]"
           />
           <Label htmlFor="isActive">Producto activo (visible en catálogo)</Label>
         </section>
 
         {/* Submit */}
-        <div className="flex items-center gap-3 border-t border-[#E8E4D9] pt-6">
+        <div className="flex items-center gap-3 border-t border-[#E2E2DC] pt-6">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting
               ? 'Guardando...'

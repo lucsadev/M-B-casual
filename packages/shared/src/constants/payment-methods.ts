@@ -1,5 +1,5 @@
 /**
- * Supported payment methods for M&B Trend.
+ * Supported payment methods for M & B Casual.
  */
 export interface PaymentMethodConstant {
   value: string;

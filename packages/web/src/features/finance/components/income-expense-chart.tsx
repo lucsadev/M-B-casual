@@ -56,7 +56,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
 
   return (
-    <div className="rounded-lg border border-[#E8E4D9] bg-white p-3 shadow-lg">
+    <div className="rounded-lg border border-[#E2E2DC] bg-white p-3 shadow-lg">
       <p className="mb-2 text-sm font-semibold text-[#1A1A1A]">
         {label ? formatMonth(label) : ''}
       </p>
@@ -111,7 +111,7 @@ export function IncomeExpenseChart({ data, loading }: IncomeExpenseChartProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center rounded-lg border border-[#E8E4D9] bg-white py-16">
+      <div className="flex items-center justify-center rounded-lg border border-[#E2E2DC] bg-white py-16">
         <p className="text-sm text-[#1A1A1A]/40">
           No hay datos de ingresos y gastos para mostrar.
         </p>
@@ -125,7 +125,7 @@ export function IncomeExpenseChart({ data, loading }: IncomeExpenseChartProps) {
   }));
 
   return (
-    <div className="rounded-lg border border-[#E8E4D9] bg-white p-6">
+    <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
       <h3 className="mb-6 text-lg font-semibold text-[#1A1A1A]">
         Ingresos vs Gastos
       </h3>
@@ -135,17 +135,17 @@ export function IncomeExpenseChart({ data, loading }: IncomeExpenseChartProps) {
           data={chartData}
           margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#E8E4D9" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E2E2DC" />
           <XAxis
             dataKey="monthLabel"
             tick={{ fontSize: 12, fill: '#1A1A1A' }}
             tickLine={false}
-            axisLine={{ stroke: '#E8E4D9' }}
+            axisLine={{ stroke: '#E2E2DC' }}
           />
           <YAxis
             tick={{ fontSize: 12, fill: '#1A1A1A' }}
             tickLine={false}
-            axisLine={{ stroke: '#E8E4D9' }}
+            axisLine={{ stroke: '#E2E2DC' }}
             tickFormatter={(v: number) =>
               v >= 1_000_000 ? `$${(v / 1_000_000).toFixed(1)}M` : `$${(v / 1000).toFixed(0)}k`
             }

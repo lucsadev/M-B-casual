@@ -69,8 +69,8 @@ export function PaymentMethodSelector({
               flex cursor-pointer items-center gap-3 rounded-md border px-4 py-3 transition-colors
               ${
                 value === method.id
-                  ? 'border-[#D4A853] bg-[#D4A853]/5'
-                  : 'border-[#E8E4D9] bg-white hover:border-[#D4A853]/50'
+                  ? 'border-[#E8836B] bg-[#E8836B]/5'
+                  : 'border-[#E2E2DC] bg-white hover:border-[#E8836B]/50'
               }
             `}
           >
@@ -80,7 +80,7 @@ export function PaymentMethodSelector({
               value={method.id}
               checked={value === method.id}
               onChange={() => onChange(method.id)}
-              className="h-4 w-4 accent-[#D4A853]"
+              className="h-4 w-4 accent-[#E8836B]"
             />
             <span className="text-[#1A1A1A]/60">
               <PaymentIcon icon={method.icon} />

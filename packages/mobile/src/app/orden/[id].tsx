@@ -86,7 +86,7 @@ export default function OrderConfirmationScreen() {
   // Loading
   if (isLoading) {
     return (
-      <View className="flex-1 bg-[#FFFFF7]" style={{ paddingTop: insets.top }}>
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
         <Stack.Screen options={{ title: 'Pedido confirmado', headerBackTitle: 'Atrás' }} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#D4A853" />
@@ -98,7 +98,7 @@ export default function OrderConfirmationScreen() {
   // Error
   if (isError || !data) {
     return (
-      <View className="flex-1 bg-[#FFFFF7]" style={{ paddingTop: insets.top }}>
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
         <Stack.Screen options={{ title: 'Pedido confirmado', headerBackTitle: 'Atrás' }} />
         <View className="flex-1 items-center justify-center px-4">
           <Text className="text-xl font-bold text-[#1A1A1A] mb-2">
@@ -130,7 +130,7 @@ export default function OrderConfirmationScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#FFFFF7]" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
       <Stack.Screen
         options={{
           title: 'Pedido confirmado',

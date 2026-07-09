@@ -140,7 +140,7 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
   }, [localFrom, localTo, onChange]);
 
   return (
-    <div className="rounded-lg border border-[#E8E4D9] bg-white p-4">
+    <div className="rounded-lg border border-[#E2E2DC] bg-white p-4">
       {/* Quick preset buttons */}
       <div className="mb-3 flex flex-wrap gap-2">
         {PRESETS.map((preset) => (

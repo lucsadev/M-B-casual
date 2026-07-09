@@ -28,7 +28,7 @@ Chain strategy: feature-branch-chain — PR 1 complete, PR 2 next
 
 - [x] 1.1 `packages/web/` — install `vite-plugin-imagemin`, `react-helmet-async`
 - [x] 1.2 `packages/mobile/` — install `@tanstack/react-query-persist-client`, `@react-native-community/netinfo`
-- [ ] 1.3 `packages/web/` — install `@playwright/test` as devDep
+- [x] 1.3 `packages/web/` — install `@playwright/test` as devDep
 
 ## Phase 2: Image Optimization (WS1 — Web)
 
@@ -57,15 +57,15 @@ Chain strategy: feature-branch-chain — PR 1 complete, PR 2 next
 
 ## Phase 5: Deploy Configs (WS4 + WS5)
 
-- [ ] 5.1 `packages/web/vercel.json` — create with SPA rewrites + cache headers
-- [ ] 5.2 `package.json` — add `deploy:vercel` script
+- [x] 5.1 `packages/web/vercel.json` — create with SPA rewrites + cache headers
+- [x] 5.2 `package.json` — add `deploy:vercel` script
 - [x] 5.3 `packages/mobile/eas.json` — create dev/preview/production profiles
 - [x] 5.4 `packages/mobile/app.json` — add deep link scheme (`mbtrend://`), expo-linking plugin
 - [ ] 5.5 README.md — add deploy section for Vercel + EAS
 
 ## Phase 6: E2E Testing (WS6)
 
-- [ ] 6.1 `packages/web/playwright.config.ts` — create config with webServer
-- [ ] 6.2 `packages/web/e2e/catalog-flow.spec.ts` — browse → add to cart → checkout
-- [ ] 6.3 `packages/web/e2e/auth-flow.spec.ts` — login → profile → order history
-- [ ] 6.4 `packages/web/e2e/admin-flow.spec.ts` — admin dashboard → clients → non-admin blocked
+- [x] 6.1 `packages/web/playwright.config.ts` — create config with webServer
+- [x] 6.2 `packages/web/e2e/catalog-flow.spec.ts` — browse → add to cart → checkout
+- [x] 6.3 `packages/web/e2e/auth-flow.spec.ts` — login → profile → order history
+- [x] 6.4 `packages/web/e2e/admin-flow.spec.ts` — admin dashboard → clients → non-admin blocked

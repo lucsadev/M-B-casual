@@ -158,7 +158,7 @@ export function ProfilePage() {
     return (
       <section className="mx-auto max-w-4xl px-4 py-12">
         <Skeleton className="mb-8 h-8 w-48" />
-        <div className="mb-8 space-y-4 rounded-lg border border-[#E8E4D9] bg-[#FFFFF7] p-6">
+        <div className="mb-8 space-y-4 rounded-lg border border-[#E2E2DC] bg-[#FFFFFF] p-6">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-5 w-32" />
@@ -185,7 +185,7 @@ export function ProfilePage() {
         </p>
         <Button
           onClick={() => window.location.reload()}
-          className="bg-[#D4A853] text-white hover:bg-[#D4A853]/90"
+          className="bg-[#E8836B] text-white hover:bg-[#E8836B]/90"
         >
           Reintentar
         </Button>
@@ -215,7 +215,7 @@ export function ProfilePage() {
       {/* ----------------------------------------------------------------- */}
       {/* Profile data section */}
       {/* ----------------------------------------------------------------- */}
-      <div className="mb-10 rounded-lg border border-[#E8E4D9] bg-[#FFFFF7] p-6">
+      <div className="mb-10 rounded-lg border border-[#E2E2DC] bg-[#FFFFFF] p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-[#1A1A1A]">Mis datos</h2>
           {!editing && (
@@ -223,7 +223,7 @@ export function ProfilePage() {
               onClick={() => setEditing(true)}
               variant="outline"
               size="sm"
-              className="border-[#D4A853] text-[#D4A853] hover:bg-[#D4A853]/10"
+              className="border-[#E8836B] text-[#E8836B] hover:bg-[#E8836B]/10"
             >
               Editar
             </Button>
@@ -299,7 +299,7 @@ export function ProfilePage() {
               <Button
                 type="submit"
                 disabled={updating}
-                className="bg-[#D4A853] text-white hover:bg-[#D4A853]/90 disabled:opacity-50"
+                className="bg-[#E8836B] text-white hover:bg-[#E8836B]/90 disabled:opacity-50"
               >
                 {updating ? 'Guardando...' : 'Guardar cambios'}
               </Button>
@@ -356,7 +356,7 @@ export function ProfilePage() {
       {/* ----------------------------------------------------------------- */}
       {/* Orders section */}
       {/* ----------------------------------------------------------------- */}
-      <div className="rounded-lg border border-[#E8E4D9] bg-[#FFFFF7] p-6">
+      <div className="rounded-lg border border-[#E2E2DC] bg-[#FFFFFF] p-6">
         <h2 className="mb-4 text-lg font-semibold text-[#1A1A1A]">
           Mis órdenes
         </h2>
@@ -375,7 +375,7 @@ export function ProfilePage() {
             </p>
             <Link
               to="/catalogo"
-              className="inline-block rounded-md bg-[#D4A853] px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-[#D4A853]/90"
+              className="inline-block rounded-md bg-[#E8836B] px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-[#E8836B]/90"
             >
               Explorar productos
             </Link>
@@ -397,7 +397,7 @@ export function ProfilePage() {
                 return (
                   <TableRow
                     key={order.id}
-                    className="cursor-pointer transition-colors hover:bg-[#E8E4D9]/30"
+                    className="cursor-pointer transition-colors hover:bg-[#E2E2DC]/30"
                     onClick={() => navigate(`/orden/${order.id}`)}
                   >
                     <TableCell className="font-medium">

@@ -1,5 +1,5 @@
 /**
- * Order status lifecycle for M&B Trend.
+ * Order status lifecycle for M & B Casual.
  * Matches the `order_status` PostgreSQL enum values.
  */
 export interface OrderStatusConstant {

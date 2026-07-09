@@ -16,7 +16,7 @@ export async function createOrder(
   const { data, error } = await supabase.rpc('create_order_from_cart', {
     p_shipping_address: input.shipping_address as unknown as Record<string, unknown>,
     p_payment_method: input.payment_method,
-  });
+  } as never);
 
   if (error) throw error;
   return data as string;

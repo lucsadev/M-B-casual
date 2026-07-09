@@ -90,7 +90,7 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
               <img
                 src={url}
                 alt={`Product image ${index + 1}`}
-                className="h-24 w-24 rounded-md border border-[#E8E4D9] object-cover"
+                className="h-24 w-24 rounded-md border border-[#E2E2DC] object-cover"
               />
               <button
                 type="button"

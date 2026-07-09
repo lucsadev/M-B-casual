@@ -19,7 +19,7 @@
  * }>
  * ```
  */
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { CartItem } from '@mbt/shared';
 
 // ---------------------------------------------------------------------------
@@ -45,21 +45,44 @@ export interface AnonymousCartItem {
 // Vanilla localStorage helpers (used outside React as well)
 // ---------------------------------------------------------------------------
 
+/**
+ * Cached parse of localStorage — returns the same array reference when
+ * the stored data hasn't changed, preventing unnecessary re-renders from
+ * useSyncExternalStore seeing a new reference each render.
+ */
+let cachedParse: AnonymousCartItem[] | null = null;
+let cachedRaw: string | null = null;
+
 function read(): AnonymousCartItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as AnonymousCartItem[]) : [];
+    if (raw === cachedRaw && cachedParse !== null) {
+      return cachedParse;
+    }
+    const parsed = raw ? (JSON.parse(raw) as AnonymousCartItem[]) : [];
+    cachedRaw = raw;
+    cachedParse = parsed;
+    return parsed;
   } catch {
+    cachedRaw = null;
+    cachedParse = null;
     return [];
   }
 }
 
+function invalidateCache(): void {
+  cachedRaw = null;
+  cachedParse = null;
+}
+
 function write(items: AnonymousCartItem[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  invalidateCache();
 }
 
 export function clearAnonymousCart(): void {
   localStorage.removeItem(STORAGE_KEY);
+  invalidateCache();
 }
 
 export function getAnonymousCartItems(): AnonymousCartItem[] {
@@ -175,38 +198,40 @@ export function useAnonymousCart() {
     notifyListeners();
   }, []);
 
-  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
-  const subtotal = items.reduce(
-    (sum, i) => sum + i.unit_price * i.quantity,
-    0,
-  );
+  return useMemo(() => {
+    const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+    const subtotal = items.reduce(
+      (sum, i) => sum + i.unit_price * i.quantity,
+      0,
+    );
 
-  /**
-   * Map anonymous items to CartItem shape for compatibility with UI components.
-   */
-  const asCartItems: CartItem[] = items.map((item, idx) => ({
-    id: `local-${idx}`,
-    user_id: '',
-    product_id: item.product_id,
-    variant_id: item.variant_id,
-    quantity: item.quantity,
-    product_name: item.product_name,
-    product_slug: '',
-    product_image: item.product_image,
-    variant_label: null,
-    unit_price: item.unit_price,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }));
+    /**
+     * Map anonymous items to CartItem shape for compatibility with UI components.
+     */
+    const asCartItems: CartItem[] = items.map((item, idx) => ({
+      id: `local-${idx}`,
+      user_id: '',
+      product_id: item.product_id,
+      variant_id: item.variant_id,
+      quantity: item.quantity,
+      product_name: item.product_name,
+      product_slug: '',
+      product_image: item.product_image,
+      variant_label: null,
+      unit_price: item.unit_price,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
 
-  return {
-    items,
-    asCartItems,
-    totalItems,
-    subtotal,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clear,
-  };
+    return {
+      items,
+      asCartItems,
+      totalItems,
+      subtotal,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clear,
+    };
+  }, [items, addItem, removeItem, updateQuantity, clear]);
 }

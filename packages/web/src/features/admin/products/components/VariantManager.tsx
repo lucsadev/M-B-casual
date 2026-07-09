@@ -49,7 +49,7 @@ export function VariantManager() {
         {fields.map((field, index) => (
           <div
             key={field.id}
-            className="flex flex-wrap items-end gap-3 rounded-md border border-[#E8E4D9] p-4"
+            className="flex flex-wrap items-end gap-3 rounded-md border border-[#E2E2DC] p-4"
           >
             <div className="space-y-1">
               <Label className="text-xs">Talle</Label>

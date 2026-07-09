@@ -10,9 +10,8 @@ import { OrderConfirmationPage } from './pages/order-confirmation.js';
 import { AdminDashboardPage } from './pages/admin-dashboard.js';
 import { AdminOrdersPage } from './pages/orders-admin.js';
 import { AdminCustomersPage } from './pages/customers-admin.js';
-import { AdminExpensesPage } from './pages/expenses-admin.js';
-import { AdminPurchasesPage } from './pages/purchases-admin.js';
-import { AdminFinancePage } from './pages/finance-admin.js';
+import { CustomerDetailPage } from '@/features/admin/customers/pages/CustomerDetailPage.js';
+import { OrderDetailPage } from '@/features/admin/orders/pages/OrderDetailPage.js';
 import { NotFoundPage } from './pages/not-found.js';
 import { AdminGuard } from '@/features/admin/guards/AdminGuard.js';
 import { ProductListPage } from '@/features/admin/products/pages/ProductListPage.js';
@@ -21,6 +20,12 @@ import { GuestRoute, ProtectedRoute } from '@/features/auth/index.js';
 import { LoginPage } from '@/features/auth/pages/LoginPage.js';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage.js';
 import { ProfilePage } from '@/features/customers/pages/ProfilePage.js';
+
+// Finance pages (PR 3 — new feature-based pages replacing old app/pages/)
+import { DashboardPage } from '@/features/finance/pages/dashboard-page.js';
+import { ExpensesPage } from '@/features/finance/pages/expenses-page.js';
+import { PurchasesPage } from '@/features/finance/pages/purchases-page.js';
+import { CashMovementsPage } from '@/features/finance/pages/cash-movements-page.js';
 
 export const router = createBrowserRouter([
   {
@@ -80,10 +85,14 @@ export const router = createBrowserRouter([
       { path: 'productos/nuevo', element: <ProductFormPage /> },
       { path: 'productos/:id/editar', element: <ProductFormPage /> },
       { path: 'ordenes', element: <AdminOrdersPage /> },
+      { path: 'ordenes/:id', element: <OrderDetailPage /> },
       { path: 'clientes', element: <AdminCustomersPage /> },
-      { path: 'compras', element: <AdminPurchasesPage /> },
-      { path: 'gastos', element: <AdminExpensesPage /> },
-      { path: 'finanzas', element: <AdminFinancePage /> },
+      { path: 'clientes/:id', element: <CustomerDetailPage /> },
+      // Finance routes (PR 3)
+      { path: 'compras', element: <PurchasesPage /> },
+      { path: 'gastos', element: <ExpensesPage /> },
+      { path: 'caja', element: <CashMovementsPage /> },
+      { path: 'finanzas', element: <DashboardPage /> },
     ],
   },
   {

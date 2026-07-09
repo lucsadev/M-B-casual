@@ -1,5 +1,5 @@
 /**
- * Predefined product categories for M&B Trend.
+ * Predefined product categories for M & B Casual.
  * Each entry maps to a row in the `categories` table.
  */
 export interface CategoryConstant {

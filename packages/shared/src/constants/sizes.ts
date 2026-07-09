@@ -1,5 +1,5 @@
 /**
- * Standard clothing sizes for M&B Trend products.
+ * Standard clothing sizes for M & B Casual products.
  */
 export interface SizeConstant {
   label: string;

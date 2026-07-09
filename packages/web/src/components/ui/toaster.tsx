@@ -7,7 +7,8 @@ import { Toaster as SonnerToaster } from 'sonner';
 export function Toaster() {
   return (
     <SonnerToaster
-      position="top-right"
+      position="bottom-right"
+      duration={2000}
       toastOptions={{
         style: {
           background: 'var(--background)',

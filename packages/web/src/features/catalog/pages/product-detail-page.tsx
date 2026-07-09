@@ -92,7 +92,12 @@ export function ProductDetailPage() {
 
   // Filter variants with stock
   const variantsInStock = product.variants.filter((v) => v.stock > 0);
-  const sizes = [...new Set(variantsInStock.map((v) => v.size).filter(Boolean))] as string[];
+  const sizes = (
+    [...new Set(variantsInStock.map((v) => v.size).filter(Boolean))] as string[]
+  ).sort((a, b) => {
+    const order = ['S', 'M', 'L', 'XL', 'XXL', 'Único', 'unico'];
+    return order.indexOf(a) - order.indexOf(b);
+  });
   const colors = [...new Set(variantsInStock.map((v) => v.color).filter(Boolean))] as string[];
   const colorHexMap = new Map(
     variantsInStock
@@ -118,8 +123,8 @@ export function ProductDetailPage() {
     <section className="mx-auto max-w-7xl px-4 py-8">
       {/* SEO: title, OG, JSON-LD */}
       <SEO
-        title={`${product.name} — M&B Trend`}
-        description={product.description?.slice(0, 160) ?? `${product.name} en M&B Trend`}
+        title={`${product.name} — M & B Casual`}
+        description={product.description?.slice(0, 160) ?? `${product.name} en M & B Casual`}
         image={productImages[0]}
         ogType="product"
         path={`/producto/${product.slug}`}
@@ -150,13 +155,13 @@ export function ProductDetailPage() {
       <nav className="mb-6 text-sm text-[#1A1A1A]/50" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
           <li>
-            <Link to="/" className="hover:text-[#D4A853]">
+            <Link to="/" className="hover:text-[#E8836B]">
               Inicio
             </Link>
           </li>
           <li>/</li>
           <li>
-            <Link to="/catalogo" className="hover:text-[#D4A853]">
+            <Link to="/catalogo" className="hover:text-[#E8836B]">
               Catálogo
             </Link>
           </li>
@@ -166,7 +171,7 @@ export function ProductDetailPage() {
               <li>
                 <Link
                   to={`/catalogo?category=${category.slug}`}
-                  className="hover:text-[#D4A853]"
+                  className="hover:text-[#E8836B]"
                 >
                   {category.name}
                 </Link>
@@ -181,7 +186,7 @@ export function ProductDetailPage() {
       <div className="grid gap-8 md:grid-cols-2">
         {/* Image gallery */}
         <div className="space-y-3">
-          <div className="aspect-[3/4] overflow-hidden rounded-lg bg-[#F5F5F0]">
+          <div className="aspect-[3/4] overflow-hidden rounded-lg bg-[#F0F0EC]">
             <OptimizedImage
               src={productImages[selectedImageIndex]}
               alt={product.name}
@@ -199,8 +204,8 @@ export function ProductDetailPage() {
                   className={cn(
                     'h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors',
                     index === selectedImageIndex
-                      ? 'border-[#D4A853]'
-                      : 'border-transparent hover:border-[#E8E4D9]',
+                      ? 'border-[#E8836B]'
+                      : 'border-transparent hover:border-[#E2E2DC]',
                   )}
                 >
                   <OptimizedImage
@@ -249,7 +254,7 @@ export function ProductDetailPage() {
           {product.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {product.tags.includes('nuevo') && (
-                <Badge variant="default" className="bg-[#D4A853] text-white">
+                <Badge variant="default" className="bg-[#E8836B] text-white">
                   Nuevo
                 </Badge>
               )}
@@ -288,8 +293,8 @@ export function ProductDetailPage() {
                     className={cn(
                       'min-w-[3rem] rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
                       selectedSize === size
-                        ? 'border-[#D4A853] bg-[#D4A853] text-white'
-                        : 'border-[#E8E4D9] bg-white text-[#1A1A1A] hover:border-[#D4A853]',
+                        ? 'border-[#E8836B] bg-[#E8836B] text-white'
+                        : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
                     )}
                   >
                     {size}
@@ -315,13 +320,13 @@ export function ProductDetailPage() {
                       className={cn(
                         'flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
                         selectedColor === color
-                          ? 'border-[#D4A853] bg-[#D4A853]/10 text-[#D4A853]'
-                          : 'border-[#E8E4D9] bg-white text-[#1A1A1A] hover:border-[#D4A853]',
+                          ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
+                          : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
                       )}
                     >
                       {hex && (
                         <span
-                          className="inline-block h-4 w-4 rounded-full border border-[#E8E4D9]"
+                          className="inline-block h-4 w-4 rounded-full border border-[#E2E2DC]"
                           style={{ backgroundColor: hex }}
                         />
                       )}
@@ -363,7 +368,7 @@ export function ProductDetailPage() {
                 quantity: 1,
               })
             }
-            className="w-full bg-[#D4A853] text-white hover:bg-[#D4A853]/90 sm:w-auto disabled:opacity-50"
+            className="w-full bg-[#E8836B] text-white hover:bg-[#E8836B]/90 sm:w-auto disabled:opacity-50"
           >
             {isAddingToCart ? (
               <span className="flex items-center gap-2">

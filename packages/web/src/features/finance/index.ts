@@ -3,9 +3,19 @@
  *
  * Exports:
  * - Components: KpiCards, IncomeExpenseChart, ProfitabilityTable, DateRangeFilter
+ * - Pages: DashboardPage, ExpensesPage, PurchasesPage, CashMovementsPage
  * - Hooks: all TanStack Query hooks from use-finance
  * - Types: API query filters, data types, and shared finance types
  */
+
+// =============================================================================
+// Pages
+// =============================================================================
+
+export { DashboardPage } from './pages/dashboard-page.js';
+export { ExpensesPage } from './pages/expenses-page.js';
+export { PurchasesPage } from './pages/purchases-page.js';
+export { CashMovementsPage } from './pages/cash-movements-page.js';
 
 // =============================================================================
 // Components
