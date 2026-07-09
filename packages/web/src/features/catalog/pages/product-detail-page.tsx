@@ -13,10 +13,13 @@
  */
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { formatPrice } from '@mbt/shared';
 import { useProduct } from '../hooks/use-product';
 import { useCategories } from '../hooks/use-categories';
 import { useCartContext } from '@/features/cart/context/CartContext';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { SEO } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,14 +41,7 @@ export function ProductDetailPage() {
     setSelectedColor(null);
   }, [slug]);
 
-  // Set document title for SEO
-  useEffect(() => {
-    if (product) {
-      document.title = `${product.name} — M&B Trend`;
-    } else {
-      document.title = 'Producto — M&B Trend';
-    }
-  }, [product]);
+  // SEO title — moved to <SEO /> component in the JSX below
 
   // Loading state
   if (isLoading) {
@@ -120,6 +116,36 @@ export function ProductDetailPage() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8">
+      {/* SEO: title, OG, JSON-LD */}
+      <SEO
+        title={`${product.name} — M&B Trend`}
+        description={product.description?.slice(0, 160) ?? `${product.name} en M&B Trend`}
+        image={productImages[0]}
+        ogType="product"
+        path={`/producto/${product.slug}`}
+      />
+
+      {/* JSON-LD structured data for Google / schema.org */}
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.name,
+            description: product.description?.slice(0, 500) ?? '',
+            image: productImages,
+            offers: {
+              '@type': 'Offer',
+              price: product.price,
+              priceCurrency: 'ARS',
+              availability: totalStock > 0
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+            },
+          })}
+        </script>
+      </Helmet>
+
       {/* Breadcrumbs */}
       <nav className="mb-6 text-sm text-[#1A1A1A]/50" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
@@ -156,10 +182,11 @@ export function ProductDetailPage() {
         {/* Image gallery */}
         <div className="space-y-3">
           <div className="aspect-[3/4] overflow-hidden rounded-lg bg-[#F5F5F0]">
-            <img
+            <OptimizedImage
               src={productImages[selectedImageIndex]}
               alt={product.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full"
+              priority
             />
           </div>
 
@@ -176,10 +203,10 @@ export function ProductDetailPage() {
                       : 'border-transparent hover:border-[#E8E4D9]',
                   )}
                 >
-                  <img
+                  <OptimizedImage
                     src={url}
                     alt={`${product.name} - ${index + 1}`}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full"
                   />
                 </button>
               ))}

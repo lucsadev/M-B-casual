@@ -20,6 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -211,10 +212,10 @@ export function ProductListPage() {
               <TableRow key={product.id}>
                 <TableCell>
                   {product.images?.[0] ? (
-                    <img
-                      src={`${product.images[0]}?width=80&format=webp`}
+                    <OptimizedImage
+                      src={`${product.images[0]}?width=80`}
                       alt={product.name}
-                      className="h-10 w-10 rounded-md object-cover"
+                      className="h-10 w-10 rounded-md"
                     />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#E8E4D9] text-xs text-[#1A1A1A]/40">

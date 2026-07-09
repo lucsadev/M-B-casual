@@ -4,13 +4,14 @@
  * auth-aware nav links with profile name, dropdown user menu, CartBadge,
  * and CartSidebar.
  */
-import { useState, useEffect, useRef } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/features/auth/context/AuthContext';
 import { CartProvider } from '@/features/cart/context/CartContext';
 import { CartBadge } from '@/features/cart/components/cart-badge';
 import { CartSidebar } from '@/features/cart/components/cart-sidebar';
 import { useProfile } from '@/features/customers/hooks/use-profile';
+import { SEO } from '@/lib/seo';
 import { toast } from 'sonner';
 
 // ---------------------------------------------------------------------------
@@ -266,13 +267,22 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
 // ---------------------------------------------------------------------------
 
 export function RootLayout() {
+  const location = useLocation();
   const [cartOpen, setCartOpen] = useState(false);
+
+  const handleOpenCart = useCallback(() => setCartOpen(true), []);
+  const handleCloseCart = useCallback(() => setCartOpen(false), []);
 
   return (
     <AuthProvider>
       <CartProvider>
+        <SEO
+          title="M&B Trend — Moda y Accesorios"
+          description="Tienda online de indumentaria y accesorios. Descubrí nuestra colección de moda urbana con personalidad única."
+          path={location.pathname}
+        />
         <div className="flex min-h-screen flex-col">
-          <HeaderNav onOpenCart={() => setCartOpen(true)} />
+          <HeaderNav onOpenCart={handleOpenCart} />
 
           <main className="flex-1">
             <Outlet />
@@ -283,7 +293,7 @@ export function RootLayout() {
           </footer>
 
           {/* Cart sidebar */}
-          <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />
+          <CartSidebar open={cartOpen} onClose={handleCloseCart} />
         </div>
       </CartProvider>
     </AuthProvider>
