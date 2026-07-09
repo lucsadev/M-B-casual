@@ -8,6 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   getDashboardKPI,
+  getMonthlyChartData,
+  getProductProfitability,
   getExpenses,
   getExpenseById,
   createExpense,
@@ -44,6 +46,34 @@ export function useDashboardKPI(filters: DashboardKPIFilters) {
   return useQuery({
     queryKey: [...FINANCE_KEY, 'dashboard-kpi', filters],
     queryFn: () => getDashboardKPI(filters),
+  });
+}
+
+// =============================================================================
+// MONTHLY CHART (Income vs Expense)
+// =============================================================================
+
+/**
+ * Hook: income vs expense data grouped by month for chart display.
+ */
+export function useMonthlyChart(months: number = 6) {
+  return useQuery({
+    queryKey: [...FINANCE_KEY, 'monthly-chart', months],
+    queryFn: () => getMonthlyChartData(months),
+  });
+}
+
+// =============================================================================
+// PRODUCT PROFITABILITY
+// =============================================================================
+
+/**
+ * Hook: product profitability data from the `product_profitability` view.
+ */
+export function useProductProfitability() {
+  return useQuery({
+    queryKey: [...FINANCE_KEY, 'product-profitability'],
+    queryFn: getProductProfitability,
   });
 }
 

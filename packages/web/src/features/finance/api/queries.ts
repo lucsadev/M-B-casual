@@ -18,6 +18,36 @@ import type {
 } from '@mbt/shared';
 
 // =============================================================================
+// TYPES
+// =============================================================================
+
+/**
+ * A single month's income vs expense data point for the chart.
+ */
+export interface MonthlyChartDataPoint {
+  /** ISO month string (e.g. "2026-01") */
+  month: string;
+  /** Total income from confirmed orders */
+  income: number;
+  /** Total expenses */
+  expense: number;
+}
+
+/**
+ * Product profitability row from the `product_profitability` view.
+ */
+export interface ProductProfitabilityRow {
+  id: string;
+  name: string;
+  price: number;
+  units_sold: number;
+  total_revenue: number;
+  estimated_cogs: number;
+  margin_percent: number;
+  gross_profit: number;
+}
+
+// =============================================================================
 // DASHBOARD KPIs
 // =============================================================================
 
@@ -78,6 +108,97 @@ export async function getDashboardKPI(
     cantidadOrdenes,
     periodo: `${fechaDesde} – ${fechaHasta}`,
   };
+}
+
+// =============================================================================
+// MONTHLY CHART (Income vs Expense per month)
+// =============================================================================
+
+/**
+ * Fetch income vs expense data grouped by month for the last N months.
+ * Queries `monthly_sales` view for income and `expenses` table aggregated
+ * by month for expenses.
+ */
+export async function getMonthlyChartData(
+  months: number = 6,
+): Promise<MonthlyChartDataPoint[]> {
+  // Build the date range for the last N months
+  const now = new Date();
+  const desde = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+  const desdeStr = desde.toISOString().split('T')[0];
+  const hastaStr = now.toISOString().split('T')[0];
+
+  // Income from monthly_sales view
+  const { data: monthlySales, error: salesError } = await supabase
+    .from('monthly_sales')
+    .select('*')
+    .gte('month', desdeStr)
+    .lte('month', hastaStr);
+
+  if (salesError) throw salesError;
+
+  // Expenses aggregated by month
+  const { data: expenses, error: expensesError } = await supabase
+    .from('expenses')
+    .select('expense_date, amount')
+    .gte('expense_date', desdeStr)
+    .lte('expense_date', hastaStr);
+
+  if (expensesError) throw expensesError;
+
+  // Build a map of month -> income
+  const incomeByMonth = new Map<string, number>();
+  for (const sale of monthlySales ?? []) {
+    const month = (sale as Record<string, unknown>).month as string;
+    // Normalize to YYYY-MM format
+    const monthKey = month.substring(0, 7);
+    incomeByMonth.set(
+      monthKey,
+      (incomeByMonth.get(monthKey) ?? 0) + Number((sale as Record<string, unknown>).revenue ?? 0),
+    );
+  }
+
+  // Build a map of month -> expenses
+  const expensesByMonth = new Map<string, number>();
+  for (const exp of expenses ?? []) {
+    const expDate = (exp as Record<string, unknown>).expense_date as string;
+    const monthKey = expDate.substring(0, 7);
+    expensesByMonth.set(
+      monthKey,
+      (expensesByMonth.get(monthKey) ?? 0) + Number((exp as Record<string, unknown>).amount ?? 0),
+    );
+  }
+
+  // Generate the last N months array
+  const result: MonthlyChartDataPoint[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    result.push({
+      month: monthKey,
+      income: incomeByMonth.get(monthKey) ?? 0,
+      expense: expensesByMonth.get(monthKey) ?? 0,
+    });
+  }
+
+  return result;
+}
+
+// =============================================================================
+// PRODUCT PROFITABILITY
+// =============================================================================
+
+/**
+ * Fetch product profitability data from the `product_profitability` view.
+ */
+export async function getProductProfitability(): Promise<ProductProfitabilityRow[]> {
+  const { data, error } = await supabase
+    .from('product_profitability')
+    .select('*')
+    .order('margin_percent', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as unknown as ProductProfitabilityRow[];
 }
 
 // =============================================================================
