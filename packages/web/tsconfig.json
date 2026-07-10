@@ -5,13 +5,12 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
     "outDir": "./dist",
-    "rootDir": "./src",
     "declaration": false,
     "declarationMap": false,
     "composite": false,
     "paths": {
       "@/*": ["./src/*"],
-      "@mbt/shared": ["../shared/src"]
+      "@mbt/shared": ["../shared/dist"]
     }
   },
   "include": ["src"],
