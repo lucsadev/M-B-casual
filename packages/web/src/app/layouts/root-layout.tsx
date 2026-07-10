@@ -55,10 +55,18 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
   // Admin check
   const isAdmin = user?.app_metadata?.role === 'admin';
 
-  // Compute display name from profile or fall back to metadata
-  const displayName = !profileLoading && profile
-    ? `${profile.firstName}${profile.lastName ? ` ${profile.lastName.charAt(0)}.` : ''}`
-    : user?.user_metadata?.nombre ?? null;
+  const profileName =
+    !profileLoading && profile
+      ? `${profile.firstName ?? ''}${profile.lastName ? ` ${profile.lastName.charAt(0)}.` : ''}`.trim()
+      : '';
+
+  const googleName =
+    user?.user_metadata?.nombre ??
+    user?.user_metadata?.full_name ??
+    user?.user_metadata?.name ??
+    null;
+
+  const displayName = profileName || googleName || user?.email || null;
 
   return (
     <header className="border-b border-[#E2E2DC] bg-[#FFFFFF]">

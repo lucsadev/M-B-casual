@@ -22,9 +22,25 @@ Supabase Auth MUST enable the email/password provider. The sign-up flow MUST cre
 - WHEN a second registration with the same email is attempted
 - THEN the API returns an error indicating email already registered
 
+### Requirement: Google OAuth authentication
+
+Supabase Auth MUST enable the Google provider. Google Sign-In SHALL request scopes for `openid`, `email`, `profile`, `user.phonenumbers.read`, and `user.addresses.read` to hydrate customer profile fields from OAuth metadata.
+
+#### Scenario: Google sign-in creates customer with profile data
+
+- GIVEN a new user clicks "Continuar con Google"
+- WHEN the OAuth flow completes
+- THEN a row exists in `auth.users` AND a linked row in `customers` with `first_name`, `last_name`, `phone`, and `address` populated from Google metadata when available
+
+#### Scenario: Google sign-in preserves existing profile data
+
+- GIVEN an existing customer with manually set `first_name`
+- WHEN the same user signs in with Google
+- THEN existing `first_name` is NOT overwritten; only empty fields are populated from OAuth metadata
+
 ### Requirement: Customer creation trigger
 
-A database trigger on `auth.users` AFTER INSERT MUST create a `customers` row with the new `user_id` and empty profile fields.
+A database trigger on `auth.users` AFTER INSERT MUST create a `customers` row with the new `user_id`. The trigger SHALL attempt to populate `first_name`, `last_name`, `phone`, and `address` from `raw_user_meta_data`, checking OAuth metadata fields (`full_name`, `name`, `phone`, `phone_numbers`, `address`, `addresses`) before falling back to empty values.
 
 #### Scenario: Trigger fires on auth insert
 

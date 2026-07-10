@@ -12,8 +12,9 @@
  *   <Route path="login" element={<LoginPage />} />
  * </Route>
  */
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { sanitizeRedirectPath } from '../hooks/use-google-auth';
 
 interface GuestRouteProps {
   /** Optional children. When omitted, renders <Outlet /> for nested routes. */
@@ -22,6 +23,7 @@ interface GuestRouteProps {
 
 export function GuestRoute({ children }: GuestRouteProps) {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -55,7 +57,12 @@ export function GuestRoute({ children }: GuestRouteProps) {
 
   // Already authenticated — redirect away from guest page
   if (user) {
-    return <Navigate to="/" replace />;
+    if (user.app_metadata?.role === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+
+    const redirectTo = new URLSearchParams(location.search).get('redirectTo');
+    return <Navigate to={sanitizeRedirectPath(redirectTo)} replace />;
   }
 
   // Guest — render children or outlet

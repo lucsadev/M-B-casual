@@ -6,6 +6,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { queryClient } from './lib/query-client.js';
 import { router } from './app/router.js';
 import { Toaster } from '@/components/ui/toaster.js';
+import { registerServiceWorker } from './lib/register-service-worker.js';
 import './app/globals.css';
 
 const root = document.getElementById('root');
@@ -24,3 +25,5 @@ ReactDOM.createRoot(root).render(
     </HelmetProvider>
   </React.StrictMode>,
 );
+
+registerServiceWorker();

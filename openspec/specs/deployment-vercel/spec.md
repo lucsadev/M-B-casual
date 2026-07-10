@@ -29,8 +29,18 @@ The `vercel.json` MUST define a rewrite rule that maps all non-file routes to `/
 #### Scenario: Successful build
 
 - GIVEN a clean checkout of the web package
-- WHEN running `vite build`
+- WHEN running `pnpm --filter @mbt/shared build && tsc --noEmit && vite build`
 - THEN all files output to `dist/` AND exit code is 0 AND no TypeScript errors block the build
+
+#### Scenario: Shared package built before web type-check
+
+- GIVEN the `@mbt/shared` package extends `tsconfig.base.json` with `composite: true`
+- WHEN the web package runs `tsc --noEmit` with `references: [{ "path": "../shared" }]`
+- THEN the shared package MUST be compiled first (`dist/`) so TypeScript can resolve its declaration files
+
+### Requirement: PWA support
+
+The production build SHALL include a service worker (`sw.js`) with network-first navigation strategy and cache-first asset strategy. A Web App Manifest (`manifest.webmanifest`) SHALL be served at the root for installable PWA support.
 
 ### Requirement: Deploy script
 

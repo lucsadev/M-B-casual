@@ -18,6 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { User } from '@supabase/supabase-js';
 import { useLogin, parseAuthError } from '../hooks/use-login';
+import { GoogleAuthButton } from '../components/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -36,6 +37,14 @@ const loginSchema = z.object({
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
+
+type RedirectLocationState = {
+  from?: {
+    pathname: string;
+    search?: string;
+    hash?: string;
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Page
@@ -66,6 +75,11 @@ export function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
 
+  const fromLocation = (location.state as RedirectLocationState | null)?.from;
+  const redirectPath = fromLocation
+    ? `${fromLocation.pathname}${fromLocation.search ?? ''}${fromLocation.hash ?? ''}`
+    : '/perfil';
+
   const onSubmit = (data: LoginFormData) => {
     setServerError(null);
     login(data, {
@@ -76,9 +90,7 @@ export function LoginPage() {
           return;
         }
         // Regular users: redirect back where they came from, or /perfil
-        const from = (location.state as { from?: { pathname: string } })?.from
-          ?.pathname;
-        navigate(from || '/perfil', { replace: true });
+        navigate(redirectPath, { replace: true });
       },
     });
   };
@@ -185,6 +197,19 @@ export function LoginPage() {
             )}
           </Button>
         </form>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-[#E2E2DC]" />
+          <span className="text-xs uppercase text-[#1A1A1A]/40">o</span>
+          <div className="h-px flex-1 bg-[#E2E2DC]" />
+        </div>
+
+        <GoogleAuthButton
+          redirectPath={redirectPath}
+          label="Continuar con Google"
+          loadingLabel="Redirigiendo a Google..."
+          onError={setServerError}
+        />
 
         {/* Register link */}
         <p className="mt-6 text-center text-sm text-[#1A1A1A]/60">

@@ -17,6 +17,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRegister, parseRegisterError } from '../hooks/use-register';
+import { GoogleAuthButton } from '../components/GoogleAuthButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -320,6 +321,19 @@ export function RegisterPage() {
             )}
           </Button>
         </form>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-[#E2E2DC]" />
+          <span className="text-xs uppercase text-[#1A1A1A]/40">o</span>
+          <div className="h-px flex-1 bg-[#E2E2DC]" />
+        </div>
+
+        <GoogleAuthButton
+          redirectPath="/perfil"
+          label="Crear cuenta con Google"
+          loadingLabel="Redirigiendo a Google..."
+          onError={setServerError}
+        />
 
         {/* Login link */}
         <p className="mt-6 text-center text-sm text-[#1A1A1A]/60">

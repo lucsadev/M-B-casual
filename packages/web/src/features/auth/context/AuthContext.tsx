@@ -27,6 +27,7 @@ import {
   getAnonymousCartItems,
   clearAnonymousCart,
 } from '@/features/cart/hooks/use-anonymous-cart';
+import { syncAuthProfileToCustomer } from '@/features/customers/api/sync-auth-profile';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -102,6 +103,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
+  const syncCustomerProfile = useCallback(async (currentUser: User) => {
+    try {
+      await syncAuthProfileToCustomer(currentUser);
+    } catch {
+      // Profile sync is best-effort; auth should not fail because of it.
+    }
+  }, []);
+
   // ------------------------------------------------------------------
   // Initial session check + reactive listener
   // ------------------------------------------------------------------
@@ -115,6 +124,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(initialSession?.user ?? null);
       setIsLoading(false);
       initialLoadDoneRef.current = true;
+
+      if (initialSession?.user) {
+        syncCustomerProfile(initialSession.user);
+      }
     });
 
     // 2. Subscribe to auth state changes (cross-tab, SSO, etc.)
@@ -128,9 +141,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Merge local cart into server on actual sign-in (skip initial load)
       if (_event === 'SIGNED_IN' && initialLoadDoneRef.current) {
-        const userId = currentSession?.user?.id;
+        const currentUser = currentSession?.user;
+        const userId = currentUser?.id;
         if (userId) {
           mergeCartOnLogin(userId);
+        }
+        if (currentUser) {
+          syncCustomerProfile(currentUser);
         }
       }
     });
@@ -139,7 +156,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       mountedRef.current = false;
       subscription.unsubscribe();
     };
-  }, [mergeCartOnLogin]);
+  }, [mergeCartOnLogin, syncCustomerProfile]);
 
   // ------------------------------------------------------------------
   // Actions

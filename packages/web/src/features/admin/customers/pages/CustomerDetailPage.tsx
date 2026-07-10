@@ -50,6 +50,27 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
+function formatAddress(address: Record<string, unknown> | null): string {
+  if (!address) return '—';
+
+  const formatted = address.formatted ?? address.formattedValue ?? address.streetAddress;
+  if (typeof formatted === 'string' && formatted.trim()) {
+    return formatted;
+  }
+
+  const parts = [
+    address.street,
+    address.route,
+    address.locality,
+    address.city,
+    address.region,
+    address.country,
+    address.postalCode,
+  ].filter((part): part is string => typeof part === 'string' && part.trim().length > 0);
+
+  return parts.length > 0 ? parts.join(', ') : '—';
+}
+
 export function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: customer, isLoading } = useAdminCustomer(id ?? '');
@@ -159,6 +180,12 @@ export function CustomerDetailPage() {
               <div className="flex justify-between border-b border-[#E2E2DC] pb-2">
                 <span className="text-sm text-[#1A1A1A]/60">Teléfono</span>
                 <span className="text-sm font-medium">{customer.phone ?? '—'}</span>
+              </div>
+              <div className="flex justify-between gap-6 border-b border-[#E2E2DC] pb-2">
+                <span className="text-sm text-[#1A1A1A]/60">Domicilio</span>
+                <span className="max-w-sm text-right text-sm font-medium">
+                  {formatAddress(customer.address)}
+                </span>
               </div>
               <div className="flex justify-between border-b border-[#E2E2DC] pb-2">
                 <span className="text-sm text-[#1A1A1A]/60">Cliente desde</span>
