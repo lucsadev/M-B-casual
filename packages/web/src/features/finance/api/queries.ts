@@ -149,9 +149,9 @@ export async function getMonthlyChartData(
   // Build a map of month -> income
   const incomeByMonth = new Map<string, number>();
   for (const sale of monthlySales ?? []) {
-    const month = (sale as Record<string, unknown>).month as string;
+    const month = String((sale as Record<string, unknown>).month ?? '');
     // Normalize to YYYY-MM format
-    const monthKey = month.substring(0, 7);
+    const monthKey = month.substring(0, 7) || 'unknown';
     incomeByMonth.set(
       monthKey,
       (incomeByMonth.get(monthKey) ?? 0) + Number((sale as Record<string, unknown>).revenue ?? 0),
@@ -161,8 +161,8 @@ export async function getMonthlyChartData(
   // Build a map of month -> expenses
   const expensesByMonth = new Map<string, number>();
   for (const exp of expenses ?? []) {
-    const expDate = (exp as Record<string, unknown>).expense_date as string;
-    const monthKey = expDate.substring(0, 7);
+    const expDate = String((exp as Record<string, unknown>).expense_date ?? '');
+    const monthKey = expDate.substring(0, 7) || 'unknown';
     expensesByMonth.set(
       monthKey,
       (expensesByMonth.get(monthKey) ?? 0) + Number((exp as Record<string, unknown>).amount ?? 0),
@@ -496,7 +496,19 @@ export async function getCashMovements(
 
   if (error) throw error;
 
-  return (data ?? []) as unknown as CashMovement[];
+  // Map snake_case from Supabase to camelCase CashMovement type
+  const rows = (data ?? []) as Array<Record<string, unknown>>;
+  return rows.map((row) => ({
+    id: row.id as string,
+    type: row.type as CashMovement['type'],
+    amount: row.amount as number,
+    description: row.description as string,
+    referenceType: (row.reference_type as string) ?? null,
+    referenceId: (row.reference_id as string) ?? null,
+    movementDate: (row.movement_date as string) ?? '',
+    createdBy: (row.created_by as string) ?? null,
+    createdAt: (row.created_at as string) ?? '',
+  }));
 }
 
 /**

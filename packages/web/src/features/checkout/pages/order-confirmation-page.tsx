@@ -139,7 +139,7 @@ export function OrderConfirmationPage() {
 
   const { order, items } = data;
   const orderTotal = order.total;
-  const orderNum = order.id.substring(0, 8).toUpperCase();
+  const orderNum = (order.id ?? '').substring(0, 8).toUpperCase();
   const paymentMethodLabels: Record<string, string> = {
     transferencia: 'Transferencia Bancaria',
     efectivo: 'Efectivo',
