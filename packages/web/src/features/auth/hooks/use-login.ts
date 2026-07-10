@@ -63,14 +63,19 @@ interface LoginInput {
  * const { mutate: login, isPending } = useLogin();
  * login({ email: 'test@example.com', password: 'secret' });
  */
+/**
+ * Returns the authenticated User on success so callers can inspect
+ * app_metadata (e.g. admin role) to decide the post-login redirect.
+ */
 export function useLogin() {
-  return useMutation<void, Error, LoginInput>({
+  return useMutation<import('@supabase/supabase-js').User, Error, LoginInput>({
     mutationFn: async ({ email, password }) => {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
+      return data.user;
     },
     onError: (_err) => {
       // The caller (LoginPage) reads error.message from mutation state.

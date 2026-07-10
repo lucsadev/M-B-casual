@@ -16,6 +16,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import type { User } from '@supabase/supabase-js';
 import { useLogin, parseAuthError } from '../hooks/use-login';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,8 +69,13 @@ export function LoginPage() {
   const onSubmit = (data: LoginFormData) => {
     setServerError(null);
     login(data, {
-      onSuccess: () => {
-        // Redirect to the page the user came from, or /perfil
+      onSuccess: (user: User) => {
+        // Admin users go straight to the dashboard
+        if (user?.app_metadata?.role === 'admin') {
+          navigate('/admin', { replace: true });
+          return;
+        }
+        // Regular users: redirect back where they came from, or /perfil
         const from = (location.state as { from?: { pathname: string } })?.from
           ?.pathname;
         navigate(from || '/perfil', { replace: true });
