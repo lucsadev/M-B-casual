@@ -6,6 +6,14 @@
 import { supabase } from '../../../lib/supabase';
 import type { CheckoutInput } from '@mbt/shared';
 
+type CreateOrderRpc = (
+  fn: 'create_order_from_cart',
+  args: {
+    p_shipping_address: Record<string, unknown>;
+    p_payment_method: CheckoutInput['payment_method'];
+  },
+) => Promise<{ data: string | null; error: Error | null }>;
+
 /**
  * Create an order from the current user's cart items.
  * Calls the Postgres RPC `create_order_from_cart`.
@@ -13,11 +21,13 @@ import type { CheckoutInput } from '@mbt/shared';
 export async function createOrder(
   input: CheckoutInput,
 ): Promise<string> {
-  const { data, error } = await supabase.rpc('create_order_from_cart', {
+  const createOrderRpc = supabase.rpc.bind(supabase) as unknown as CreateOrderRpc;
+  const { data, error } = await createOrderRpc('create_order_from_cart', {
     p_shipping_address: input.shipping_address as unknown as Record<string, unknown>,
     p_payment_method: input.payment_method,
-  } as never);
+  });
 
   if (error) throw error;
+  if (!data) throw new Error('No se pudo crear la orden.');
   return data as string;
 }

@@ -19,7 +19,13 @@ import type { DateRange } from '../components/date-range-filter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -252,10 +258,23 @@ export function ExpensesPage() {
             Categoría
           </Label>
           <Select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            options={EXPENSE_CATEGORIES}
-          />
+            value={categoryFilter || '__all__'}
+            onValueChange={(value: string) =>
+              setCategoryFilter(value === '__all__' ? '' : value)
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Todas las categorías" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todas las categorías</SelectItem>
+              {CATEGORY_OPTIONS.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -392,11 +411,20 @@ export function ExpensesPage() {
               <div>
                 <Label htmlFor="exp-category">Categoría</Label>
                 <Select
-                  id="exp-category"
                   value={form.category}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({ ...form, category: e.target.value })}
-                  options={CATEGORY_OPTIONS}
-                />
+                  onValueChange={(value: string) => setForm({ ...form, category: value })}
+                >
+                  <SelectTrigger id="exp-category">
+                    <SelectValue placeholder="Categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORY_OPTIONS.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

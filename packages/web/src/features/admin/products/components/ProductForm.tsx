@@ -9,14 +9,20 @@
  * - ImageUploader for Supabase Storage image upload
  */
 import { useEffect, useCallback } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { useCategories } from '@/features/catalog';
 import { VariantManager } from './VariantManager';
 import { ImageUploader } from './ImageUploader';
@@ -182,16 +188,26 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="categoryId">Categoría</Label>
-              <Select
-                id="categoryId"
-                {...register('categoryId')}
-                placeholder="Seleccionar categoría"
-                options={
-                  categories?.map((c) => ({
-                    value: c.id,
-                    label: c.name,
-                  })) ?? []
-                }
+              <Controller
+                name="categoryId"
+                control={form.control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger id="categoryId">
+                      <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories?.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
               {errors.categoryId && (
                 <p className="text-xs text-red-500">

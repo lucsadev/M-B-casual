@@ -12,7 +12,13 @@ import {
   useMonthlySales,
 } from '@/features/admin/finance/api/use-finance-queries';
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -109,18 +115,21 @@ export function AdminFinancePage() {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-[#1A1A1A]">Movimientos</h2>
           <Select
-            value={typeFilter}
-            onChange={(e) => {
-              setTypeFilter(e.target.value);
+            value={typeFilter || '__all__'}
+            onValueChange={(value: string) => {
+              setTypeFilter(value === '__all__' ? '' : value);
               setPage(1);
             }}
-            options={[
-              { value: '', label: 'Todos' },
-              { value: 'income', label: 'Ingresos' },
-              { value: 'expense', label: 'Gastos' },
-            ]}
-            className="w-36"
-          />
+          >
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todos</SelectItem>
+              <SelectItem value="income">Ingresos</SelectItem>
+              <SelectItem value="expense">Gastos</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="rounded-md border border-[#E2E2DC]">

@@ -19,7 +19,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -467,17 +473,19 @@ export function AdminPurchasesPage() {
                       <Label className="text-xs">Producto</Label>
                       <Select
                         value={item.product_id}
-                        onChange={(e) =>
-                          handleProductSelect(index, e.target.value)
-                        }
-                        options={
-                          productOptions?.map((p) => ({
-                            value: p.id,
-                            label: p.name,
-                          })) ?? []
-                        }
-                        className="w-full"
-                      />
+                        onValueChange={(value: string) => handleProductSelect(index, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar producto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {productOptions?.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Variant selector */}
@@ -485,32 +493,35 @@ export function AdminPurchasesPage() {
                       <div className="w-28">
                         <Label className="text-xs">Variante</Label>
                         <Select
-                          value={item.variant_id ?? ''}
-                          onChange={(e) => {
+                          value={item.variant_id ?? '__none__'}
+                          onValueChange={(value: string) => {
+                            const selected = value === '__none__' ? '' : value;
                             const product = productOptions?.find(
                               (p) => p.id === item.product_id,
                             );
                             const variant = product?.variants.find(
-                              (v) => v.id === e.target.value,
+                              (v) => v.id === selected,
                             );
                             updateLineItem(index, {
-                              variant_id: e.target.value || null,
+                              variant_id: selected || null,
                               variant_label: variant?.label ?? null,
                             });
                           }}
-                          options={[
-                            { value: '', label: 'Sin variante' },
-                            ...(
-                              productOptions?.find(
-                                (p) => p.id === item.product_id,
-                              )?.variants ?? []
-                            ).map((v) => ({
-                              value: v.id,
-                              label: v.label,
-                            })),
-                          ]}
-                          className="w-full"
-                        />
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Sin variante" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none__">Sin variante</SelectItem>
+                            {(productOptions?.find(
+                              (p) => p.id === item.product_id,
+                            )?.variants ?? []).map((v) => (
+                              <SelectItem key={v.id} value={v.id}>
+                                {v.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
 

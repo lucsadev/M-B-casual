@@ -23,28 +23,23 @@ export function CheckoutPage() {
   const { mutate: checkout, isPending: isCheckingOut } = useCheckout();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>('transferencia');
-  const [shippingData, setShippingData] = useState<ShippingAddressInput | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleShippingSubmit = useCallback(
     (data: ShippingAddressInput) => {
-      setShippingData(data);
       setFormError(null);
+      checkout({
+        shipping_address: data,
+        payment_method: paymentMethod,
+      });
     },
-    [],
+    [paymentMethod, checkout],
   );
 
   const handleConfirmOrder = useCallback(() => {
-    if (!shippingData) {
-      setFormError('Completá los datos de envío antes de confirmar.');
-      return;
-    }
-
-    checkout({
-      shipping_address: shippingData,
-      payment_method: paymentMethod,
-    });
-  }, [shippingData, paymentMethod, checkout]);
+    const form = document.getElementById('shipping-form') as HTMLFormElement | null;
+    form?.requestSubmit();
+  }, []);
 
   // Loading state
   if (isLoading) {
@@ -128,9 +123,10 @@ export function CheckoutPage() {
 
             {/* Confirm button */}
             <Button
+              type="button"
               size="lg"
               onClick={handleConfirmOrder}
-              disabled={isCheckingOut || !shippingData}
+              disabled={isCheckingOut}
               className="w-full bg-[#E8836B] text-white hover:bg-[#E8836B]/90 disabled:opacity-50"
             >
               {isCheckingOut ? (

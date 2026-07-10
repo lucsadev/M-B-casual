@@ -16,7 +16,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 
 const STATUS_BADGE: Record<string, 'default' | 'secondary' | 'destructive' | 'success'> = {
   pending: 'secondary',
@@ -168,19 +174,22 @@ export function CustomerDetailPage() {
                   </Badge>
                   <Select
                     value={isAdmin ? 'admin' : 'user'}
-                    onChange={(event) =>
+                    onValueChange={(value) =>
                       toggleAdmin.mutate({
                         userId: customer.user_id,
-                        makeAdmin: event.target.value === 'admin',
+                        makeAdmin: value === 'admin',
                       })
                     }
                     disabled={toggleAdmin.isPending}
-                    options={[
-                      { value: 'user', label: 'Usuario' },
-                      { value: 'admin', label: 'Administrador' },
-                    ]}
-                    className="w-[160px]"
-                  />
+                  >
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">Usuario</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

@@ -10,14 +10,13 @@
  * - "Confirmar orden" button with loading state
  * - Error handling
  */
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,13 +24,16 @@ import { PAYMENT_METHODS, type PaymentMethodId, type ShippingAddressInput } from
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useCart } from '../features/cart/hooks/use-cart';
 import { useCheckout } from '../features/checkout/hooks/useCheckout';
-import { ShippingForm } from '../features/checkout/components/shipping-form';
+import { ShippingForm, type ShippingFormHandle } from '../features/checkout/components/shipping-form';
 import { OrderSummary } from '../features/checkout/components/order-summary';
 
 export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
   const { user, isLoading: isAuthLoading } = useAuth();
   const { items, summary, isLoading: isCartLoading } = useCart();
+  const { mutate: checkout, isPending: isCheckingOut } = useCheckout();
+  const shippingFormRef = useRef<ShippingFormHandle>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>('transferencia');
 
   // Auth guard: redirect to login if not authenticated
   useEffect(() => {
@@ -50,26 +52,16 @@ export default function CheckoutScreen() {
       </View>
     );
   }
-  const { mutate: checkout, isPending: isCheckingOut } = useCheckout();
-
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>('transferencia');
-  const [shippingData, setShippingData] = useState<ShippingAddressInput | null>(null);
-
   const handleShippingSubmit = useCallback((data: ShippingAddressInput) => {
-    setShippingData(data);
-  }, []);
-
-  const handleConfirmOrder = useCallback(() => {
-    if (!shippingData) {
-      Alert.alert('Datos incompletos', 'Completá los datos de envío antes de confirmar.');
-      return;
-    }
-
     checkout({
-      shipping_address: shippingData,
+      shipping_address: data,
       payment_method: paymentMethod,
     });
-  }, [shippingData, paymentMethod, checkout]);
+  }, [paymentMethod, checkout]);
+
+  const handleConfirmOrder = useCallback(() => {
+    shippingFormRef.current?.submit();
+  }, []);
 
   // Loading
   if (isCartLoading) {
@@ -127,7 +119,7 @@ export default function CheckoutScreen() {
           <Text className="text-base font-bold text-[#1A1A1A] mb-4">
             Datos de envío
           </Text>
-          <ShippingForm onSubmit={handleShippingSubmit} />
+          <ShippingForm ref={shippingFormRef} onSubmit={handleShippingSubmit} />
         </View>
 
         {/* Payment method */}
@@ -176,9 +168,9 @@ export default function CheckoutScreen() {
       >
         <TouchableOpacity
           onPress={handleConfirmOrder}
-          disabled={isCheckingOut || !shippingData}
+          disabled={isCheckingOut}
           className={`w-full py-3.5 rounded-md items-center ${
-            isCheckingOut || !shippingData
+            isCheckingOut
               ? 'bg-neutral-300'
               : 'bg-[#D4A853] active:bg-[#D4A853]/80'
           }`}

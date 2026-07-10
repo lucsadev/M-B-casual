@@ -23,7 +23,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -545,15 +551,19 @@ export function PurchasesPage() {
                       <Label className="text-xs">Producto</Label>
                       <Select
                         value={item.productId}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleProductSelect(index, e.target.value)}
-                        options={
-                          productOptions?.map((p) => ({
-                            value: p.id,
-                            label: p.name,
-                          })) ?? []
-                        }
-                        className="w-full"
-                      />
+                        onValueChange={(value: string) => handleProductSelect(index, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar producto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {productOptions?.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Variant selector */}
@@ -561,28 +571,33 @@ export function PurchasesPage() {
                       <div className="w-28">
                         <Label className="text-xs">Variante</Label>
                         <Select
-                          value={item.variantId ?? ''}
-                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                          value={item.variantId ?? '__none__'}
+                          onValueChange={(value: string) => {
+                            const selected = value === '__none__' ? '' : value;
                             const product = productOptions?.find(
                               (p) => p.id === item.productId,
                             );
                             const variant = product?.variants.find(
-                              (v) => v.id === e.target.value,
+                              (v) => v.id === selected,
                             );
                             updateLineItem(index, {
-                              variantId: e.target.value || null,
+                              variantId: selected || null,
                               variantLabel: variant?.label ?? null,
                             });
                           }}
-                          options={[
-                            { value: '', label: 'Sin variante' },
-                            ...(productOptions?.find((p) => p.id === item.productId)?.variants ?? []).map((v) => ({
-                              value: v.id,
-                              label: v.label,
-                            })),
-                          ]}
-                          className="w-full"
-                        />
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Sin variante" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none__">Sin variante</SelectItem>
+                            {(productOptions?.find((p) => p.id === item.productId)?.variants ?? []).map((v) => (
+                              <SelectItem key={v.id} value={v.id}>
+                                {v.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
 

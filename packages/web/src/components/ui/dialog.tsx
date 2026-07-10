@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-const Dialog = ({ open, onOpenChange, children }: { open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode }) => {
+const Dialog = ({ open, onOpenChange, className, children }: { open: boolean; onOpenChange: (open: boolean) => void; className?: string; children: React.ReactNode }) => {
   React.useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -19,7 +19,7 @@ const Dialog = ({ open, onOpenChange, children }: { open: boolean; onOpenChange:
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative z-50 w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg">
+      <div className={cn('relative z-50 w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg', className)}>
         {children}
       </div>
     </div>

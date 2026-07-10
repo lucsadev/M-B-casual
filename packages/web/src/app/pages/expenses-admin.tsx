@@ -13,7 +13,13 @@ import {
 } from '@/features/admin/finance/api/use-finance-queries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import {
   Table,
@@ -99,14 +105,24 @@ export function AdminExpensesPage() {
       {/* Filters */}
       <div className="mb-6">
         <Select
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value);
+          value={category || '__all__'}
+          onValueChange={(value: string) => {
+            setCategory(value === '__all__' ? '' : value);
             setPage(1);
           }}
-          options={EXPENSE_CATEGORIES}
-          className="w-48"
-        />
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Todas las categorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">Todas las categorías</SelectItem>
+            {EXPENSE_CATEGORIES.slice(1).map((c) => (
+              <SelectItem key={c.value} value={c.value}>
+                {c.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
@@ -229,11 +245,20 @@ export function AdminExpensesPage() {
               <div>
                 <Label htmlFor="expCat">Categoría</Label>
                 <Select
-                  id="expCat"
                   value={form.expenseCategory}
-                  onChange={(e) => setForm({ ...form, expenseCategory: e.target.value })}
-                  options={EXPENSE_CATEGORIES.slice(1)}
-                />
+                  onValueChange={(value: string) => setForm({ ...form, expenseCategory: value })}
+                >
+                  <SelectTrigger id="expCat">
+                    <SelectValue placeholder="Categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXPENSE_CATEGORIES.slice(1).map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div>

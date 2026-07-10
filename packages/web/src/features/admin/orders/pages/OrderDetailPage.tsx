@@ -12,7 +12,13 @@ import {
 } from '@/features/admin/orders/api/use-order-queries';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const STATUS_OPTIONS = [
@@ -106,8 +112,28 @@ export function OrderDetailPage() {
                 <div key={item.id} className="flex items-center justify-between py-3">
                   <div>
                     <p className="text-sm font-medium text-[#1A1A1A]">{item.product_name}</p>
-                    <p className="text-xs text-[#1A1A1A]/40">
+                    <p className="mt-0.5 text-xs text-[#1A1A1A]/40">
                       {item.quantity} × {formatPrice(item.unit_price)}
+                      {item.variant && (item.variant.size || item.variant.color) && (
+                        <span className="ml-2 inline-flex items-center gap-1.5">
+                          {item.variant.size && (
+                            <span className="rounded bg-[#F0F0EC] px-1.5 py-0.5 text-[#1A1A1A]/70">
+                              Talle {item.variant.size}
+                            </span>
+                          )}
+                          {item.variant.color && (
+                            <span className="inline-flex items-center gap-1 text-[#1A1A1A]/70">
+                              {item.variant.color_hex && (
+                                <span
+                                  className="inline-block h-3 w-3 rounded-full border border-[#E2E2DC]"
+                                  style={{ backgroundColor: item.variant.color_hex }}
+                                />
+                              )}
+                              {item.variant.color}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </p>
                   </div>
                   <span className="font-semibold">{formatPrice(item.subtotal)}</span>
@@ -129,10 +155,19 @@ export function OrderDetailPage() {
             <div className="space-y-3">
               <Select
                 value={currentStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                options={STATUS_OPTIONS}
-                className="w-full"
-              />
+                onValueChange={(value: string) => setSelectedStatus(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button
                 className="w-full"
                 onClick={handleStatusChange}

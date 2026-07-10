@@ -3,6 +3,7 @@
  *
  * Uses react-hook-form + Zod for validation, mirroring the web ShippingForm.
  */
+import { forwardRef, useImperativeHandle } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { View, Text, TextInput, ScrollView } from 'react-native';
@@ -12,7 +13,12 @@ interface ShippingFormProps {
   onSubmit: (data: ShippingAddressInput) => void;
 }
 
-export function ShippingForm({ onSubmit }: ShippingFormProps) {
+export interface ShippingFormHandle {
+  submit: () => void;
+}
+
+export const ShippingForm = forwardRef<ShippingFormHandle, ShippingFormProps>(
+  function ShippingForm({ onSubmit }, ref) {
   const {
     control,
     handleSubmit,
@@ -29,6 +35,12 @@ export function ShippingForm({ onSubmit }: ShippingFormProps) {
       notes: '',
     },
   });
+
+  useImperativeHandle(ref, () => ({
+    submit: () => {
+      handleSubmit(onSubmit)();
+    },
+  }), [handleSubmit, onSubmit]);
 
   return (
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -217,4 +229,4 @@ export function ShippingForm({ onSubmit }: ShippingFormProps) {
       </View>
     </ScrollView>
   );
-}
+});

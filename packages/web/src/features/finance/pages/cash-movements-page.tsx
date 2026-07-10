@@ -15,7 +15,13 @@ import {
 } from '../hooks/use-finance';
 import { DateRangeFilter } from '../components/date-range-filter';
 import type { DateRange } from '../components/date-range-filter';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CashMovement } from '@mbt/shared';
 
@@ -240,10 +246,20 @@ export function CashMovementsPage() {
             Tipo
           </label>
           <Select
-            value={typeFilter}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTypeFilter(e.target.value)}
-            options={TYPE_OPTIONS}
-          />
+            value={typeFilter || '__all__'}
+            onValueChange={(value: string) =>
+              setTypeFilter(value === '__all__' ? '' : value)
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Todos los tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todos los tipos</SelectItem>
+              <SelectItem value="income">Ingresos</SelectItem>
+              <SelectItem value="expense">Egresos</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

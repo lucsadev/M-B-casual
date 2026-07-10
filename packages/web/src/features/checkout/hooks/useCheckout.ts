@@ -34,6 +34,10 @@ export function useCheckout() {
     onSuccess: (orderId) => {
       // Invalidate cart so it re-fetches (empty cart after checkout)
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      // Checkout decrements variant stock — refresh product/variant caches
+      queryClient.invalidateQueries({ queryKey: ['product'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
       toast.success('¡Pedido creado con éxito!');
       navigate(`/gracias/${orderId}`);
     },

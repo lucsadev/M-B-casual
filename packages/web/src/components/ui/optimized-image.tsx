@@ -11,7 +11,7 @@
  * <OptimizedImage src="/product.jpg" alt="Product" className="w-full" />
  * <OptimizedImage src="/hero.jpg" alt="Hero" priority className="w-full" />
  */
-import { useState, type ImgHTMLAttributes } from 'react';
+import { useState, useEffect, type ImgHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -23,6 +23,15 @@ import { cn } from '@/lib/utils';
  * Falls back to the original src when the extension is not jpg/jpeg/png.
  */
 function toWebpSrc(src: string): string {
+  // Don't convert external URLs or Supabase storage URLs to WebP
+  // Only convert local images that we control
+  const isExternal = src.startsWith('http://') || src.startsWith('https://');
+  const isSupabaseStorage = src.includes('supabase.co/storage/v1/object/public/');
+  
+  if (isExternal || isSupabaseStorage) {
+    return src; // Return original - don't try WebP conversion
+  }
+  
   return src.replace(/\.(jpe?g|png)(\?.*)?$/i, '.webp$2');
 }
 
@@ -109,6 +118,11 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
 
+  // Reset status when src changes to trigger new image load
+  useEffect(() => {
+    setStatus('loading');
+  }, [src]);
+
   const webpSrc = toWebpSrc(src);
   const baseSrc = toBaseSrc(src);
   const isWebpSupported = webpSrc !== src; // Only add webp source if extension was replaced
@@ -116,10 +130,10 @@ export function OptimizedImage({
   const handleLoad = () => setStatus('loaded');
   const handleError = () => setStatus('error');
 
-  return (
+return (
     <div
-      className={cn('relative overflow-hidden', className)}
-      style={{ width, height }}
+      className={cn('relative overflow-hidden h-full w-full', className)}
+      style={width || height ? { width, height } : undefined}
     >
       {/* Skeleton placeholder while loading */}
       {status === 'loading' && (
@@ -135,7 +149,7 @@ export function OptimizedImage({
           <span className="text-xs text-[#1A1A1A]/40">Sin imagen</span>
         </div>
       ) : (
-        <picture>
+        <picture className="h-full w-full">
           {isWebpSupported && (
             <source srcSet={webpSrc} type="image/webp" />
           )}
@@ -148,8 +162,9 @@ export function OptimizedImage({
             onLoad={handleLoad}
             onError={handleError}
             className={cn(
-              'h-full w-full object-cover transition-opacity duration-300',
+              'h-full w-full transition-opacity duration-300',
               status === 'loading' ? 'opacity-0' : 'opacity-100',
+              className
             )}
             {...imgProps}
           />

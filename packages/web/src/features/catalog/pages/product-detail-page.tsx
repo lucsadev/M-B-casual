@@ -34,12 +34,23 @@ export function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
-  // Reset selection when product changes
+  // Reset selection when product (slug) changes
   useEffect(() => {
     setSelectedImageIndex(0);
     setSelectedSize(null);
     setSelectedColor(null);
   }, [slug]);
+
+  // Pre-select a default in-stock variant so the user starts with a valid choice
+  useEffect(() => {
+    if (!product) return;
+    if (selectedSize || selectedColor) return;
+    const defaultVariant = product.variants.find((v) => v.stock > 0);
+    if (defaultVariant) {
+      setSelectedSize(defaultVariant.size ?? null);
+      setSelectedColor(defaultVariant.color ?? null);
+    }
+  }, [product, selectedSize, selectedColor]);
 
   // SEO title — moved to <SEO /> component in the JSX below
 
@@ -109,9 +120,11 @@ export function ProductDetailPage() {
   const hasDiscount =
     product.comparePrice !== undefined && product.comparePrice > product.price;
 
-  // Resolve variant_id from selected size+color
+  // Resolve variant_id from selected size+color (fall back to first in-stock variant)
   const selectedVariantId = (() => {
-    if (!selectedSize && !selectedColor) return null;
+    if (!selectedSize && !selectedColor) {
+      return product.variants.find((v) => v.stock > 0)?.id ?? null;
+    }
     return product.variants.find((v) => {
       const sizeMatch = !selectedSize || v.size === selectedSize;
       const colorMatch = !selectedColor || v.color === selectedColor;
@@ -190,7 +203,7 @@ export function ProductDetailPage() {
             <OptimizedImage
               src={productImages[selectedImageIndex]}
               alt={product.name}
-              className="h-full w-full"
+              className="h-full w-full object-contain"
               priority
             />
           </div>

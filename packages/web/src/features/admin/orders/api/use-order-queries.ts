@@ -29,8 +29,19 @@ export interface OrderWithCustomer extends OrderRow {
   item_count: number;
 }
 
+export interface OrderItemWithProduct extends OrderItemRow {
+  product_name: string;
+  variant: {
+    size: string | null;
+    color: string | null;
+    color_hex: string | null;
+    sku: string | null;
+  } | null;
+}
+
 export interface OrderDetail extends OrderRow {
-  items: (OrderItemRow & { product_name: string })[];
+  customer_name: string;
+  items: OrderItemWithProduct[];
 }
 
 // ---------------------------------------------------------------------------
@@ -50,16 +61,23 @@ async function fetchAdminOrders(
   const pagination = buildPagination(filters.page, filters.pageSize);
   let query = supabase
     .from('orders')
-    .select('*, customers(first_name, last_name), order_items(count)', { count: 'exact' });
+    .select('*, order_items(count)', { count: 'exact' });
 
   if (filters.status && filters.status !== 'all') {
     query = query.eq('status', filters.status);
   }
 
   if (filters.search) {
-    query = query.or(
-      `id.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`,
-    );
+    const term = filters.search.trim();
+    const conditions = [
+      `notes.ilike.%${term}%`,
+      `customer_name.ilike.%${term}%`,
+    ];
+    // id is a uuid — only include it when the term looks like a uuid fragment
+    if (/^[0-9a-fA-F-]{8,}$/.test(term)) {
+      conditions.push(`id.ilike.%${term}%`);
+    }
+    query = query.or(conditions.join(','));
   }
 
   const from = pagination.offset;
@@ -83,10 +101,7 @@ async function fetchAdminOrders(
     shipping_address: row.shipping_address,
     created_at: row.created_at,
     updated_at: row.updated_at,
-    customer_name:
-      row.customers
-        ? `${row.customers.first_name ?? ''} ${row.customers.last_name ?? ''}`.trim()
-        : 'Cuenta eliminada',
+    customer_name: row.customer_name ?? 'Cuenta eliminada',
     item_count: row.order_items?.length ?? 0,
   }));
 
@@ -107,22 +122,27 @@ export function useAdminOrders(filters: AdminOrdersFilters) {
 async function fetchOrderDetail(id: string): Promise<OrderDetail | null> {
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select('*')
+    .select('*, customers(first_name, last_name)')
     .eq('id', id)
-    .single<OrderRow>();
+    .single<OrderRow & { customers: { first_name: string | null; last_name: string | null } | null }>();
 
   if (orderError) throw orderError;
   if (!order) return null;
 
+  const customer_name = order.customers
+    ? `${order.customers.first_name ?? ''} ${order.customers.last_name ?? ''}`.trim()
+    : 'Cuenta eliminada';
+
   const { data: items, error: itemsError } = await supabase
     .from('order_items')
-    .select('*, products(name)')
+    .select('*, products(name), product_variants(size, color, color_hex, sku)')
     .eq('order_id', id);
 
   if (itemsError) throw itemsError;
 
   return {
     ...order,
+    customer_name,
     items: (items ?? []).map((item: any) => ({
       id: item.id,
       order_id: item.order_id,
@@ -132,6 +152,14 @@ async function fetchOrderDetail(id: string): Promise<OrderDetail | null> {
       unit_price: item.unit_price,
       subtotal: item.subtotal,
       product_name: item.products?.name ?? 'Producto eliminado',
+      variant: item.variant_id
+        ? {
+            size: item.product_variants?.size ?? null,
+            color: item.product_variants?.color ?? null,
+            color_hex: item.product_variants?.color_hex ?? null,
+            sku: item.product_variants?.sku ?? null,
+          }
+        : null,
     })),
   };
 }
@@ -175,6 +203,10 @@ export function useUpdateOrderStatus() {
     mutationFn: updateOrderStatus,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_ORDERS_KEY });
+      // Status changes can return or re-decrement stock — refresh product/variant caches
+      queryClient.invalidateQueries({ queryKey: ['product'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
       toast.success('Estado de orden actualizado');
     },
     onError: (error: Error) => {
@@ -251,6 +283,10 @@ export function useCreateAdminOrder() {
     mutationFn: createAdminOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_ORDERS_KEY });
+      // Creating an order decrements stock — refresh product/variant caches
+      queryClient.invalidateQueries({ queryKey: ['product'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
       toast.success('Orden creada correctamente');
     },
     onError: (error: Error) => {

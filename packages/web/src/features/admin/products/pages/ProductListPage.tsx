@@ -33,6 +33,7 @@ import {
 import { useDeleteProduct } from '../api/use-product-mutations';
 import { buildPagination } from '@mbt/shared';
 import type { Database } from '@/lib/database.types';
+import { Edit, Trash2 } from 'lucide-react';
 
 type ProductRow = Database['public']['Tables']['products']['Row'];
 
@@ -44,6 +45,7 @@ const PAGE_SIZE = 20;
 
 interface AdminProductRow extends ProductRow {
   total_stock: number;
+  category_name: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -240,19 +242,18 @@ export function ProductListPage() {
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Link to={`/admin/productos/${product.id}/editar`}>
-                      <Button variant="ghost" size="sm">
-                        Editar
+                      <Button variant="ghost" size="icon" aria-label="Editar producto">
+                        <Edit className="h-4 w-4" />
                       </Button>
                     </Link>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
                       className="text-red-500 hover:text-red-700"
-                      onClick={() =>
-                        openDeleteDialog(product.id, product.name)
-                      }
+                      onClick={() => openDeleteDialog(product.id, product.name)}
+                      aria-label="Eliminar producto"
                     >
-                      Eliminar
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>

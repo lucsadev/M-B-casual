@@ -160,7 +160,10 @@ export function useUpdateProduct() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY });
       queryClient.invalidateQueries({ queryKey: ADMIN_PRODUCTS_KEY });
-      queryClient.invalidateQueries({ queryKey: ['product', data.id] });
+      // Invalidate ALL product queries (by slug or id)
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === 'product',
+      });
       toast.success('Producto actualizado correctamente');
     },
     onError: (error: Error) => {
@@ -213,6 +216,7 @@ export function useDeleteProduct() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PRODUCTS_KEY });
       queryClient.invalidateQueries({ queryKey: ADMIN_PRODUCTS_KEY });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
       toast.success('Producto eliminado correctamente');
     },
     onError: (error: Error) => {
