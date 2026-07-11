@@ -4,6 +4,9 @@
  * Accepts image files via file input. Uploads each file to
  * the `product-images` bucket in Supabase Storage. Returns
  * the public URLs once uploaded.
+ *
+ * Deleting an image removes it from both the local array AND
+ * from Supabase Storage (the underlying file).
  */
 import { useState, useRef, type ChangeEvent } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -12,6 +15,27 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const BUCKET = 'product-images';
+
+/**
+ * Extract the storage path from a Supabase public URL.
+ *
+ * Supabase public URL format:
+ *   https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
+ *
+ * Returns null for non-Supabase URLs (external images).
+ */
+function extractStoragePath(publicUrl: string): string | null {
+  try {
+    const url = new URL(publicUrl);
+    // Match: /storage/v1/object/public/<bucket>/<path>
+    const match = url.pathname.match(
+      /^\/storage\/v1\/object\/public\/product-images\/(.+)$/,
+    );
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 interface ImageUploaderProps {
   value: string[];
@@ -74,7 +98,24 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
     }
   }
 
-  function removeImage(index: number) {
+  async function removeImage(index: number) {
+    const url = value[index];
+
+    // Try to delete the file from Storage (best-effort — don't block UX)
+    if (url) {
+      const storagePath = extractStoragePath(url);
+      if (storagePath) {
+        const { error } = await supabase.storage
+          .from(BUCKET)
+          .remove([storagePath]);
+
+        if (error) {
+          console.error('Error deleting image from storage:', error);
+        }
+      }
+    }
+
+    // Remove from local state regardless of storage result
     onChange(value.filter((_, i) => i !== index));
   }
 
