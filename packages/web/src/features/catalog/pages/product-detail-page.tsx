@@ -132,6 +132,16 @@ export function ProductDetailPage() {
     })?.id ?? null;
   })();
 
+  // Resolve selected variant object (for discount computation)
+  const selectedVariant = selectedVariantId
+    ? product.variants.find((v) => v.id === selectedVariantId)
+    : null;
+  const variantDiscount = selectedVariant?.discount ?? 0;
+  const effectivePrice =
+    variantDiscount > 0
+      ? Math.round(product.price * (1 - variantDiscount / 100) * 100) / 100
+      : product.price;
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-8">
       {/* SEO: title, OG, JSON-LD */}
@@ -154,7 +164,7 @@ export function ProductDetailPage() {
             image: productImages,
             offers: {
               '@type': 'Offer',
-              price: product.price,
+              price: effectivePrice,
               priceCurrency: 'ARS',
               availability: totalStock > 0
                 ? 'https://schema.org/InStock'
@@ -242,9 +252,21 @@ export function ProductDetailPage() {
 
             <div className="mt-3 flex items-baseline gap-3">
               <span className="text-3xl font-bold text-[#1A1A1A]">
-                {formatPrice(product.price)}
+                {formatPrice(effectivePrice)}
               </span>
-              {hasDiscount && (
+
+              {/* Variant-level discount */}
+              {variantDiscount > 0 && (
+                <>
+                  <span className="text-lg text-[#1A1A1A]/50 line-through">
+                    {formatPrice(product.price)}
+                  </span>
+                  <Badge variant="destructive">-{variantDiscount}%</Badge>
+                </>
+              )}
+
+              {/* Product-level compare-at price */}
+              {!variantDiscount && hasDiscount && (
                 <>
                   <span className="text-lg text-[#1A1A1A]/50 line-through">
                     {formatPrice(product.comparePrice!)}

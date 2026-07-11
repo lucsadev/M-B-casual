@@ -42,6 +42,7 @@ interface CartItemJoined {
   product_variant: {
     size: string | null;
     color: string | null;
+    discount: number;
   } | null;
 }
 
@@ -50,6 +51,12 @@ interface CartItemJoined {
 // ---------------------------------------------------------------------------
 
 function mapCartItem(row: CartItemJoined): CartItem {
+  const basePrice = row.product?.price ?? 0;
+  const discount = row.product_variant?.discount ?? 0;
+  const unitPrice = discount > 0
+    ? Math.round(basePrice * (1 - discount / 100) * 100) / 100
+    : basePrice;
+
   return {
     id: row.id,
     user_id: '',
@@ -64,7 +71,7 @@ function mapCartItem(row: CartItemJoined): CartItem {
           .filter(Boolean)
           .join(' / ') || null
       : null,
-    unit_price: row.product?.price ?? 0,
+    unit_price: unitPrice,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -95,7 +102,8 @@ export async function getCart(userId: string): Promise<CartItem[]> {
       ),
       product_variant:variant_id (
         size,
-        color
+        color,
+        discount
       )
     `)
     .eq('user_id', userId)

@@ -41,6 +41,7 @@ interface CreateProductInput {
     size?: string | null;
     color?: string | null;
     color_hex?: string | null;
+    discount?: number;
     stock: number;
     sku?: string | null;
   }[];
@@ -110,6 +111,7 @@ interface UpdateProductInput {
     size?: string | null;
     color?: string | null;
     color_hex?: string | null;
+    discount?: number;
     stock: number;
     sku?: string | null;
   }[];
@@ -137,6 +139,7 @@ async function updateProduct({ id, product, variants }: UpdateProductInput) {
       size: v.size ?? null,
       color: v.color ?? null,
       color_hex: v.color_hex ?? null,
+      discount: v.discount ?? 0,
       stock: v.stock ?? 0,
       sku: v.sku ?? null,
       product_id: id,

@@ -29,6 +29,7 @@ export function VariantManager() {
               size: '',
               color: '',
               color_hex: '#000000',
+              discount: 0,
               stock: 0,
               sku: '',
             })
@@ -75,6 +76,20 @@ export function VariantManager() {
                 type="color"
                 {...register(`variants.${index}.color_hex`)}
                 className="h-9 w-14 p-1"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs">Dto. %</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                {...register(`variants.${index}.discount`, {
+                  valueAsNumber: true,
+                })}
+                placeholder="0"
+                className="w-16"
               />
             </div>
 

@@ -92,6 +92,7 @@ export interface Database {
           size: string | null;
           color: string | null;
           color_hex: string | null;
+          discount: number;
           stock: number;
           sku: string | null;
           created_at: string;
@@ -102,6 +103,7 @@ export interface Database {
           size?: string | null;
           color?: string | null;
           color_hex?: string | null;
+          discount?: number;
           stock?: number;
           sku?: string | null;
           created_at?: string;
@@ -112,6 +114,7 @@ export interface Database {
           size?: string | null;
           color?: string | null;
           color_hex?: string | null;
+          discount?: number;
           stock?: number;
           sku?: string | null;
           created_at?: string;
