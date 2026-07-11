@@ -10,6 +10,7 @@
  */
 import { Link } from 'react-router-dom';
 import { useProducts } from '../hooks/use-products';
+import { useDiscountedProducts } from '../hooks/use-discounted-products';
 import { useCategories } from '../hooks/use-categories';
 import { ProductCard } from '../components/product-card';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -26,6 +27,8 @@ export function HomePage() {
   const { data: featuredData, isLoading: featuredLoading } =
     useProducts(featuredFilters);
   const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { data: discountedProducts, isLoading: discountsLoading } =
+    useDiscountedProducts();
 
   const featuredProducts =
     featuredData?.pages.flatMap((p) => p.data) ?? [];
@@ -110,6 +113,46 @@ export function HomePage() {
             Próximamente productos destacados.
           </p>
         )}
+      </section>
+
+      {/* Discounted products */}
+      <section className="mx-auto max-w-7xl px-4 py-16">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-[#1A1A1A] md:text-3xl">
+              Ofertas
+            </h2>
+            <p className="mt-1 text-[#1A1A1A]/60">
+              Productos con descuento por tiempo limitado.
+            </p>
+          </div>
+          <Link
+            to="/catalogo?tag=oferta"
+            className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#E8836B] transition-colors hover:bg-accent hover:text-accent-foreground"
+          >
+            Ver todos →
+          </Link>
+        </div>
+
+        {discountsLoading ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="overflow-hidden rounded-lg border border-[#E2E2DC]">
+                <Skeleton className="aspect-[3/4] w-full rounded-none" />
+                <div className="space-y-2 p-3">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-5 w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : discountedProducts && discountedProducts.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {discountedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : null}
       </section>
 
       {/* Category cards */}

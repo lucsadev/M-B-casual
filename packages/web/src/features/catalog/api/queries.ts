@@ -220,4 +220,63 @@ export async function getProductById(
   };
 }
 
+// ---------------------------------------------------------------------------
+// Discounted products
+// ---------------------------------------------------------------------------
+
+interface DiscountedProductRow {
+  id: string | null;
+  name: string | null;
+  slug: string | null;
+  description: string | null;
+  category_id: string | null;
+  price: number | null;
+  compare_price: number | null;
+  images: string[] | null;
+  tags: string[] | null;
+  is_active: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+  effective_price: number | null;
+  max_discount: number | null;
+}
+
+function mapDiscountedProduct(row: DiscountedProductRow): Product {
+  return {
+    id: row.id ?? '',
+    categoryId: row.category_id ?? '',
+    name: row.name ?? '',
+    slug: row.slug ?? '',
+    description: row.description ?? undefined,
+    price: row.price ?? 0,
+    comparePrice: row.compare_price ?? undefined,
+    images: row.images ?? [],
+    tags: row.tags ?? [],
+    isActive: row.is_active ?? false,
+    createdAt: row.created_at ?? '',
+    updatedAt: row.updated_at ?? '',
+    effectivePrice: row.effective_price ?? undefined,
+    variantDiscountPercent: row.max_discount ?? undefined,
+  };
+}
+
+/**
+ * Fetch active products that have at least one variant with discount > 0.
+ * Includes computed `effectivePrice` (cheapest variant after discount)
+ * and `variantDiscountPercent` (highest variant discount %).
+ */
+export async function getDiscountedProducts(
+  params: { limit?: number } = {},
+): Promise<Product[]> {
+  const { limit = 8 } = params;
+
+  const { data, error } = await supabase
+    .from('discounted_products')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data ?? []).map(mapDiscountedProduct);
+}
 

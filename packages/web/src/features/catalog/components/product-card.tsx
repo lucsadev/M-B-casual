@@ -20,14 +20,36 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const hasDiscount =
-    product.comparePrice !== undefined && product.comparePrice > product.price;
+  // Variant-level discount (from discounted_products view)
+  const hasVariantDiscount =
+    product.variantDiscountPercent !== undefined &&
+    product.variantDiscountPercent > 0 &&
+    product.effectivePrice !== undefined;
 
-  const discountPercent = hasDiscount
-    ? Math.round(
-        ((product.comparePrice! - product.price) / product.comparePrice!) * 100,
-      )
-    : 0;
+  // Product-level discount (comparePrice)
+  const hasCompareDiscount =
+    !hasVariantDiscount &&
+    product.comparePrice !== undefined &&
+    product.comparePrice > product.price;
+
+  const displayPrice = hasVariantDiscount
+    ? product.effectivePrice!
+    : product.price;
+
+  const comparePrice = hasVariantDiscount
+    ? product.price
+    : hasCompareDiscount
+      ? product.comparePrice!
+      : null;
+
+  const badgePercent = hasVariantDiscount
+    ? product.variantDiscountPercent!
+    : hasCompareDiscount
+      ? Math.round(
+          ((product.comparePrice! - product.price) / product.comparePrice!) *
+            100,
+        )
+      : 0;
 
   const thumbnailUrl =
     product.images && product.images.length > 0
@@ -60,8 +82,8 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.tags.includes('destacado') && (
             <Badge variant="secondary">Destacado</Badge>
           )}
-          {hasDiscount && (
-            <Badge variant="destructive">-{discountPercent}%</Badge>
+          {badgePercent > 0 && (
+            <Badge variant="destructive">-{badgePercent}%</Badge>
           )}
         </div>
       </div>
@@ -74,11 +96,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <div className="flex items-baseline gap-2">
           <span className="text-base font-bold text-[#1A1A1A]">
-            {formatPrice(product.price)}
+            {formatPrice(displayPrice)}
           </span>
-          {hasDiscount && (
+          {comparePrice !== null && (
             <span className="text-xs text-[#1A1A1A]/50 line-through">
-              {formatPrice(product.comparePrice!)}
+              {formatPrice(comparePrice)}
             </span>
           )}
         </div>

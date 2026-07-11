@@ -23,6 +23,10 @@ export interface Product {
   tags: string[];
   /** Whether the product is visible and purchasable */
   isActive: boolean;
+  /** Lowest price after variant discount (populated by discounted_products view) */
+  effectivePrice?: number;
+  /** Highest variant discount percentage (populated by discounted_products view) */
+  variantDiscountPercent?: number;
   /** ISO timestamp of creation */
   createdAt: string;
   /** ISO timestamp of last update */

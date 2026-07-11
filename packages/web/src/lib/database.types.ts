@@ -436,6 +436,24 @@ export interface Database {
           last_order_date: string | null;
         };
       };
+      discounted_products: {
+        Row: {
+          id: string | null;
+          category_id: string | null;
+          name: string | null;
+          slug: string | null;
+          description: string | null;
+          price: number | null;
+          compare_price: number | null;
+          images: string[] | null;
+          tags: string[] | null;
+          is_active: boolean | null;
+          created_at: string | null;
+          updated_at: string | null;
+          effective_price: number | null;
+          max_discount: number | null;
+        };
+      };
     };
     Functions: {
       is_admin: {
