@@ -6,6 +6,7 @@
  * - Search icon on the left
  * - Clear button when there's text
  * - Controlled via the parent to sync with URL params
+ * - Modern design with rounded corners and subtle shadows
  */
 import { useState, useEffect, useRef } from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -58,7 +59,7 @@ export function SearchBar({
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1A1A1A]/40"
+        className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#E8836B]"
       >
         <circle cx="11" cy="11" r="8" />
         <path d="m21 21-4.35-4.35" />
@@ -69,7 +70,7 @@ export function SearchBar({
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-[#E2E2DC] bg-white py-2 pl-10 pr-8 text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 focus:outline-none focus:ring-2 focus:ring-[#E8836B]"
+        className="w-full rounded-2xl border-0 bg-[#F9F9F7] py-3.5 pl-12 pr-10 text-sm text-[#1A1A1A] shadow-sm ring-1 ring-inset ring-[#E2E2DC]/50 placeholder:text-[#1A1A1A]/40 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#E8836B] focus:ring-offset-0"
         aria-label={placeholder}
       />
 
@@ -78,7 +79,7 @@ export function SearchBar({
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-[#1A1A1A]/40 hover:text-[#1A1A1A]"
+          className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-[#E8836B]/10 text-[#E8836B] transition-colors hover:bg-[#E8836B] hover:text-white"
           aria-label="Limpiar búsqueda"
         >
           <svg
@@ -89,7 +90,7 @@ export function SearchBar({
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-4 w-4"
+            className="h-3.5 w-3.5"
           >
             <path d="M18 6 6 18" />
             <path d="m6 6 12 12" />

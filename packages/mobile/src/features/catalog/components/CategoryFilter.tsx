@@ -3,6 +3,7 @@
  *
  * Active category is highlighted. "Todas" chip clears the filter.
  * Uses a horizontal ScrollView for native horizontal scrolling.
+ * Modern pill design with smooth transitions and shadow effects.
  */
 import { ScrollView, TouchableOpacity, Text, View } from 'react-native';
 import { useCategories } from '../hooks/use-categories';
@@ -24,11 +25,12 @@ export function CategoryFilter({
         horizontal
         showsHorizontalScrollIndicator={false}
         className="flex-row gap-2 py-2"
+        contentContainerStyle={{ gap: 8, paddingVertical: 8 }}
       >
         {Array.from({ length: 5 }).map((_, i) => (
           <View
             key={i}
-            className="h-9 w-24 rounded-full bg-neutral-200 animate-pulse"
+            className="h-10 w-28 rounded-full bg-[#E8E4D9] animate-pulse"
           />
         ))}
       </ScrollView>
@@ -49,14 +51,15 @@ export function CategoryFilter({
       {/* "Todas" chip */}
       <TouchableOpacity
         onPress={() => onCategoryChange('')}
-        className={`px-4 py-1.5 rounded-full border ${
+        className={`px-5 py-2.5 rounded-full border shadow-sm ${
           !activeCategory
             ? 'bg-[#D4A853] border-[#D4A853]'
             : 'bg-white border-[#E8E4D9]'
         }`}
+        activeOpacity={0.7}
       >
         <Text
-          className={`text-sm font-medium ${
+          className={`text-sm font-semibold tracking-wide ${
             !activeCategory ? 'text-white' : 'text-[#1A1A1A]'
           }`}
         >
@@ -68,14 +71,15 @@ export function CategoryFilter({
         <TouchableOpacity
           key={cat.id}
           onPress={() => onCategoryChange(cat.slug)}
-          className={`px-4 py-1.5 rounded-full border ${
+          className={`px-5 py-2.5 rounded-full border shadow-sm ${
             activeCategory === cat.slug
               ? 'bg-[#D4A853] border-[#D4A853]'
               : 'bg-white border-[#E8E4D9]'
           }`}
+          activeOpacity={0.7}
         >
           <Text
-            className={`text-sm font-medium ${
+            className={`text-sm font-semibold tracking-wide ${
               activeCategory === cat.slug ? 'text-white' : 'text-[#1A1A1A]'
             }`}
           >

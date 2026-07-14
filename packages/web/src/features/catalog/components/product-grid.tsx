@@ -8,6 +8,7 @@
  * - Loading skeleton while fetching
  * - Empty state when no results match filters
  * - Error state with retry message
+ * - Modern design with improved spacing and visual hierarchy
  */
 import { useRef, useCallback, useEffect } from 'react';
 import type { CatalogFilters } from '@mbt/shared';
@@ -67,13 +68,13 @@ export function ProductGrid({ category, search }: ProductGridProps) {
   // Loading state — show skeleton grid
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="overflow-hidden rounded-lg border border-[#E2E2DC]">
-            <Skeleton className="aspect-[3/4] w-full rounded-none" />
-            <div className="space-y-2 p-3">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-5 w-1/3" />
+          <div key={i} className="overflow-hidden rounded-2xl border border-[#E2E2DC]/50 bg-white shadow-sm">
+            <Skeleton className="aspect-[3/4] w-full rounded-none bg-[#F0F0EC]" />
+            <div className="space-y-2 p-4">
+              <Skeleton className="h-5 w-3/4 bg-[#F0F0EC]" />
+              <Skeleton className="h-7 w-1/3 bg-[#F0F0EC]" />
             </div>
           </div>
         ))}
@@ -84,7 +85,7 @@ export function ProductGrid({ category, search }: ProductGridProps) {
   // Error state
   if (isError) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16 text-center">
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-[#E2E2DC]/50 bg-white py-16 text-center shadow-sm">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -93,7 +94,7 @@ export function ProductGrid({ category, search }: ProductGridProps) {
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-12 w-12 text-red-400"
+          className="h-14 w-14 text-red-400"
         >
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
@@ -117,7 +118,7 @@ export function ProductGrid({ category, search }: ProductGridProps) {
   // Empty state
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16 text-center">
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-[#E2E2DC]/50 bg-white py-16 text-center shadow-sm">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -126,7 +127,7 @@ export function ProductGrid({ category, search }: ProductGridProps) {
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-12 w-12 text-[#1A1A1A]/30"
+          className="h-14 w-14 text-[#1A1A1A]/30"
         >
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
           <path d="M3 6h18" />
@@ -147,15 +148,15 @@ export function ProductGrid({ category, search }: ProductGridProps) {
   return (
     <div>
       {/* Results count */}
-      <p className="mb-4 text-sm text-[#1A1A1A]/50">
-        {totalCount} {totalCount === 1 ? 'producto' : 'productos'}
+      <p className="mb-6 text-sm font-medium text-[#1A1A1A]/50">
+        {totalCount} {totalCount === 1 ? 'producto encontrado' : 'productos encontrados'}
         {search && <> para &ldquo;{search}&rdquo;</>}
       </p>
 
       {/* Product grid */}
       <div
         className={cn(
-          'grid grid-cols-1 gap-4',
+          'grid grid-cols-1 gap-6',
           'sm:grid-cols-2',
           'lg:grid-cols-3',
           'xl:grid-cols-4',
@@ -171,11 +172,12 @@ export function ProductGrid({ category, search }: ProductGridProps) {
 
       {/* Fallback "Cargar más" button (shown when observer fails) */}
       {hasNextPage && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-10 flex justify-center">
           <Button
             variant="outline"
             disabled={isFetchingNextPage}
             onClick={() => fetchNextPage()}
+            className="rounded-full px-8 py-6 text-sm font-semibold shadow-sm hover:shadow-md"
           >
             {isFetchingNextPage ? 'Cargando...' : 'Cargar más productos'}
           </Button>
@@ -184,13 +186,13 @@ export function ProductGrid({ category, search }: ProductGridProps) {
 
       {/* Loading more indicator */}
       {isFetchingNextPage && (
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="overflow-hidden rounded-lg border border-[#E2E2DC]">
-              <Skeleton className="aspect-[3/4] w-full rounded-none" />
-              <div className="space-y-2 p-3">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-5 w-1/3" />
+            <div key={i} className="overflow-hidden rounded-2xl border border-[#E2E2DC]/50 bg-white shadow-sm">
+              <Skeleton className="aspect-[3/4] w-full rounded-none bg-[#F0F0EC]" />
+              <div className="space-y-2 p-4">
+                <Skeleton className="h-5 w-3/4 bg-[#F0F0EC]" />
+                <Skeleton className="h-7 w-1/3 bg-[#F0F0EC]" />
               </div>
             </div>
           ))}
