@@ -21,6 +21,7 @@ import {
 import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProducts } from '../../features/catalog/hooks/use-products';
+import { usePrefetchProduct } from '../../features/catalog/hooks/use-products';
 import { ProductListItem } from '../../features/catalog/components/ProductListItem';
 import { SearchBar } from '../../features/catalog/components/SearchBar';
 import { CategoryFilter } from '../../features/catalog/components/CategoryFilter';
@@ -73,6 +74,7 @@ export default function CatalogScreen() {
     pageSize: 20,
   });
 
+  const prefetchProduct = usePrefetchProduct();
   const products: Product[] = data?.pages.flatMap((p) => p.data) ?? [];
 
   // Pull-to-refresh
@@ -89,9 +91,18 @@ export default function CatalogScreen() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const handleProductPress = useCallback(
+    (slug: string) => {
+      prefetchProduct(slug);
+    },
+    [prefetchProduct],
+  );
+
   const renderItem = useCallback(
-    ({ item }: { item: Product }) => <ProductListItem product={item} />,
-    [],
+    ({ item }: { item: Product }) => (
+      <ProductListItem product={item} onPress={() => handleProductPress(item.slug)} />
+    ),
+    [handleProductPress],
   );
 
   const keyExtractor = useCallback((item: Product) => item.id, []);
@@ -173,6 +184,12 @@ export default function CatalogScreen() {
         windowSize={7}
         maxToRenderPerBatch={10}
         updateCellsBatchingPeriod={50}
+        initialNumToRender={10}
+        getItemLayout={(_data, index) => ({
+          length: 220, // Approximate height per item
+          offset: 220 * Math.floor(index / 2), // Account for 2 columns
+          index,
+        })}
       />
     </View>
   );
