@@ -2,34 +2,26 @@
 @import "tw-animate-css";
 
 /* =============================================================
- * M & B Casual — Design Tokens & Theme
+ * M & B Casual — Cyberpunk Dark Mode Theme
  * Tailwind CSS v4 with CSS variables for shadcn/ui theming
  * =============================================================
  *
  * Palette:
- *   Base:      White (#FFF), Light Gray (#F0F0EC..N)
- *   Secondary: Light Blue (#C5D9E8), Mint (#B5E2C8)
- *   Accent:    Coral (#E8836B), Deep Coral (#D46B54)
- *   Text:      Near Black (#1A1A1A)
+ *   Base:      Dark Grays (#0A0A0B, #121214, #1C1C1F)
+ *   Neon:      Violet (#8B5CF6), Fuchsia (#D946EF), Cyan (#22D3EE)
+ *   Text:      White (#FFFFFF), Gray (#A1A1AA)
  */
 
 @theme {
   /* Brand palette — use with text-brand-* / bg-brand-* */
-  --color-brand-black: #1A1A1A;
-  --color-brand-white: #FFFFFF;
-  --color-brand-gray-50: #F8F8F6;
-  --color-brand-gray-100: #F0F0EC;
-  --color-brand-gray-200: #E2E2DC;
-  --color-brand-gray-300: #C8C8C0;
-  --color-brand-blue: #C5D9E8;
-  --color-brand-blue-soft: #E5EFF6;
-  --color-brand-mint: #B5E2C8;
-  --color-brand-mint-soft: #E0F5E8;
-  --color-brand-coral: #E8836B;
-  --color-brand-coral-deep: #D46B54;
-  --color-brand-coral-soft: #FCE8E4;
-  --color-brand-gold: #D4A853;
-
+  --color-brand-black: #0A0A0B;
+  --color-brand-gray-100: #1C1C1F;
+  --color-brand-gray-200: #27272A;
+  --color-brand-gray-300: #3F3F46;
+  --color-brand-violet: #8B5CF6;
+  --color-brand-fuchsia: #D946EF;
+  --color-brand-cyan: #22D3EE;
+  
   /* shadcn/ui theme tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -50,7 +42,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-
+  
   /* Brand font */
   --font-brand: "Cormorant Garamond", serif;
   --font-casual: "Montserrat", sans-serif;
@@ -67,50 +59,50 @@
   --radius: 0.5rem;
 }
 
-/* Light theme (default) */
+/* Dark cyberpunk theme (default) */
 :root {
   /* Base */
-  --background: #FFFFFF;
-  --foreground: #1A1A1A;
-  --card: #FFFFFF;
-  --card-foreground: #1A1A1A;
-  --popover: #FFFFFF;
-  --popover-foreground: #1A1A1A;
-
-  /* Primary — near black, clean */
-  --primary: #1A1A1A;
+  --background: #0A0A0B;
+  --foreground: #FAFAFA;
+  --card: #121214;
+  --card-foreground: #FAFAFA;
+  --popover: #121214;
+  --popover-foreground: #FAFAFA;
+  
+  /* Primary — violet neon */
+  --primary: #8B5CF6;
   --primary-foreground: #FFFFFF;
-
-  /* Secondary — light blue */
-  --secondary: #C5D9E8;
-  --secondary-foreground: #1A1A1A;
-
-  /* Muted — light gray */
-  --muted: #F0F0EC;
-  --muted-foreground: #6B6B6B;
-
-  /* Accent — coral */
-  --accent: #E8836B;
+  
+  /* Secondary — fuchsia */
+  --secondary: #D946EF;
+  --secondary-foreground: #FFFFFF;
+  
+  /* Muted — dark gray */
+  --muted: #1C1C1F;
+  --muted-foreground: #A1A1AA;
+  
+  /* Accent — cyan */
+  --accent: #22D3EE;
   --accent-foreground: #FFFFFF;
-
+  
   /* Destructive */
   --destructive: #ef4444;
   --destructive-foreground: #FFFFFF;
-
+  
   /* Borders & inputs */
-  --border: #E2E2DC;
-  --input: #E2E2DC;
-  --ring: #E8836B;
-
-  /* Sidebar — light gray base */
-  --sidebar-background: #F8F8F6;
-  --sidebar-foreground: #1A1A1A;
-  --sidebar-primary: #1A1A1A;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #8B5CF6;
+  
+  /* Sidebar — dark base */
+  --sidebar-background: #0F0F11;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #8B5CF6;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #E5EFF6;
-  --sidebar-accent-foreground: #1A1A1A;
-  --sidebar-border: #E2E2DC;
-  --sidebar-ring: #E8836B;
+  --sidebar-accent: #1C1C1F;
+  --sidebar-accent-foreground: #D946EF;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #8B5CF6;
 }
 
 /* Base reset */
@@ -122,4 +114,23 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121214;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3F3F46;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5CF6;
 }

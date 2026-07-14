@@ -4,7 +4,7 @@
  * Desktop: horizontal scrollable row of category chips.
  * Mobile: dropdown <select> that takes full width.
  * Active category is highlighted based on the URL ?category=slug param.
- * Modern design with rounded pills, shadows, and smooth transitions.
+ * Cyberpunk dark mode design with neon glow effects and gradients
  */
 import { useCategories } from '../hooks/use-categories';
 import { cn } from '@/lib/utils';
@@ -27,7 +27,7 @@ export function CategoryFilter({
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="h-10 w-28 animate-pulse rounded-full bg-[#F0F0EC]"
+            className="h-10 w-28 animate-pulse rounded-full bg-gray-800"
           />
         ))}
       </div>
@@ -46,11 +46,11 @@ export function CategoryFilter({
         <button
           onClick={() => onCategoryChange('')}
           className={cn(
-            'whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200',
-            'shadow-sm hover:shadow-md hover:-translate-y-0.5',
+            'whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300',
+            'hover:-translate-y-0.5',
             !activeCategory
-              ? 'bg-gradient-to-r from-[#E8836B] to-[#E8836B]/90 text-white shadow-md'
-              : 'bg-white text-[#1A1A1A] border border-[#E2E2DC] hover:border-[#E8836B] hover:text-[#E8836B]',
+              ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-600 text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50'
+              : 'bg-gray-900/80 text-gray-300 border border-white/10 hover:border-violet-500/50 hover:text-violet-400 backdrop-blur-sm',
           )}
         >
           Todas
@@ -60,11 +60,11 @@ export function CategoryFilter({
             key={cat.id}
             onClick={() => onCategoryChange(cat.slug)}
             className={cn(
-              'whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200',
-              'shadow-sm hover:shadow-md hover:-translate-y-0.5',
+              'whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300',
+              'hover:-translate-y-0.5',
               activeCategory === cat.slug
-                ? 'bg-gradient-to-r from-[#E8836B] to-[#E8836B]/90 text-white shadow-md'
-                : 'bg-white text-[#1A1A1A] border border-[#E2E2DC] hover:border-[#E8836B] hover:text-[#E8836B]',
+                ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-600 text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50'
+                : 'bg-gray-900/80 text-gray-300 border border-white/10 hover:border-violet-500/50 hover:text-violet-400 backdrop-blur-sm',
             )}
           >
             {cat.name}
@@ -76,7 +76,7 @@ export function CategoryFilter({
       <select
         value={activeCategory}
         onChange={(e) => onCategoryChange(e.target.value)}
-        className="w-full rounded-xl border border-[#E2E2DC] bg-white px-4 py-3 text-sm font-medium text-[#1A1A1A] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E8836B] focus:ring-offset-0 sm:hidden"
+        className="w-full rounded-xl border border-white/10 bg-gray-900/80 px-4 py-3 text-sm font-medium text-gray-100 shadow-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-0 focus:ring-offset-gray-900 sm:hidden"
         aria-label="Filtrar por categoría"
       >
         <option value="">Todas las categorías</option>

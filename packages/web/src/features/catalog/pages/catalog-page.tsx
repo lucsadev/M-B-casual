@@ -4,7 +4,7 @@
  * Route: /catalogo
  * Reads initial state from URL ?category=...&q=... params.
  * SEO title: "Catálogo — M & B Casual"
- * Modern design with improved spacing and visual hierarchy
+ * Cyberpunk dark mode design with neon effects and gradients
  */
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { SearchBar } from '../components/search-bar';
@@ -16,7 +16,14 @@ export function CatalogPage() {
   const { category, search, setCategory, setSearch } = useUrlFilters();
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <section className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Background gradient mesh */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-1/4 -top-1/4 h-[500px] w-[500px] rounded-full bg-violet-600/10 blur-[100px]" />
+        <div className="absolute -right-1/4 -bottom-1/4 h-[500px] w-[500px] rounded-full bg-fuchsia-600/10 blur-[100px]" />
+        <div className="absolute left-1/2 top-1/3 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-cyan-600/5 blur-[80px]" />
+      </div>
+
       <SEO
         title="Catálogo — M & B Casual"
         description="Explorá nuestra colección de indumentaria y accesorios. Encontrá el estilo que habla por vos."
@@ -24,11 +31,11 @@ export function CatalogPage() {
       />
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-[#1A1A1A] sm:text-4xl">
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold tracking-tight text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text sm:text-5xl drop-shadow-lg">
           Catálogo
         </h1>
-        <p className="mt-2 text-base text-[#1A1A1A]/60">
+        <p className="mt-3 text-base text-gray-400">
           Explorá nuestra colección de indumentaria y accesorios.
         </p>
       </div>
@@ -37,7 +44,7 @@ export function CatalogPage() {
       <SearchBar
         value={search}
         onChange={setSearch}
-        className="mb-6"
+        className="mb-8"
       />
 
       {/* Category filter */}
@@ -47,7 +54,7 @@ export function CatalogPage() {
       />
 
       {/* Divider */}
-      <hr className="my-8 border-[#E2E2DC]" />
+      <hr className="my-10 border-white/10" />
 
       {/* Product grid */}
       <ProductGrid category={category} search={search} />

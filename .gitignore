@@ -2,52 +2,65 @@
 # Dependencies
 node_modules/
 
+# Build outputs
+dist/
+build/
+.next/
+out/
+
 # Environment variables
 .env
 .env.local
 .env.*
 
-# Build outputs
-dist/
-build/
-target/
-
-# Package manager
-package-lock.json
-
-# IDE files
+# Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
 
 # Logs
 *.log
-
-# Temporary files
-*.tmp
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.Python
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
 
 # Coverage
+.coverage
 coverage/
 htmlcov/
-.coverage
 
-# MyPy
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Cache directories
+.cache/
 .mypy_cache/
-
-# PyTest
 .pytest_cache/
+.nyc_output/
+coverage/
 
-# Gradle
-.gradle/
+# Compiled files
+*.class
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
-# Compression
+# Compressed files
 *.zip
 *.gz
 *.tar
