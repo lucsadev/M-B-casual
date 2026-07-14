@@ -5,6 +5,7 @@
  * - Product image (first image or placeholder) with caching headers
  * - Name, price, discount badge
  * - Category badge overlay
+ * - Modern card design with elevated shadows and rounded corners
  * - Optimized for FlatList: memoized, fixed height estimation
  * - Optional prefetch callback for product detail navigation
  */
@@ -53,12 +54,12 @@ export const ProductListItem = memo(function ProductListItem({
 
   return (
     <TouchableOpacity 
-      className="flex-1 max-w-[50%] p-1.5 active:opacity-80"
+      className="flex-1 max-w-[50%] p-1.5 active:opacity-70"
       onPress={handlePress}
       accessibilityLabel={`Ver detalles de ${product.name}`}
       accessibilityRole="button"
     >
-      <View className="rounded-lg border border-[#E8E4D9] bg-white overflow-hidden">
+      <View className="rounded-2xl border border-[#E8E4D9] bg-white overflow-hidden shadow-sm">
         {/* Image */}
         <View className="aspect-[3/4] bg-[#F5F5F0] relative">
           <Image
@@ -69,31 +70,34 @@ export const ProductListItem = memo(function ProductListItem({
           />
 
           {/* Badges overlay */}
-          <View className="absolute left-1.5 top-1.5 flex-col gap-1">
+          <View className="absolute left-2 top-2 flex-col gap-1.5">
             {isNew && (
-              <View className="bg-[#D4A853] px-2 py-0.5 rounded-full">
-                <Text className="text-[10px] font-bold text-white">
-                  Nuevo
+              <View className="bg-[#D4A853] px-2.5 py-1 rounded-full shadow-md">
+                <Text className="text-[10px] font-bold text-white tracking-wide">
+                  NUEVO
                 </Text>
               </View>
             )}
             {hasDiscount && (
-              <View className="bg-red-500 px-2 py-0.5 rounded-full">
-                <Text className="text-[10px] font-bold text-white">
+              <View className="bg-red-500 px-2.5 py-1 rounded-full shadow-md">
+                <Text className="text-[10px] font-bold text-white tracking-wide">
                   -{discountPercent}%
                 </Text>
               </View>
             )}
           </View>
+          
+          {/* Quick view hint */}
+          <View className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
         </View>
 
         {/* Info */}
-        <View className="px-2 py-2 gap-0.5">
-          <Text className="text-xs font-medium text-[#1A1A1A]" numberOfLines={2}>
+        <View className="px-3 py-2.5 gap-1">
+          <Text className="text-xs font-semibold text-[#1A1A1A]" numberOfLines={2} leadingTrim="both">
             {product.name}
           </Text>
           <View className="flex-row items-baseline gap-1.5">
-            <Text className="text-sm font-bold text-[#1A1A1A]">
+            <Text className="text-base font-bold text-[#1A1A1A]">
               {formatPrice(product.price)}
             </Text>
             {hasDiscount && (
