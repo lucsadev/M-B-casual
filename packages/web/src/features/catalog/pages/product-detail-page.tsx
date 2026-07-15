@@ -117,8 +117,6 @@ export function ProductDetailPage() {
   );
 
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-  const hasDiscount =
-    product.comparePrice !== undefined && product.comparePrice > product.price;
 
   // Resolve variant_id from selected size+color (fall back to first in-stock variant)
   const selectedVariantId = (() => {
@@ -250,38 +248,19 @@ export function ProductDetailPage() {
               {product.name}
             </h1>
 
-            <div className="mt-3 flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-[#1A1A1A]">
-                {formatPrice(effectivePrice)}
-              </span>
-
-              {/* Variant-level discount */}
+            <div className="mt-3">
               {variantDiscount > 0 && (
-                <>
-                  <span className="text-lg text-[#1A1A1A]/50 line-through">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="text-xs font-medium text-[#1A1A1A]/40">Antes</span>
+                  <span className="text-sm text-[#1A1A1A]/40 line-through">
                     {formatPrice(product.price)}
                   </span>
                   <Badge variant="destructive">-{variantDiscount}%</Badge>
-                </>
+                </div>
               )}
-
-              {/* Product-level compare-at price */}
-              {!variantDiscount && hasDiscount && (
-                <>
-                  <span className="text-lg text-[#1A1A1A]/50 line-through">
-                    {formatPrice(product.comparePrice!)}
-                  </span>
-                  <Badge variant="destructive">
-                    -
-                    {Math.round(
-                      ((product.comparePrice! - product.price) /
-                        product.comparePrice!) *
-                        100,
-                    )}
-                    %
-                  </Badge>
-                </>
-              )}
+              <span className="text-3xl font-bold text-[#1A1A1A]">
+                {formatPrice(effectivePrice)}
+              </span>
             </div>
           </div>
 

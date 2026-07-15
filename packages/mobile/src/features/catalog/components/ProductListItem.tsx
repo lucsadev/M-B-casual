@@ -27,13 +27,19 @@ export const ProductListItem = memo(function ProductListItem({
   const router = useRouter();
   
   const hasDiscount =
-    product.comparePrice !== undefined && product.comparePrice > product.price;
+    (product.variantDiscountPercent ?? 0) > 0;
 
   const discountPercent = hasDiscount
-    ? Math.round(
-        ((product.comparePrice! - product.price) / product.comparePrice!) * 100,
-      )
+    ? product.variantDiscountPercent!
     : 0;
+
+  const displayPrice = hasDiscount && product.effectivePrice !== undefined
+    ? product.effectivePrice
+    : product.price;
+
+  const comparePrice = hasDiscount
+    ? product.price
+    : null;
 
   const imageUrl =
     product.images.length > 0
@@ -59,7 +65,7 @@ export const ProductListItem = memo(function ProductListItem({
       accessibilityLabel={`Ver detalles de ${product.name}`}
       accessibilityRole="button"
     >
-      <View className="rounded-2xl border border-[#E8E4D9] bg-white overflow-hidden shadow-sm">
+      <View className="rounded-none border border-[#E8E4D9] bg-white overflow-hidden shadow-sm">
         {/* Image */}
         <View className="aspect-[3/4] bg-[#F5F5F0] relative">
           <Image
@@ -96,15 +102,18 @@ export const ProductListItem = memo(function ProductListItem({
           <Text className="text-xs font-semibold text-[#1A1A1A]" numberOfLines={2} leadingTrim="both">
             {product.name}
           </Text>
-          <View className="flex-row items-baseline gap-1.5">
-            <Text className="text-base font-bold text-[#1A1A1A]">
-              {formatPrice(product.price)}
-            </Text>
-            {hasDiscount && (
-              <Text className="text-[10px] text-[#1A1A1A]/50 line-through">
-                {formatPrice(product.comparePrice!)}
-              </Text>
+          <View className="flex-col">
+            {comparePrice !== null && (
+              <View className="flex-row items-center gap-1">
+                <Text className="text-[9px] font-medium text-[#1A1A1A]/40">Antes</Text>
+                <Text className="text-[10px] text-[#1A1A1A]/40 line-through">
+                  {formatPrice(comparePrice)}
+                </Text>
+              </View>
             )}
+            <Text className="text-base font-bold text-[#1A1A1A]">
+              {formatPrice(displayPrice)}
+            </Text>
           </View>
         </View>
       </View>

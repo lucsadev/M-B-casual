@@ -23,7 +23,6 @@ const mockProduct = {
   slug: 'camisa-oversize-blanca',
   description: 'Una camisa blanca oversize',
   price: 15000,
-  comparePrice: 18000,
   images: ['https://example.com/image.jpg'],
   tags: ['nuevo', 'oferta'],
   isActive: true,

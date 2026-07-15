@@ -32,7 +32,6 @@ interface CreateProductInput {
     description?: string | null;
     category_id: string;
     price: number;
-    compare_price?: number | null;
     images?: string[];
     tags?: string[];
     is_active?: boolean;
@@ -102,7 +101,6 @@ interface UpdateProductInput {
     description?: string | null;
     category_id?: string;
     price?: number;
-    compare_price?: number | null;
     images?: string[];
     tags?: string[];
     is_active?: boolean;

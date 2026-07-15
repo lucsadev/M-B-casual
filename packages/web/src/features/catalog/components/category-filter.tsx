@@ -42,7 +42,7 @@ export function CategoryFilter({
   return (
     <div>
       {/* Desktop: horizontal chips */}
-      <div className="hidden gap-2 overflow-x-auto pb-2 sm:flex">
+      <div className="hidden gap-2 overflow-x-auto py-2 sm:flex">
         <button
           onClick={() => onCategoryChange('')}
           className={cn(
