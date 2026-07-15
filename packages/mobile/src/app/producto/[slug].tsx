@@ -92,7 +92,7 @@ export default function ProductDetailScreen() {
 
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
   const hasDiscount =
-    product.comparePrice !== undefined && product.comparePrice > product.price;
+    (product.variantDiscountPercent ?? 0) > 0;
 
   // Resolve variant_id from selected size+color
   const selectedVariantId = (() => {
@@ -190,28 +190,23 @@ export default function ProductDetailScreen() {
               {product.name}
             </Text>
 
-            <View className="flex-row items-baseline gap-2 mt-2">
-              <Text className="text-2xl font-bold text-[#1A1A1A]">
-                {formatPrice(product.price)}
-              </Text>
+            <View className="mt-2">
               {hasDiscount && (
-                <>
-                  <Text className="text-sm text-[#1A1A1A]/50 line-through">
-                    {formatPrice(product.comparePrice!)}
+                <View className="flex-row items-center gap-1.5 mb-0.5">
+                  <Text className="text-xs text-[#1A1A1A]/40 font-medium">Antes</Text>
+                  <Text className="text-xs text-[#1A1A1A]/40 line-through">
+                    {formatPrice(product.comparePrice ?? product.price)}
                   </Text>
                   <View className="bg-red-500 px-1.5 py-0.5 rounded">
                     <Text className="text-[10px] font-bold text-white">
-                      -
-                      {Math.round(
-                        ((product.comparePrice! - product.price) /
-                          product.comparePrice!) *
-                          100,
-                      )}
-                      %
+                      -{product.variantDiscountPercent}%
                     </Text>
                   </View>
-                </>
+                </View>
               )}
+              <Text className="text-2xl font-bold text-[#1A1A1A]">
+                {formatPrice(product.price)}
+              </Text>
             </View>
           </View>
 

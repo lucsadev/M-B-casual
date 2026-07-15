@@ -48,12 +48,31 @@ function mapProduct(row: ProductRow): Product {
     slug: row.slug,
     description: row.description ?? undefined,
     price: row.price,
-    comparePrice: row.compare_price ?? undefined,
     images: row.images ?? [],
     tags: row.tags ?? [],
     isActive: row.is_active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+/** Compute discount info from variants list */
+function computeVariantDiscounts(
+  product: Product,
+  variants: ProductVariant[],
+): { comparePrice?: number; effectivePrice?: number; variantDiscountPercent?: number } {
+  const discounts = variants
+    .map((v) => v.discount ?? 0)
+    .filter((d) => d > 0);
+
+  if (discounts.length === 0) return {};
+
+  const maxDiscount = Math.max(...discounts);
+  return {
+    comparePrice: product.price,
+    effectivePrice:
+      Math.round(product.price * (1 - maxDiscount / 100) * 100) / 100,
+    variantDiscountPercent: maxDiscount,
   };
 }
 
@@ -184,9 +203,12 @@ export async function getProductBySlug(
 
   if (variantError) throw variantError;
 
+  const product = mapProduct(productRows);
+  const variants = (variantRows ?? []).map(mapVariant);
   return {
-    ...mapProduct(productRows),
-    variants: (variantRows ?? []).map(mapVariant),
+    ...product,
+    ...computeVariantDiscounts(product, variants),
+    variants,
   };
 }
 
@@ -214,9 +236,12 @@ export async function getProductById(
 
   if (variantError) throw variantError;
 
+  const product = mapProduct(productRows);
+  const variants = (variantRows ?? []).map(mapVariant);
   return {
-    ...mapProduct(productRows),
-    variants: (variantRows ?? []).map(mapVariant),
+    ...product,
+    ...computeVariantDiscounts(product, variants),
+    variants,
   };
 }
 

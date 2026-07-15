@@ -210,7 +210,7 @@ const NAV_ITEMS: NavItem[] = [
 // ---------------------------------------------------------------------------
 
 const ROUTE_LABELS: Record<string, string> = {
-  admin: 'Admin',
+  admin: 'Administración',
   productos: 'Productos',
   ordenes: 'Órdenes',
   clientes: 'Usuarios',
@@ -287,7 +287,7 @@ export function AdminLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#E2E2DC] bg-white p-6 transition-transform duration-200 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[#E2E2DC] bg-white p-6 transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -303,7 +303,7 @@ export function AdminLayout() {
             B
           </span>
           <span className="font-casual font-light text-xs tracking-widest uppercase mt-[-0.1em] block">Casual</span>
-          <span className="ml-2 text-xs font-normal text-[#E8836B]">Admin</span>
+          <span className="ml-2 text-xs font-normal text-[#E8836B]">Administración</span>
         </Link>
 
         {/* Navigation */}
@@ -347,9 +347,9 @@ export function AdminLayout() {
       </aside>
 
       {/* Main content area */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col lg:h-screen">
         {/* Header */}
-        <header className="flex h-16 items-center gap-4 border-b border-[#E2E2DC] bg-white px-4 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-[#E2E2DC] bg-white px-4 lg:px-8">
           <button
             onClick={() => setSidebarOpen(true)}
             className="flex items-center justify-center rounded-md p-1.5 hover:bg-[#F0F0EC] lg:hidden"
@@ -380,7 +380,7 @@ export function AdminLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

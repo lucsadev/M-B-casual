@@ -34,7 +34,7 @@ insert into categories (id, name, slug, description, sort_order) values
 -- =============================================================
 -- 2. PRODUCTS (Mujer)
 -- =============================================================
-insert into products (id, category_id, name, slug, description, price, compare_price, images, tags, is_active) values
+insert into products (id, category_id, name, slug, description, price, images, tags, is_active) values
   (
     'p0000000-0000-0000-0000-000000000001',
     'c0000000-0000-0000-0000-000000000001',
@@ -42,7 +42,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'camisa-oversize-blanca',
     'Camisa de corte oversize en algodón premium. Ideal para looks casuales y elegantes.',
     18900,
-    24900,
     '{"https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600"}',
     '{nuevo, destacado}',
     true
@@ -54,7 +53,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'vestido-midax-negro',
     'Vestido midi corte recto en crepe negro. Elegante y versátil.',
     25900,
-    null,
     '{"https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600"}',
     '{destacado}',
     true
@@ -66,7 +64,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'blazer-beige',
     'Blazer entallado en tono beige. Perfecto para la oficina o salidas.',
     35900,
-    42900,
     '{"https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600"}',
     '{destacado}',
     true
@@ -78,7 +75,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'remon-basico-algodon',
     'Remón mangas cortas en algodón peinado. Imprescindible en tu guardarropa.',
     8900,
-    null,
     '{"https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600"}',
     '{}',
     true
@@ -90,7 +86,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'pollera-tabla-marfil',
     'Pollera con tabla en frente y cierre trasero. Tiro medio.',
     15900,
-    19900,
     '{"https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=600"}',
     '{nuevo}',
     true
@@ -99,7 +94,7 @@ insert into products (id, category_id, name, slug, description, price, compare_p
 -- =============================================================
 -- 3. PRODUCTS (Hombre)
 -- =============================================================
-insert into products (id, category_id, name, slug, description, price, compare_price, images, tags, is_active) values
+insert into products (id, category_id, name, slug, description, price, images, tags, is_active) values
   (
     'p0000000-0000-0000-0000-000000000006',
     'c0000000-0000-0000-0000-000000000002',
@@ -107,7 +102,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'camisa-slim-fit-celeste',
     'Camisa manga larga corte slim fit. Ideal para eventos formales.',
     17900,
-    21900,
     '{"https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600"}',
     '{destacado}',
     true
@@ -119,7 +113,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'chomba-lacoste-blanca',
     'Chomba clásica con cuello. Algodón piqué de alta calidad.',
     12900,
-    null,
     '{"https://images.unsplash.com/photo-1593030761757-71fae45fa0e2?w=600"}',
     '{}',
     true
@@ -131,7 +124,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'jean-recto-clasico',
     'Jean de corte recto en denim índigo. Clásico de toda la vida.',
     19900,
-    25900,
     '{"https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=600"}',
     '{destacado, oferta}',
     true
@@ -140,7 +132,7 @@ insert into products (id, category_id, name, slug, description, price, compare_p
 -- =============================================================
 -- 4. PRODUCTS (Accesorios)
 -- =============================================================
-insert into products (id, category_id, name, slug, description, price, compare_price, images, tags, is_active) values
+insert into products (id, category_id, name, slug, description, price, images, tags, is_active) values
   (
     'p0000000-0000-0000-0000-000000000009',
     'c0000000-0000-0000-0000-000000000003',
@@ -148,7 +140,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'cinto-cuero-negro',
     'Cinto de cuero genuino con hebilla dorada. Ancho 3cm.',
     8900,
-    null,
     '{"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600"}',
     '{nuevo}',
     true
@@ -160,7 +151,6 @@ insert into products (id, category_id, name, slug, description, price, compare_p
     'cartera-bandolera-marron',
     'Bandolera de cuero sintético con compartimentos. Tamaño medio.',
     24500,
-    29900,
     '{"https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600"}',
     '{destacado, oferta}',
     true

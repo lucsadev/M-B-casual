@@ -45,9 +45,6 @@ export function ProductFormPage() {
           description: values.description || null,
           category_id: values.categoryId,
           price: values.price,
-          compare_price: values.comparePrice
-            ? Number(values.comparePrice)
-            : null,
           images: values.images,
           tags,
           is_active: values.isActive,
@@ -69,9 +66,6 @@ export function ProductFormPage() {
           description: values.description || null,
           category_id: values.categoryId,
           price: values.price,
-          compare_price: values.comparePrice
-            ? Number(values.comparePrice)
-            : null,
           images: values.images,
           tags,
           is_active: values.isActive,

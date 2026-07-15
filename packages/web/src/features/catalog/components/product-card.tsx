@@ -3,7 +3,7 @@
  *
  * Features:
  * - Thumbnail image (first image or placeholder)
- * - Product name, price, compare price (for discounts)
+ * - Product name, price, effective price (from variant discounts)
  * - Tags displayed as badges: "Nuevo", "Oferta"
  * - Hover effect: subtle lift + shadow + image zoom
  * - Links to /producto/:slug
@@ -22,35 +22,22 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   // Variant-level discount (from discounted_products view)
-  const hasVariantDiscount =
+  const hasDiscount =
     product.variantDiscountPercent !== undefined &&
     product.variantDiscountPercent > 0 &&
     product.effectivePrice !== undefined;
 
-  // Product-level discount (comparePrice)
-  const hasCompareDiscount =
-    !hasVariantDiscount &&
-    product.comparePrice !== undefined &&
-    product.comparePrice > product.price;
-
-  const displayPrice = hasVariantDiscount
+  const displayPrice = hasDiscount
     ? product.effectivePrice!
     : product.price;
 
-  const comparePrice = hasVariantDiscount
+  const comparePrice = hasDiscount
     ? product.price
-    : hasCompareDiscount
-      ? product.comparePrice!
-      : null;
+    : null;
 
-  const badgePercent = hasVariantDiscount
+  const badgePercent = hasDiscount
     ? product.variantDiscountPercent!
-    : hasCompareDiscount
-      ? Math.round(
-          ((product.comparePrice! - product.price) / product.comparePrice!) *
-            100,
-        )
-      : 0;
+    : 0;
 
   const thumbnailUrl =
     product.images && product.images.length > 0
@@ -61,8 +48,8 @@ export function ProductCard({ product }: ProductCardProps) {
     <Link
       to={`/producto/${product.slug}`}
       className={cn(
-        'group flex flex-col overflow-hidden rounded-2xl bg-white transition-all duration-300',
-        'border border-[#E2E2DC]/50 shadow-sm hover:-translate-y-1 hover:shadow-xl',
+        'group flex flex-col overflow-hidden rounded-none bg-white transition-all duration-300',
+        'border border-[#E2E2DC]/50 shadow-sm hover:-translate-y-0.5 hover:shadow-sm',
       )}
     >
       {/* Image container */}
@@ -111,15 +98,18 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.name}
         </h3>
 
-        <div className="flex items-baseline gap-2">
+        <div className="flex flex-col">
+          {comparePrice !== null && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-medium text-[#1A1A1A]/40">Antes</span>
+              <span className="text-[11px] text-[#1A1A1A]/40 line-through">
+                {formatPrice(comparePrice)}
+              </span>
+            </div>
+          )}
           <span className="text-lg font-bold text-[#1A1A1A]">
             {formatPrice(displayPrice)}
           </span>
-          {comparePrice !== null && (
-            <span className="text-xs font-medium text-[#1A1A1A]/50 line-through">
-              {formatPrice(comparePrice)}
-            </span>
-          )}
         </div>
       </div>
     </Link>

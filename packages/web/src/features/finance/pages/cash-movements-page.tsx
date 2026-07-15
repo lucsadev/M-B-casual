@@ -132,17 +132,20 @@ function MovementRow({ movement }: { movement: CashMovement }) {
       {/* Content */}
       <div className="min-w-0 flex-1">
         <p className="font-medium text-[#1A1A1A]">{movement.description}</p>
-        {movement.referenceType && (
-          <p className="mt-0.5 text-xs text-[#1A1A1A]/40">
-            {movement.referenceType === 'order'
-              ? 'Orden de venta'
-              : movement.referenceType === 'expense'
-                ? 'Gasto registrado'
-                : movement.referenceType === 'purchase'
-                  ? 'Compra a proveedor'
-                  : movement.referenceType}
-          </p>
-        )}
+        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#1A1A1A]/40">
+          {movement.referenceType && (
+            <span>
+              {movement.referenceType === 'order'
+                ? 'Orden de venta'
+                : movement.referenceType === 'expense'
+                  ? 'Gasto registrado'
+                  : movement.referenceType === 'purchase'
+                    ? 'Compra a proveedor'
+                    : movement.referenceType}
+            </span>
+          )}
+          <span>{formatDate(movement.movementDate)}</span>
+        </div>
       </div>
 
       {/* Amount */}

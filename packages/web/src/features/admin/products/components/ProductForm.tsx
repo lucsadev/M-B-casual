@@ -3,7 +3,7 @@
  *
  * Fields:
  * - name, slug (auto-generated from name), description
- * - price, compare_price, category (select), tags, images
+ * - price, category (select), tags, images
  * - is_active toggle
  * - VariantManager for inline variant CRUD
  * - ImageUploader for Supabase Storage image upload
@@ -38,7 +38,6 @@ const productFormSchema = z.object({
   description: z.string().optional(),
   categoryId: z.string().min(1, 'La categoría es obligatoria'),
   price: z.coerce.number().min(0, 'El precio debe ser mayor o igual a 0'),
-  comparePrice: z.coerce.number().min(0).optional().or(z.literal('')),
   tags: z.string().optional(),
   isActive: z.boolean().default(true),
   images: z.array(z.string()).default([]),
@@ -94,7 +93,6 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
     description: product?.description ?? '',
     categoryId: product?.categoryId ?? '',
     price: product?.price ?? 0,
-    comparePrice: product?.comparePrice ?? '',
     tags: product?.tags?.join(', ') ?? '',
     isActive: product?.isActive ?? true,
     images: product?.images ?? [],
@@ -253,21 +251,7 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
               )}
             </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="comparePrice">
-                Precio de comparación ($)
-              </Label>
-              <Input
-                id="comparePrice"
-                type="number"
-                step="0.01"
-                {...register('comparePrice')}
-                placeholder="20000"
-              />
-              <p className="text-xs text-[#1A1A1A]/50">
-                Precio anterior o de referencia (tachado)
-              </p>
-            </div>
+
           </div>
         </section>
 
