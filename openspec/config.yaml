@@ -2,11 +2,13 @@
 schema: spec-driven
 
 context: |
-  Proyecto greenfield: tienda M&B Trend (indumentaria y accesorios).
-  Stack: React Native (Expo SDK 52+) + React 18+ (Vite 5+) + Supabase.
-  Monorepo con pnpm workspaces. Arquitectura limpia, RLS-first.
-  Web: Tailwind CSS v4, shadcn/ui. Mobile: NativeWind v5, Expo Router.
-  Cache: TanStack Query. Persistencia mobile: MMKV.
+  M&B Trend monorepo — ecommerce de indumentaria y accesorios.
+  Stack: React 18+ (Vite 6+), React Native (Expo SDK 52+), Supabase.
+  Monorepo con pnpm workspaces (packages/web, packages/mobile, packages/shared).
+  Web: Tailwind CSS v4, shadcn/ui, TanStack Query v5, React Router v6.
+  Mobile: NativeWind v5, Expo Router, TanStack Query v5, MMKV (offline-first).
+  Shared: TypeScript, Zod v4 validators, pagination utils.
+  Arquitectura limpia, RLS-first. Roles: cliente, admin.
   Plan de 7 fases definido en PLAN_ARQUITECTURA.md.
 
 rules:
@@ -24,26 +26,29 @@ rules:
   apply:
     - Follow existing code patterns
     - tdd: false
-    - test_command: ''
+    - test_command: 'pnpm --filter web test'
   verify:
-    test_command: ''
-    build_command: ''
+    test_command: 'pnpm --filter web test'
+    build_command: 'pnpm --filter web build'
     coverage_threshold: 0
   archive:
     - Warn before merging destructive deltas
 
 testing:
   strict_tdd: false
-  test_runner: null
+  test_runner: vitest
   layers:
-    unit: false
+    unit: true
     integration: false
-    e2e: false
+    e2e: true
   coverage: false
   quality:
-    linter: false
-    type_checker: false
-    formatter: false
+    linter: true
+    type_checker: true
+    formatter: true
   note: >
-    Strict TDD disabled because no test runner is installed.
-    Project is greenfield — configure Vitest/Jest at subproject init.
+    Strict TDD disabled per project convention. Vitest available in web package
+    (unit: Testing Library React + jest-dom; E2E: Playwright). Mobile and shared
+    packages have no test runner yet — configure when needed. No coverage tool
+    installed (@vitest/coverage-v8 missing). Quality: ESLint 10.x + Prettier 3.x
+    + TypeScript 5.8 (strict mode).

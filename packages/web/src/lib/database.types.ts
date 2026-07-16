@@ -120,6 +120,50 @@ export interface Database {
           created_at?: string;
         };
       };
+      product_questions: {
+        Row: {
+          id: string;
+          product_id: string;
+          customer_id: string | null;
+          customer_name: string | null;
+          question_text: string;
+          answer_text: string | null;
+          answered_by: string | null;
+          answered_at: string | null;
+          is_visible: boolean;
+          session_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id: string;
+          customer_id?: string | null;
+          customer_name?: string | null;
+          question_text: string;
+          answer_text?: string | null;
+          answered_by?: string | null;
+          answered_at?: string | null;
+          is_visible?: boolean;
+          session_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string;
+          customer_id?: string | null;
+          customer_name?: string | null;
+          question_text?: string;
+          answer_text?: string | null;
+          answered_by?: string | null;
+          answered_at?: string | null;
+          is_visible?: boolean;
+          session_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       cart_items: {
         Row: {
           id: string;

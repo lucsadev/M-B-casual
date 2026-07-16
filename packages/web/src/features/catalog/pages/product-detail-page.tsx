@@ -19,6 +19,7 @@ import { useProduct } from '../hooks/use-product';
 import { useCategories } from '../hooks/use-categories';
 import { useCartContext } from '@/features/cart/context/CartContext';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { ProductQuestions } from '../components/product-questions';
 import { SEO } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -430,6 +431,9 @@ export function ProductDetailPage() {
           </Button>
         </div>
       </div>
+
+      {/* Product Q&A section */}
+      <ProductQuestions productId={product.id} />
     </section>
   );
 }

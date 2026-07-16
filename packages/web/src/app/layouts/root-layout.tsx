@@ -57,7 +57,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
 
   const profileName =
     !profileLoading && profile
-      ? `${profile.firstName ?? ''}${profile.lastName ? ` ${profile.lastName.charAt(0)}.` : ''}`.trim()
+      ? `${profile.firstName ?? ''}${profile.lastName ? ` ${profile.lastName}` : ''}`.trim()
       : '';
 
   const googleName =
@@ -69,9 +69,9 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
   const displayName = profileName || googleName || user?.email || null;
 
   return (
-    <header className="border-b border-[#E2E2DC] bg-[#FFFFFF]">
+    <header className="border-b border-brand-gray-200 bg-brand-white">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
-        <Link to="/" className="flex flex-col items-start leading-tight text-[#1A1A1A] hover:opacity-80 transition-opacity" aria-label="M&B Casual - Inicio">
+        <Link to="/" className="flex flex-col items-start leading-tight text-brand-black hover:opacity-80 transition-opacity" aria-label="M&B Casual - Inicio">
           <div className="flex items-baseline gap-2">
             <span className="font-brand text-4xl font-bold">
               M
@@ -88,19 +88,19 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
           <li>
             <Link
               to="/catalogo"
-              className="text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+              className="text-brand-black transition-colors hover:text-brand-coral"
             >
               Catálogo
             </Link>
           </li>
 
           {authLoading ? null : user ? (
-            <li className="relative" ref={menuRef}>
+            <li className="relative shrink-0" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((prev) => !prev)}
-                className="flex items-center gap-1 text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+                className="flex items-center gap-1 text-brand-black transition-colors hover:text-brand-coral"
               >
-                <span>{displayName ?? 'Mi perfil'}</span>
+                <span className="w-max" title={displayName ?? 'Mi perfil'}>{displayName ?? 'Mi perfil'}</span>
                 <svg
                   className={`h-4 w-4 transition-transform ${menuOpen ? 'rotate-180' : ''}`}
                   xmlns="http://www.w3.org/2000/svg"
@@ -231,7 +231,7 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
             {authLoading ? null : user ? (
               <>
                 <li className="border-t border-[#E2E2DC]/50 pt-3">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#1A1A1A]/50">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-brand-black/50">
                     {displayName ?? 'Mi cuenta'}
                   </p>
                 </li>

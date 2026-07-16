@@ -1,5 +1,6 @@
 /**
- * Product detail screen — Full product view with image gallery, variant selector.
+ * Product detail screen — Full product view with image gallery, variant selector,
+ * and product Q&A bottom sheet.
  *
  * Expo Router route: /producto/:slug
  * Features:
@@ -7,7 +8,8 @@
  * - Product name, price, description
  * - Size and color variant selector
  * - Stock indicator
- * - "Agregar al carrito" placeholder button
+ * - "Agregar al carrito" button
+ * - "Preguntas y respuestas" section with bottom sheet
  * - Back navigation via Expo Router
  */
 import { useState, useEffect, useCallback } from 'react';
@@ -26,6 +28,7 @@ import { formatPrice } from '@mbt/shared';
 import { useProduct } from '../../features/catalog/hooks/use-product';
 import { useCategories } from '../../features/catalog/hooks/use-categories';
 import { VariantSelector } from '../../features/catalog/components/VariantSelector';
+import { ProductQuestionsSheet } from '../../features/catalog/components/ProductQuestionsSheet';
 import { useAddToCart } from '../../features/cart/hooks/use-cart';
 
 export default function ProductDetailScreen() {
@@ -37,6 +40,7 @@ export default function ProductDetailScreen() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [questionsSheetVisible, setQuestionsSheetVisible] = useState(false);
 
   // Reset selection when product changes
   useEffect(() => {
@@ -302,8 +306,33 @@ export default function ProductDetailScreen() {
               {isAddingToCart ? 'Agregando...' : 'Agregar al carrito'}
             </Text>
           </TouchableOpacity>
+
+          {/* Preguntas y respuestas section */}
+          <View className="border-t border-[#E2E2DC]/50 pt-4">
+            <TouchableOpacity
+              onPress={() => setQuestionsSheetVisible(true)}
+              className="flex-row items-center justify-between py-2"
+              accessibilityLabel="Ver preguntas y respuestas"
+              accessibilityRole="button"
+            >
+              <Text className="text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide">
+                Preguntas y respuestas
+              </Text>
+              <Text className="text-lg text-[#D4A853]">›</Text>
+            </TouchableOpacity>
+            <Text className="text-xs text-[#1A1A1A]/50">
+              Consultá las dudas de otros clientes o hacé tu propia pregunta.
+            </Text>
+          </View>
         </View>
       </ScrollView>
+
+      {/* Product Q&A bottom sheet */}
+      <ProductQuestionsSheet
+        productId={product.id}
+        visible={questionsSheetVisible}
+        onClose={() => setQuestionsSheetVisible(false)}
+      />
     </View>
   );
 }
