@@ -18,3 +18,4 @@ export type {
   PaginatedResponse,
 } from './catalog.js';
 export type { CartItem, ShippingAddress, CartSummary } from './cart.js';
+export type { ProductQuestion, CreateQuestionInput, AnswerInput, QuestionsFilter } from './product-question.js';
