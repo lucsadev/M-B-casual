@@ -10,4 +10,3 @@ export { cashMovementSchema } from './finance.js';
 export { cartItemSchema, shippingAddressSchema, checkoutSchema } from './cart.js';
 export type { CartItemInput, ShippingAddressInput, CheckoutInput } from './cart.js';
 export { createQuestionSchema, answerQuestionSchema } from './product-question.js';
-export type { CreateQuestionInput, AnswerInput } from './product-question.js';
