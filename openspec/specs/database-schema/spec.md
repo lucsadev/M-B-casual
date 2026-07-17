@@ -52,12 +52,40 @@ The migration MUST create a function and trigger on `products` and `orders` to a
 - WHEN updating its `price`
 - THEN `updated_at` automatically changes to the current timestamp
 
+### Requirement: Pending-order WhatsApp notification state
+
+The schema MUST track idempotent WhatsApp notification state on `orders` and keep an audit trail in `notification_logs`.
+
+#### Scenario: Order notification state prevents duplicate sends
+
+- GIVEN an order with `status = pending`
+- WHEN `notify-sale-whatsapp` claims the notification
+- THEN `orders.whatsapp_pending_notification_status` changes from `not_sent` or `failed` to `sending`
+- AND concurrent invocations for the same order are skipped
+
+#### Scenario: Successful notification is auditable
+
+- GIVEN Meta WhatsApp Cloud API accepts the template message
+- WHEN the notification completes
+- THEN `orders.whatsapp_pending_notification_status` becomes `sent`
+- AND `orders.whatsapp_pending_notified_at` is set
+- AND `notification_logs` records the recipient and provider response
+
+#### Scenario: Failed notification is retryable
+
+- GIVEN Meta WhatsApp Cloud API rejects the notification
+- WHEN `notify-sale-whatsapp` catches the failure
+- THEN `orders.whatsapp_pending_notification_status` becomes `failed`
+- AND `orders.whatsapp_pending_notification_error` stores the error message
+- AND a later invocation may retry the notification
+
 ## Acceptance Criteria
 
 - [ ] Migration executes without errors on fresh Supabase project
 - [ ] All 10 tables, 2 views, and indexes exist
 - [ ] Foreign keys enforce referential integrity
 - [ ] `updated_at` trigger works on products and orders
+- [ ] Pending-order WhatsApp notification state and logs are present
 
 ## Dependencies
 

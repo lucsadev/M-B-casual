@@ -230,6 +230,10 @@ export interface Database {
           shipping_address: Record<string, unknown> | null;
           created_at: string;
           updated_at: string;
+          whatsapp_pending_notification_status: string;
+          whatsapp_pending_notification_attempted_at: string | null;
+          whatsapp_pending_notified_at: string | null;
+          whatsapp_pending_notification_error: string | null;
         };
         Insert: {
           id?: string;
@@ -244,6 +248,10 @@ export interface Database {
           shipping_address?: Record<string, unknown> | null;
           created_at?: string;
           updated_at?: string;
+          whatsapp_pending_notification_status?: string;
+          whatsapp_pending_notification_attempted_at?: string | null;
+          whatsapp_pending_notified_at?: string | null;
+          whatsapp_pending_notification_error?: string | null;
         };
         Update: {
           id?: string;
@@ -258,6 +266,10 @@ export interface Database {
           shipping_address?: Record<string, unknown> | null;
           created_at?: string;
           updated_at?: string;
+          whatsapp_pending_notification_status?: string;
+          whatsapp_pending_notification_attempted_at?: string | null;
+          whatsapp_pending_notified_at?: string | null;
+          whatsapp_pending_notification_error?: string | null;
         };
       };
       order_items: {
@@ -287,6 +299,44 @@ export interface Database {
           quantity?: number;
           unit_price?: number;
           subtotal?: number;
+        };
+      };
+      notification_logs: {
+        Row: {
+          id: string;
+          order_id: string | null;
+          channel: string;
+          event: string;
+          recipient: string | null;
+          status: string;
+          provider_message_id: string | null;
+          provider_response: Record<string, unknown> | null;
+          error_message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id?: string | null;
+          channel: string;
+          event: string;
+          recipient?: string | null;
+          status: string;
+          provider_message_id?: string | null;
+          provider_response?: Record<string, unknown> | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          order_id?: string | null;
+          channel?: string;
+          event?: string;
+          recipient?: string | null;
+          status?: string;
+          provider_message_id?: string | null;
+          provider_response?: Record<string, unknown> | null;
+          error_message?: string | null;
+          created_at?: string;
         };
       };
       purchases: {

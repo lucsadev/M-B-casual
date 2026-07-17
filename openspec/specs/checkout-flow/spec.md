@@ -58,6 +58,25 @@ On "Confirmar orden" the system MUST perform a transactional insert: INSERT into
 - AND all `cart_items` for the user are deleted
 - AND the app navigates to `/gracias/{orderId}`
 
+### Requirement: Admin WhatsApp notification for pending orders
+
+After an order is created with `status = pending`, the system MUST request a WhatsApp notification to configured administrators through the `notify-sale-whatsapp` Supabase Edge Function using Meta WhatsApp Cloud API.
+
+#### Scenario: Pending order requests admin notification
+
+- GIVEN a checkout creates an order with `status = pending`
+- WHEN the order ID is returned to the app
+- THEN the app invokes `notify-sale-whatsapp` with that order ID
+- AND the notification request does not block order creation success
+
+#### Scenario: WhatsApp notification failure does not break checkout
+
+- GIVEN a pending order was created successfully
+- WHEN the WhatsApp Edge Function fails because Meta credentials, templates, or phone numbers are misconfigured
+- THEN the checkout still succeeds
+- AND the app still navigates to `/gracias/{orderId}`
+- AND the failure is recorded in notification state/logs for admin troubleshooting
+
 #### Scenario: Duplicate submission prevented
 
 - GIVEN a submitted order

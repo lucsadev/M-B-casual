@@ -119,6 +119,14 @@ Toda la información se administrará en una planilla de Excel.
 
 Canales principales: - Instagram - WhatsApp
 
+### Notificaciones operativas
+
+Cuando se registre una venta/pedido con estado `pending`, el sistema
+debe avisar por WhatsApp a los administradores configurados para que
+puedan gestionar rápidamente la confirmación, pago y preparación del
+pedido. La integración técnica usa Meta WhatsApp Cloud API mediante una
+Supabase Edge Function, con control de duplicados y registro de auditoría.
+
 ## 11. Indicadores (KPIs)
 
 - Facturación mensual

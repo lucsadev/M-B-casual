@@ -20,6 +20,16 @@ type ProductRow = Database['public']['Tables']['products']['Row'];
 
 const ADMIN_ORDERS_KEY = ['admin', 'orders'] as const;
 
+async function notifyPendingOrder(orderId: string): Promise<void> {
+  const { error } = await supabase.functions.invoke('notify-sale-whatsapp', {
+    body: { order_id: orderId },
+  });
+
+  if (error) {
+    console.warn('Pending order WhatsApp notification failed', error);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -101,6 +111,10 @@ async function fetchAdminOrders(
     shipping_address: row.shipping_address,
     created_at: row.created_at,
     updated_at: row.updated_at,
+    whatsapp_pending_notification_status: row.whatsapp_pending_notification_status,
+    whatsapp_pending_notification_attempted_at: row.whatsapp_pending_notification_attempted_at,
+    whatsapp_pending_notified_at: row.whatsapp_pending_notified_at,
+    whatsapp_pending_notification_error: row.whatsapp_pending_notification_error,
     customer_name: row.customer_name ?? 'Cuenta eliminada',
     item_count: row.order_items?.length ?? 0,
   }));
@@ -271,6 +285,10 @@ async function createAdminOrder(input: CreateAdminOrderInput) {
       .insert(orderItems as never);
 
     if (itemsError) throw itemsError;
+  }
+
+  if ((input.status ?? 'pending') === 'pending') {
+    void notifyPendingOrder(order.id);
   }
 
   return order;

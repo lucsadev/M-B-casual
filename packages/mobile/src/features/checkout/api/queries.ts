@@ -14,6 +14,16 @@ type CreateOrderRpc = (
   },
 ) => Promise<{ data: string | null; error: Error | null }>;
 
+async function notifyPendingOrder(orderId: string): Promise<void> {
+  const { error } = await supabase.functions.invoke('notify-sale-whatsapp', {
+    body: { order_id: orderId },
+  });
+
+  if (error) {
+    console.warn('Pending order WhatsApp notification failed', error);
+  }
+}
+
 /**
  * Create an order from the current user's cart items.
  * Calls the Postgres RPC `create_order_from_cart`.
@@ -29,5 +39,8 @@ export async function createOrder(
 
   if (error) throw error;
   if (!data) throw new Error('No se pudo crear la orden.');
+
+  void notifyPendingOrder(data);
+
   return data as string;
 }
