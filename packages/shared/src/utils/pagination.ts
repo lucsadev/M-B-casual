@@ -1,4 +1,4 @@
-import type { PaginationParams, PaginatedResponse } from '../types/catalog.js';
+import type { PaginationParams, PaginatedResponse } from '../types/catalog.ts';
 
 /**
  * Build pagination parameters from page and pageSize.

@@ -1,7 +1,7 @@
-export type { Product, ProductVariant } from './product.js';
-export type { Category } from './category.js';
-export type { Order, OrderItem, OrderStatus } from './order.js';
-export type { Customer, CustomerProfile, ProfileUpdateInput } from './customer.js';
+export type { Product, ProductVariant } from './product.ts';
+export type { Category } from './category.ts';
+export type { Order, OrderItem, OrderStatus } from './order.ts';
+export type { Customer, CustomerProfile, ProfileUpdateInput } from './customer.ts';
 export type {
   CashMovement,
   CashMovementType,
@@ -10,12 +10,12 @@ export type {
   ExpenseCategory,
   Purchase,
   PurchaseItem,
-} from './finance.js';
+} from './finance.ts';
 export type {
   CatalogFilters,
   CatalogSort,
   PaginationParams,
   PaginatedResponse,
-} from './catalog.js';
-export type { CartItem, ShippingAddress, CartSummary } from './cart.js';
-export type { ProductQuestion, CreateQuestionInput, AnswerInput, QuestionsFilter } from './product-question.js';
+} from './catalog.ts';
+export type { CartItem, ShippingAddress, CartSummary } from './cart.ts';
+export type { ProductQuestion, CreateQuestionInput, AnswerInput, QuestionsFilter } from './product-question.ts';

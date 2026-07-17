@@ -2,20 +2,29 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ESNext",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "jsx": "react-jsx",
     "outDir": "./dist",
     "declaration": false,
     "declarationMap": false,
     "composite": false,
     "paths": {
-      "@/*": ["./src/*"],
-      "@mbt/shared": ["../shared/src"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@mbt/shared": [
+        "../shared/src"
+      ]
     }
   },
   "include": [
     "src",
     "*.ts",
-    "*.tsx"
+    "*.tsx",
+    "nativewind-env.d.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ]
 }
