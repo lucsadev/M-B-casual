@@ -5,10 +5,10 @@
   "type": "module",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=\"--no-strip-types\" expo start",
-    "android": "cross-env NODE_OPTIONS=\"--no-strip-types\" expo start --android",
-    "ios": "cross-env NODE_OPTIONS=\"--no-strip-types\" expo start --ios",
-    "web": "cross-env NODE_OPTIONS=\"--no-strip-types\" expo start --web",
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -39,11 +39,10 @@
     "react-native-safe-area-context": "^4.14.0",
     "react-native-screens": "~4.4.0",
     "react-native-web": "~0.19.13",
-    "tailwindcss": "^4.1.4"
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@types/react": "^18.3.20",
-    "cross-env": "^10.1.0",
     "typescript": "^5.8.3"
   }
 }
