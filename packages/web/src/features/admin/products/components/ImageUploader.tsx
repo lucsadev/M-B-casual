@@ -7,6 +7,11 @@
  *
  * Deleting an image removes it from both the local array AND
  * from Supabase Storage (the underlying file).
+ *
+ * Configurable via props:
+ * - `label`: custom label above the uploader.
+ * - `single`: single-image mode — one file at a time, replaces the
+ *   current value on upload instead of appending.
  */
 import { useState, useRef, type ChangeEvent } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -40,9 +45,18 @@ function extractStoragePath(publicUrl: string): string | null {
 interface ImageUploaderProps {
   value: string[];
   onChange: (urls: string[]) => void;
+  /** Custom label above the uploader. Defaults to 'Imágenes del producto'. */
+  label?: string;
+  /** Single-image mode: accepts one file at a time and replaces the current value. */
+  single?: boolean;
 }
 
-export function ImageUploader({ value, onChange }: ImageUploaderProps) {
+export function ImageUploader({
+  value,
+  onChange,
+  label = 'Imágenes del producto',
+  single = false,
+}: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -87,7 +101,8 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
       }
 
       if (uploadedUrls.length > 0) {
-        onChange([...value, ...uploadedUrls]);
+        // Single mode replaces the current value; multiple mode appends.
+        onChange(single ? uploadedUrls : [...value, ...uploadedUrls]);
       }
     } finally {
       setUploading(false);
@@ -121,7 +136,7 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
 
   return (
     <div className="space-y-3">
-      <Label>Imágenes del producto</Label>
+      <Label>{label}</Label>
 
       {/* Preview grid */}
       {value.length > 0 && (
@@ -130,8 +145,12 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
             <div key={url} className="group relative">
               <img
                 src={url}
-                alt={`Product image ${index + 1}`}
-                className="h-24 w-24 rounded-md border border-[#E2E2DC] object-cover"
+                alt={single ? label : `Product image ${index + 1}`}
+                className={
+                  single
+                    ? 'h-40 w-full max-w-xs rounded-md border border-[#E2E2DC] object-cover'
+                    : 'h-24 w-24 rounded-md border border-[#E2E2DC] object-cover'
+                }
               />
               <button
                 type="button"
@@ -153,18 +172,22 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
           disabled={uploading}
           onClick={() => fileInputRef.current?.click()}
         >
-          {uploading ? 'Subiendo...' : 'Seleccionar imágenes'}
+          {uploading
+            ? 'Subiendo...'
+            : single
+              ? 'Seleccionar imagen'
+              : 'Seleccionar imágenes'}
         </Button>
         <Input
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          multiple
+          multiple={!single}
           className="hidden"
           onChange={handleFiles}
         />
         <span className="text-xs text-[#1A1A1A]/50">
-          PNG, JPG o WebP. Múltiples archivos.
+          {single ? 'PNG, JPG o WebP.' : 'PNG, JPG o WebP. Múltiples archivos.'}
         </span>
       </div>
     </div>
