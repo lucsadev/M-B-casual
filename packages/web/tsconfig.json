@@ -8,9 +8,10 @@
     "declaration": false,
     "declarationMap": false,
     "composite": false,
+    "allowImportingTsExtensions": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@mbt/shared": ["../shared/dist"]
+      "@mbt/shared": ["../shared/src"]
     }
   },
   "include": ["src"]
