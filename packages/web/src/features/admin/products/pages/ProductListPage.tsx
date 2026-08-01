@@ -31,6 +31,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useDeleteProduct } from '../api/use-product-mutations';
+import { CreateCategoryDialog } from '../components/CreateCategoryDialog';
 import { buildPagination } from '@mbt/shared';
 import type { Database } from '@/lib/database.types';
 import { Edit, Trash2 } from 'lucide-react';
@@ -124,6 +125,7 @@ export function ProductListPage() {
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteName, setDeleteName] = useState('');
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'products', { search, page }],
@@ -153,9 +155,17 @@ export function ProductListPage() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-[#1A1A1A]">Productos</h1>
-        <Link to="/admin/productos/nuevo">
-          <Button>+ Nuevo producto</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setCategoryDialogOpen(true)}
+          >
+            + Nueva categoría
+          </Button>
+          <Link to="/admin/productos/nuevo">
+            <Button>+ Nuevo producto</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
@@ -329,6 +339,12 @@ export function ProductListPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Create category dialog */}
+      <CreateCategoryDialog
+        open={categoryDialogOpen}
+        onOpenChange={setCategoryDialogOpen}
+      />
     </div>
   );
 }
