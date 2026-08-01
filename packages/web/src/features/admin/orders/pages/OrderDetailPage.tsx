@@ -30,6 +30,13 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelada' },
 ];
 
+const PAYMENT_STATUS_OPTIONS = [
+  { value: 'pending', label: 'Pendiente' },
+  { value: 'paid', label: 'Pagado' },
+  { value: 'refunded', label: 'Reembolsado' },
+  { value: 'cancelled', label: 'Cancelado' },
+];
+
 const STATUS_BADGE: Record<string, 'default' | 'secondary' | 'destructive' | 'success'> = {
   pending: 'secondary',
   confirmed: 'default',
@@ -52,6 +59,7 @@ export function OrderDetailPage() {
   const { data: order, isLoading } = useAdminOrder(id ?? '');
   const updateStatus = useUpdateOrderStatus();
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
 
   if (isLoading) {
     return (
@@ -188,11 +196,43 @@ export function OrderDetailPage() {
               </div>
               <div className="flex justify-between border-b border-[#E2E2DC] pb-2">
                 <span className="text-sm text-[#1A1A1A]/60">Estado pago</span>
-                <Badge variant={order.payment_status === 'paid' ? 'success' : 'secondary'}>
-                  {order.payment_status === 'paid' ? 'Pagado' : 'Pendiente'}
+                <Badge variant={order.payment_status === 'paid' ? 'success' : order.payment_status === 'cancelled' ? 'destructive' : 'secondary'}>
+                  {PAYMENT_STATUS_OPTIONS.find((o) => o.value === order.payment_status)?.label ?? '—'}
                 </Badge>
               </div>
-              <div className="flex justify-between pb-2">
+
+              {/* Payment status changer */}
+              <Select
+                value={selectedPaymentStatus || order.payment_status || ''}
+                onValueChange={(value: string) => setSelectedPaymentStatus(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Actualizar pago" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_STATUS_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  if (!selectedPaymentStatus || selectedPaymentStatus === order.payment_status) return;
+                  updateStatus.mutate(
+                    { id: order.id, status: order.status, payment_status: selectedPaymentStatus },
+                    { onSuccess: () => setSelectedPaymentStatus('') },
+                  );
+                }}
+                disabled={!selectedPaymentStatus || selectedPaymentStatus === order.payment_status || updateStatus.isPending}
+                size="sm"
+              >
+                {updateStatus.isPending ? 'Actualizando...' : 'Actualizar pago'}
+              </Button>
+
+              <div className="flex justify-between pt-2">
                 <span className="text-sm text-[#1A1A1A]/60">Total</span>
                 <span className="font-bold">{formatPrice(order.total)}</span>
               </div>

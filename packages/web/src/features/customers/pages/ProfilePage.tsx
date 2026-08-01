@@ -354,6 +354,36 @@ export function ProfilePage() {
       </div>
 
       {/* ----------------------------------------------------------------- */}
+      {/* Quick links section */}
+      {/* ----------------------------------------------------------------- */}
+      <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Link
+          to="/preguntas"
+          className="flex items-center gap-4 rounded-lg border border-[#E2E2DC] bg-[#FFFFFF] p-4 transition-colors hover:bg-[#E2E2DC]/30"
+        >
+          <span className="text-2xl">❓</span>
+          <div>
+            <p className="font-semibold text-[#1A1A1A]">Mis Preguntas</p>
+            <p className="text-xs text-[#1A1A1A]/60">
+              Preguntas y respuestas sobre productos
+            </p>
+          </div>
+        </Link>
+        <Link
+          to="/mensajes"
+          className="flex items-center gap-4 rounded-lg border border-[#E2E2DC] bg-[#FFFFFF] p-4 transition-colors hover:bg-[#E2E2DC]/30"
+        >
+          <span className="text-2xl">💬</span>
+          <div>
+            <p className="font-semibold text-[#1A1A1A]">Mensajes</p>
+            <p className="text-xs text-[#1A1A1A]/60">
+              Notificaciones del vendedor
+            </p>
+          </div>
+        </Link>
+      </div>
+
+      {/* ----------------------------------------------------------------- */}
       {/* Orders section */}
       {/* ----------------------------------------------------------------- */}
       <div className="rounded-lg border border-[#E2E2DC] bg-[#FFFFFF] p-6">

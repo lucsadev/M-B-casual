@@ -1,9 +1,12 @@
 /**
- * Database type definitions for Supabase client (mobile).
+ * Database type definitions for Supabase client.
  *
  * Maps Postgres tables to their TypeScript row types.
- * Manually aligned with the SQL schema and @mbt/shared type interfaces.
- * Mirrors packages/web/src/lib/database.types.ts.
+ * Generated types should replace this file when `supabase gen types`
+ * is run against the production database.
+ *
+ * For now, these are manually aligned with the SQL schema
+ * and the @mbt/shared type interfaces.
  */
 
 export interface Database {
@@ -89,6 +92,7 @@ export interface Database {
           size: string | null;
           color: string | null;
           color_hex: string | null;
+          discount: number;
           stock: number;
           sku: string | null;
           created_at: string;
@@ -99,6 +103,7 @@ export interface Database {
           size?: string | null;
           color?: string | null;
           color_hex?: string | null;
+          discount?: number;
           stock?: number;
           sku?: string | null;
           created_at?: string;
@@ -109,6 +114,7 @@ export interface Database {
           size?: string | null;
           color?: string | null;
           color_hex?: string | null;
+          discount?: number;
           stock?: number;
           sku?: string | null;
           created_at?: string;
@@ -379,6 +385,38 @@ export interface Database {
           created_at?: string;
         };
       };
+      messages: {
+        Row: {
+          id: string;
+          customer_id: string;
+          order_id: string | null;
+          type: string;
+          title: string;
+          body: string | null;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          customer_id: string;
+          order_id?: string | null;
+          type?: string;
+          title: string;
+          body?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          customer_id?: string;
+          order_id?: string | null;
+          type?: string;
+          title?: string;
+          body?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+      };
       cash_movements: {
         Row: {
           id: string;
@@ -450,6 +488,18 @@ export interface Database {
           total_revenue: number;
         };
       };
+      product_profitability: {
+        Row: {
+          id: string;
+          name: string;
+          price: number;
+          units_sold: number;
+          total_revenue: number;
+          estimated_cogs: number;
+          margin_percent: number;
+          gross_profit: number;
+        };
+      };
       customer_summary: {
         Row: {
           id: string;
@@ -460,6 +510,24 @@ export interface Database {
           total_orders: number;
           total_spent: number;
           last_order_date: string | null;
+        };
+      };
+      discounted_products: {
+        Row: {
+          id: string | null;
+          category_id: string | null;
+          name: string | null;
+          slug: string | null;
+          description: string | null;
+          price: number | null;
+          compare_price: number | null;
+          images: string[] | null;
+          tags: string[] | null;
+          is_active: boolean | null;
+          created_at: string | null;
+          updated_at: string | null;
+          effective_price: number | null;
+          max_discount: number | null;
         };
       };
     };

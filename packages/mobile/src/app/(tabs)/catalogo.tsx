@@ -20,7 +20,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Stack } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProducts } from '../../features/catalog/hooks/use-products';
 import { usePrefetchProduct } from '../../features/catalog/hooks/use-products';
 import { ProductListItem } from '../../features/catalog/components/ProductListItem';
@@ -59,7 +58,6 @@ function EmptyState() {
 }
 
 export default function CatalogScreen() {
-  const insets = useSafeAreaInsets();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -149,7 +147,7 @@ export default function CatalogScreen() {
   // Error state
   if (isError) {
     return (
-      <View className="flex-1 bg-[#FAFAF9]" style={{ paddingTop: insets.top }}>
+      <View className="flex-1 bg-[#FAFAF9]">
         <Stack.Screen options={{ title: 'Catálogo' }} />
         {ListHeaderComponent}
         <View className="flex-1 items-center justify-center px-6">

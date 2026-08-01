@@ -11,7 +11,7 @@
  */
 import { memo, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import type { Product } from '@mbt/shared';
 import { formatPrice } from '@mbt/shared';
 
@@ -41,12 +41,15 @@ export const ProductListItem = memo(function ProductListItem({
     ? product.price
     : null;
 
+  const images = product.images ?? [];
+  const tags = product.tags ?? [];
+
   const imageUrl =
-    product.images.length > 0
-      ? product.images[0]
+    images.length > 0
+      ? images[0]
       : 'https://placehold.co/400x600/F5F5F0/1A1A1A?text=Sin+imagen';
 
-  const isNew = product.tags.includes('nuevo');
+  const isNew = tags.includes('nuevo');
 
   const handlePress = useCallback(() => {
     if (onPress) {
@@ -99,7 +102,7 @@ export const ProductListItem = memo(function ProductListItem({
 
         {/* Info */}
         <View className="px-3 py-2.5 gap-1">
-          <Text className="text-xs font-semibold text-[#1A1A1A]" numberOfLines={2} leadingTrim="both">
+          <Text className="text-xs font-semibold text-[#1A1A1A]" numberOfLines={2}>
             {product.name}
           </Text>
           <View className="flex-col">

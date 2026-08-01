@@ -23,12 +23,12 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import {
   useProfile,
   useUpdateProfile,
 } from '../hooks/use-profile';
+import { useIsAdmin } from '../../admin/guards/use-is-admin';
 import type { ProfileUpdateInput } from '@mbt/shared';
 
 // ---------------------------------------------------------------------------
@@ -69,10 +69,10 @@ const ORDER_STATUS_COLORS: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 export default function ProfileScreen() {
-  const insets = useSafeAreaInsets();
   const { user, logout: authLogout } = useAuth();
   const { profile, isLoading, error: profileError, refetch } = useProfile();
   const { update: updateProfile, isPending: isUpdating } = useUpdateProfile();
+  const { data: isAdmin } = useIsAdmin();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editFirstName, setEditFirstName] = useState('');
@@ -363,7 +363,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
       <Stack.Screen options={{ title: 'Perfil' }} />
 
       <FlatList
@@ -379,6 +379,74 @@ export default function ProfileScreen() {
           <>
             {/* Profile section */}
             {renderProfileSection()}
+
+            {/* User links */}
+            <View className="mb-4 gap-3">
+              {/* Mis Preguntas */}
+              <TouchableOpacity
+                onPress={() => router.push('/(tabs)/preguntas')}
+                className="flex-row items-center justify-between rounded-lg border border-[#E8E4D9] bg-white px-4 py-3 active:bg-[#F0F0EC]"
+              >
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 rounded-full bg-[#D4A853]/20 items-center justify-center">
+                    <Text className="text-lg">❓</Text>
+                  </View>
+                  <View>
+                    <Text className="text-sm font-semibold text-[#1A1A1A]">
+                      Mis Preguntas
+                    </Text>
+                    <Text className="text-xs text-[#1A1A1A]/60">
+                      Preguntas y respuestas sobre productos
+                    </Text>
+                  </View>
+                </View>
+                <Text className="text-lg text-[#D4A853]">›</Text>
+              </TouchableOpacity>
+
+              {/* Mensajes */}
+              <TouchableOpacity
+                onPress={() => router.push('/(tabs)/mensajes')}
+                className="flex-row items-center justify-between rounded-lg border border-[#E8E4D9] bg-white px-4 py-3 active:bg-[#F0F0EC]"
+              >
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 rounded-full bg-[#D4A853]/20 items-center justify-center">
+                    <Text className="text-lg">💬</Text>
+                  </View>
+                  <View>
+                    <Text className="text-sm font-semibold text-[#1A1A1A]">
+                      Mensajes
+                    </Text>
+                    <Text className="text-xs text-[#1A1A1A]/60">
+                      Notificaciones del vendedor
+                    </Text>
+                  </View>
+                </View>
+                <Text className="text-lg text-[#D4A853]">›</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Admin link */}
+            {isAdmin && (
+              <TouchableOpacity
+                onPress={() => router.push('/(admin)' as any)}
+                className="flex-row items-center justify-between rounded-lg border border-[#E8E4D9] bg-white px-4 py-3 mb-4 active:bg-[#F0F0EC]"
+              >
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 rounded-full bg-[#1A1A1A] items-center justify-center">
+                    <Text className="text-lg font-bold text-white">A</Text>
+                  </View>
+                  <View>
+                    <Text className="text-sm font-semibold text-[#1A1A1A]">
+                      Administración
+                    </Text>
+                    <Text className="text-xs text-[#1A1A1A]/60">
+                      Productos, pedidos, preguntas
+                    </Text>
+                  </View>
+                </View>
+                <Text className="text-lg text-[#D4A853]">›</Text>
+              </TouchableOpacity>
+            )}
 
             {/* Order history header */}
             <Text className="text-base font-bold text-[#1A1A1A] mb-3">

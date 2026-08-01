@@ -30,7 +30,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-linking"
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true
@@ -41,3 +41,4 @@
     }
   }
 }
+

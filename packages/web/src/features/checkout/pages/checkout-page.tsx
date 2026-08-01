@@ -28,10 +28,19 @@ export function CheckoutPage() {
   const handleShippingSubmit = useCallback(
     (data: ShippingAddressInput) => {
       setFormError(null);
-      checkout({
-        shipping_address: data,
-        payment_method: paymentMethod,
-      });
+      checkout(
+        {
+          shipping_address: data,
+          payment_method: paymentMethod,
+        },
+        {
+          onError: (error) => {
+            setFormError(
+              error.message || 'No se pudo confirmar el pedido. Intentalo de nuevo.',
+            );
+          },
+        },
+      );
     },
     [paymentMethod, checkout],
   );
@@ -167,3 +176,4 @@ export function CheckoutPage() {
     </section>
   );
 }
+

@@ -385,6 +385,38 @@ export interface Database {
           created_at?: string;
         };
       };
+      messages: {
+        Row: {
+          id: string;
+          customer_id: string;
+          order_id: string | null;
+          type: string;
+          title: string;
+          body: string | null;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          customer_id: string;
+          order_id?: string | null;
+          type?: string;
+          title: string;
+          body?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          customer_id?: string;
+          order_id?: string | null;
+          type?: string;
+          title?: string;
+          body?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+      };
       cash_movements: {
         Row: {
           id: string;

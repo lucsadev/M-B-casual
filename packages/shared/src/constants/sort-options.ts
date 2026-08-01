@@ -1,4 +1,4 @@
-import type { CatalogSort } from '../types/catalog.js';
+import type { CatalogSort } from '../types/catalog.ts';
 
 /**
  * A sort option entry for UI selectors (dropdowns, radio groups).

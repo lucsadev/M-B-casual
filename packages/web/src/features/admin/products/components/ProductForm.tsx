@@ -53,7 +53,8 @@ const productFormSchema = z.object({
   ).default([]),
 });
 
-export type ProductFormValues = z.infer<typeof productFormSchema>;
+type ProductFormInputValues = z.input<typeof productFormSchema>;
+export type ProductFormValues = z.output<typeof productFormSchema>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -87,7 +88,7 @@ interface ProductFormProps {
 export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProps) {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
 
-  const defaultValues: ProductFormValues = {
+  const defaultValues: ProductFormInputValues = {
     name: product?.name ?? '',
     slug: product?.slug ?? '',
     description: product?.description ?? '',
@@ -107,7 +108,7 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
       })) ?? [],
   };
 
-  const form = useForm<ProductFormValues>({
+  const form = useForm<ProductFormInputValues, unknown, ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues,
   });
@@ -259,7 +260,7 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
         <section className="space-y-4">
           <h3 className="text-lg font-semibold text-[#1A1A1A]">Imágenes</h3>
           <ImageUploader
-            value={images}
+            value={images ?? []}
             onChange={(urls) => setValue('images', urls)}
           />
         </section>
@@ -302,3 +303,5 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
     </FormProvider>
   );
 }
+
+

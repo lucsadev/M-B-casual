@@ -12,6 +12,7 @@ import type { ProductQuestion, CreateQuestionInput } from '@mbt/shared';
 // ---------------------------------------------------------------------------
 
 type QuestionRow = Database['public']['Tables']['product_questions']['Row'];
+type QuestionInsert = Database['public']['Tables']['product_questions']['Insert'];
 
 // ---------------------------------------------------------------------------
 // Mapper (DB snake_case → domain camelCase)
@@ -59,12 +60,14 @@ export async function getProductQuestions(productId: string): Promise<ProductQue
  * The hook adds an optimistic placeholder to the local cache.
  */
 export async function createQuestion(input: CreateQuestionInput): Promise<void> {
-  const { error } = await supabase.from('product_questions').insert({
+  const payload: QuestionInsert = {
     product_id: input.productId,
     question_text: input.questionText,
     customer_name: input.customerName ?? null,
     session_id: input.sessionId ?? null,
-  });
+  };
+
+  const { error } = await supabase.from('product_questions').insert(payload as never);
 
   if (error) throw error;
 }

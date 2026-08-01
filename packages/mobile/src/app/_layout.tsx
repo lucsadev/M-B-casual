@@ -10,7 +10,7 @@
  * for 7 days using AsyncStorage, enabling offline browsing.
  */
 import { useEffect } from 'react';
-import { Slot, SplashScreen } from 'expo-router';
+import { Stack, SplashScreen } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
@@ -23,10 +23,17 @@ import { queryClient } from '../lib/query-client';
 import { asyncStoragePersister } from '../lib/storage';
 import { AuthProvider } from '../features/auth/context/AuthContext';
 import { OfflineBanner } from '../components/offline-banner';
+import { useAdminNewOrderNotifications } from '../features/admin/notifications/use-admin-new-order-notifications';
+import { BrandHeader } from '../components/BrandHeader';
 import { View, Text } from 'react-native';
 import './global.css';
 
 SplashScreen.preventAutoHideAsync();
+function AdminNewOrderNotifications() {
+  useAdminNewOrderNotifications();
+
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -54,11 +61,48 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <AdminNewOrderNotifications />
           <OfflineBanner />
           <StatusBar style="dark" />
-          <Slot />
+          <Stack
+            screenOptions={{
+              headerStyle: { backgroundColor: '#FFFFFF', height: 140 } as any,
+              headerTintColor: '#1A1A1A',
+              headerTitleAlign: 'center',
+            }}
+          >
+            <Stack.Screen
+              name="(tabs)"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="(admin)"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="login"
+              options={{ headerTitle: () => <BrandHeader subtitle="Iniciar sesión" /> }}
+            />
+            <Stack.Screen
+              name="register"
+              options={{ headerTitle: () => <BrandHeader subtitle="Crear cuenta" /> }}
+            />
+            <Stack.Screen
+              name="checkout"
+              options={{ headerTitle: () => <BrandHeader subtitle="Finalizar compra" /> }}
+            />
+            <Stack.Screen
+              name="producto/[slug]"
+              options={{ headerTitle: () => <BrandHeader subtitle="Detalle de producto" /> }}
+            />
+            <Stack.Screen
+              name="orden/[id]"
+              options={{ headerTitle: () => <BrandHeader subtitle="Pedido confirmado" /> }}
+            />
+          </Stack>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   );
 }
+

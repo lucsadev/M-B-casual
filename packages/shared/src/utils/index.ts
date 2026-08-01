@@ -1,2 +1,2 @@
-export { formatPrice, formatDate, generateSlug } from './format.js';
-export { buildPagination, buildPaginatedResponse } from './pagination.js';
+export { formatPrice, formatDate, generateSlug } from './format.ts';
+export { buildPagination, buildPaginatedResponse } from './pagination.ts';

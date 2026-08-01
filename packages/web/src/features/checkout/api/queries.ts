@@ -35,5 +35,6 @@ export async function createOrder(
 
   if (error) throw error;
   if (!data) throw new Error('No se pudo crear la orden.');
+
   return data as string;
 }

@@ -12,8 +12,7 @@
  * - "Volver al catálogo" button
  */
 import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLocalSearchParams, router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { formatPrice, ORDER_STATUS } from '@mbt/shared';
@@ -79,15 +78,13 @@ function getStatusDescription(status: string): string {
 }
 
 export default function OrderConfirmationScreen() {
-  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data, isLoading, isError } = useOrder(id ?? '');
 
   // Loading
   if (isLoading) {
     return (
-      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-        <Stack.Screen options={{ title: 'Pedido confirmado', headerBackTitle: 'Atrás' }} />
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#D4A853" />
         </View>
@@ -98,8 +95,7 @@ export default function OrderConfirmationScreen() {
   // Error
   if (isError || !data) {
     return (
-      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-        <Stack.Screen options={{ title: 'Pedido confirmado', headerBackTitle: 'Atrás' }} />
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
         <View className="flex-1 items-center justify-center px-4">
           <Text className="text-xl font-bold text-[#1A1A1A] mb-2">
             Orden no encontrada
@@ -130,13 +126,7 @@ export default function OrderConfirmationScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-      <Stack.Screen
-        options={{
-          title: 'Pedido confirmado',
-          headerBackTitle: 'Atrás',
-        }}
-      />
+    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
 
       <ScrollView
         className="flex-1"
