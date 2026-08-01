@@ -4,8 +4,7 @@
  * Renders fields for: full name, street, city, state, zip code, phone, and optional notes.
  * Uses `shippingAddressSchema` from @mbt/shared for validation.
  */
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { shippingAddressSchema, type ShippingAddressInput } from '@mbt/shared';
 
 interface ShippingFormProps {
@@ -17,9 +16,10 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
   const {
     register,
     handleSubmit,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<ShippingAddressInput>({
-    resolver: zodResolver(shippingAddressSchema),
     defaultValues: {
       full_name: '',
       street: '',
@@ -32,8 +32,28 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
     },
   });
 
+  const handleValidSubmit: SubmitHandler<ShippingAddressInput> = (values) => {
+    clearErrors();
+
+    const result = shippingAddressSchema.safeParse(values);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setError(field as keyof ShippingAddressInput, {
+            type: issue.code,
+            message: issue.message,
+          });
+        }
+      }
+      return;
+    }
+
+    onSubmit(result.data);
+  };
+
   return (
-    <form id="shipping-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form id="shipping-form" onSubmit={handleSubmit(handleValidSubmit)} className="space-y-4">
       {/* Full name */}
       <div>
         <label

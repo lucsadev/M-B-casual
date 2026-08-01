@@ -22,8 +22,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLocalSearchParams, router } from 'expo-router';
 import { formatPrice } from '@mbt/shared';
 import { useProduct } from '../../features/catalog/hooks/use-product';
 import { useCategories } from '../../features/catalog/hooks/use-categories';
@@ -33,9 +32,9 @@ import { useAddToCart } from '../../features/cart/hooks/use-cart';
 
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const insets = useSafeAreaInsets();
   const { data: product, isLoading, isError } = useProduct(slug ?? '');
   const { data: categories } = useCategories();
+  const { mutate: addToCart, isPending: isAddingToCart } = useAddToCart();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -49,11 +48,38 @@ export default function ProductDetailScreen() {
     setSelectedColor(null);
   }, [slug]);
 
+  const selectedVariantId = product
+    ? product.variants.find((v) => {
+        const sizeMatch = !selectedSize || v.size === selectedSize;
+        const colorMatch = !selectedColor || v.color === selectedColor;
+        return sizeMatch && colorMatch;
+      })?.id ?? null
+    : null;
+
+  const handleAddToCart = useCallback(() => {
+    if (!product) return;
+
+    addToCart(
+      {
+        product_id: product.id,
+        variant_id: selectedVariantId,
+        quantity: 1,
+      },
+      {
+        onSuccess: () => {
+          Alert.alert('Agregado', 'Producto agregado al carrito');
+        },
+        onError: (err) => {
+          Alert.alert('Error', err.message ?? 'Error al agregar al carrito');
+        },
+      },
+    );
+  }, [addToCart, product, selectedVariantId]);
+
   // Loading
   if (isLoading) {
     return (
-      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-        <Stack.Screen options={{ title: 'Producto', headerBackTitle: 'Atrás' }} />
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#D4A853" />
         </View>
@@ -64,8 +90,7 @@ export default function ProductDetailScreen() {
   // Error / not found
   if (isError || !product) {
     return (
-      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-        <Stack.Screen options={{ title: 'Producto', headerBackTitle: 'Atrás' }} />
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
         <View className="flex-1 items-center justify-center px-4">
           <Text className="text-xl font-bold text-[#1A1A1A] mb-2">
             Producto no encontrado
@@ -92,51 +117,12 @@ export default function ProductDetailScreen() {
       ? product.images
       : ['https://placehold.co/600x800/F5F5F0/1A1A1A?text=Sin+imagen'];
 
-  const { mutate: addToCart, isPending: isAddingToCart } = useAddToCart();
-
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
   const hasDiscount =
     (product.variantDiscountPercent ?? 0) > 0;
 
-  // Resolve variant_id from selected size+color
-  const selectedVariantId = (() => {
-    if (!selectedSize && !selectedColor) return null;
-    return product.variants.find((v) => {
-      const sizeMatch = !selectedSize || v.size === selectedSize;
-      const colorMatch = !selectedColor || v.color === selectedColor;
-      return sizeMatch && colorMatch;
-    })?.id ?? null;
-  })();
-
-  const handleAddToCart = useCallback(() => {
-    addToCart(
-      {
-        product_id: product.id,
-        variant_id: selectedVariantId,
-        quantity: 1,
-      },
-      {
-        onSuccess: () => {
-          Alert.alert('Agregado', 'Producto agregado al carrito');
-        },
-        onError: (err) => {
-          Alert.alert('Error', err.message ?? 'Error al agregar al carrito');
-        },
-      },
-    );
-  }, [addToCart, product.id, selectedVariantId]);
-
   return (
     <View className="flex-1 bg-[#FFFFFF]">
-      <Stack.Screen
-        options={{
-          title: product.name.length > 20
-            ? product.name.substring(0, 20) + '...'
-            : product.name,
-          headerBackTitle: 'Atrás',
-        }}
-      />
-
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 32 }}
@@ -209,7 +195,7 @@ export default function ProductDetailScreen() {
                 </View>
               )}
               <Text className="text-2xl font-bold text-[#1A1A1A]">
-                {formatPrice(product.price)}
+                {formatPrice(product.effectivePrice ?? product.price)}
               </Text>
             </View>
           </View>

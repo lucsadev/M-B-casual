@@ -10,6 +10,7 @@
     "declaration": false,
     "declarationMap": false,
     "composite": false,
+    "allowImportingTsExtensions": true,
     "paths": {
       "@/*": [
         "./src/*"

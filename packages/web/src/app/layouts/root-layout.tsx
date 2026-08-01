@@ -121,25 +121,39 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
                     <Link
                       to="/admin"
                       onClick={() => setMenuOpen(false)}
-                      className="block px-4 py-2 text-sm font-medium text-[#E8836B] transition-colors hover:bg-[#E2E2DC]/30"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#E8836B] transition-colors hover:bg-[#E2E2DC]/30"
                     >
-                      Administración
+                      <span>⚙️</span> Administración
                     </Link>
                   ) : (
                     <>
                       <Link
                         to="/perfil"
                         onClick={() => setMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
                       >
-                        Perfil
+                        <span>👤</span> Perfil
                       </Link>
                       <Link
                         to="/perfil#ordenes"
                         onClick={() => setMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
                       >
-                        Mis órdenes
+                        <span>📦</span> Mis órdenes
+                      </Link>
+                      <Link
+                        to="/preguntas"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
+                      >
+                        <span>❓</span> Mis preguntas
+                      </Link>
+                      <Link
+                        to="/mensajes"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-[#1A1A1A] transition-colors hover:bg-[#E2E2DC]/30"
+                      >
+                        <span>💬</span> Mensajes
                       </Link>
                     </>
                   )}
@@ -240,9 +254,9 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
                     <Link
                       to="/admin"
                       onClick={() => setMobileOpen(false)}
-                      className="block font-medium text-[#E8836B] transition-colors hover:text-[#E8836B]/80"
+                      className="flex items-center gap-2 font-medium text-[#E8836B] transition-colors hover:text-[#E8836B]/80"
                     >
-                      Administración
+                      <span>⚙️</span> Administración
                     </Link>
                   </li>
                 ) : (
@@ -251,18 +265,36 @@ function HeaderNav({ onOpenCart }: { onOpenCart: () => void }) {
                       <Link
                         to="/perfil"
                         onClick={() => setMobileOpen(false)}
-                        className="block text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+                        className="flex items-center gap-2 text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
                       >
-                        Perfil
+                        <span>👤</span> Perfil
                       </Link>
                     </li>
                     <li>
                       <Link
                         to="/perfil#ordenes"
                         onClick={() => setMobileOpen(false)}
-                        className="block text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+                        className="flex items-center gap-2 text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
                       >
-                        Mis órdenes
+                        <span>📦</span> Mis órdenes
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/preguntas"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2 text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+                      >
+                        <span>❓</span> Mis preguntas
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/mensajes"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2 text-[#1A1A1A] transition-colors hover:text-[#E8836B]"
+                      >
+                        <span>💬</span> Mensajes
                       </Link>
                     </li>
                   </>

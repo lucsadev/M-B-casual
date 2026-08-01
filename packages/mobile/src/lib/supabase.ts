@@ -1,7 +1,7 @@
 /**
  * Typed Supabase client for the mobile app.
  *
- * Uses EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY
+ * Uses EXPO_PUBLIC_SUPABASE_URL and a public Supabase API key
  * from environment variables (Expo's EXPO_PUBLIC_ prefix).
  * Falls back to app.json extra fields for build-time injection.
  */
@@ -14,6 +14,8 @@ declare const process:
   | {
       env: {
         EXPO_PUBLIC_SUPABASE_URL?: string;
+        EXPO_PUBLIC_SUPABASE_KEY?: string;
+        EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
         EXPO_PUBLIC_SUPABASE_ANON_KEY?: string;
       };
     }
@@ -25,20 +27,24 @@ const supabaseUrl =
     : undefined) ??
   (Constants.expoConfig?.extra?.supabaseUrl as string | undefined);
 
-const supabaseAnonKey =
+const supabaseKey =
   (typeof process !== 'undefined'
-    ? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+    ? process.env.EXPO_PUBLIC_SUPABASE_KEY ??
+      process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
     : undefined) ??
+  (Constants.expoConfig?.extra?.supabaseKey as string | undefined) ??
+  (Constants.expoConfig?.extra?.supabasePublishableKey as string | undefined) ??
   (Constants.expoConfig?.extra?.supabaseAnonKey as string | undefined);
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseKey) {
   throw new Error(
     'Missing Supabase environment variables. ' +
-      'Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env or app.json extra.',
+      'Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_KEY in .env or app.json extra.',
   );
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,

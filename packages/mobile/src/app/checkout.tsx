@@ -18,8 +18,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Stack, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import { PAYMENT_METHODS, type PaymentMethodId, type ShippingAddressInput } from '@mbt/shared';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useCart } from '../features/cart/hooks/use-cart';
@@ -28,7 +27,6 @@ import { ShippingForm, type ShippingFormHandle } from '../features/checkout/comp
 import { OrderSummary } from '../features/checkout/components/order-summary';
 
 export default function CheckoutScreen() {
-  const insets = useSafeAreaInsets();
   const { user, isLoading: isAuthLoading } = useAuth();
   const { items, summary, isLoading: isCartLoading } = useCart();
   const { mutate: checkout, isPending: isCheckingOut } = useCheckout();
@@ -44,8 +42,7 @@ export default function CheckoutScreen() {
 
   if (isAuthLoading || !user) {
     return (
-      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-        <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#D4A853" />
         </View>
@@ -66,8 +63,7 @@ export default function CheckoutScreen() {
   // Loading
   if (isCartLoading) {
     return (
-      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-        <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#D4A853" />
         </View>
@@ -78,8 +74,7 @@ export default function CheckoutScreen() {
   // Empty cart
   if (items.length === 0) {
     return (
-      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-        <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
+      <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
         <View className="flex-1 items-center justify-center px-4">
           <Text className="text-xl font-bold text-[#1A1A1A] mb-2">
             Tu carrito está vacío
@@ -101,9 +96,7 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
-      <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Atrás' }} />
-
+    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: 8 }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
@@ -164,7 +157,7 @@ export default function CheckoutScreen() {
       {/* Fixed bottom bar with confirm button */}
       <View
         className="bg-white border-t border-[#E8E4D9] px-4 py-3"
-        style={{ paddingBottom: insets.bottom + 8 }}
+        style={{ paddingBottom: 8 }}
       >
         <TouchableOpacity
           onPress={handleConfirmOrder}

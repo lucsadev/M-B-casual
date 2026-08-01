@@ -24,6 +24,7 @@ import { buildPagination, buildPaginatedResponse } from '@mbt/shared';
 type CategoryRow = Database['public']['Tables']['categories']['Row'];
 type ProductRow = Database['public']['Tables']['products']['Row'];
 type VariantRow = Database['public']['Tables']['product_variants']['Row'];
+type DiscountedProductRow = Database['public']['Views']['discounted_products']['Row'];
 
 // ---------------------------------------------------------------------------
 // Mappers (DB snake_case → domain camelCase)
@@ -49,11 +50,30 @@ function mapProduct(row: ProductRow): Product {
     slug: row.slug,
     description: row.description ?? undefined,
     price: row.price,
-    images: row.images,
-    tags: row.tags,
+    images: row.images ?? [],
+    tags: row.tags ?? [],
     isActive: row.is_active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+function mapDiscountedProduct(row: DiscountedProductRow): Product {
+  return {
+    id: row.id ?? '',
+    categoryId: row.category_id ?? '',
+    name: row.name ?? '',
+    slug: row.slug ?? '',
+    description: row.description ?? undefined,
+    price: row.price ?? 0,
+    comparePrice: row.compare_price ?? undefined,
+    images: row.images ?? [],
+    tags: row.tags ?? [],
+    isActive: row.is_active ?? false,
+    createdAt: row.created_at ?? '',
+    updatedAt: row.updated_at ?? '',
+    effectivePrice: row.effective_price ?? undefined,
+    variantDiscountPercent: row.max_discount ?? undefined,
   };
 }
 
@@ -84,6 +104,7 @@ function mapVariant(row: VariantRow): ProductVariant {
     size: row.size ?? undefined,
     color: row.color ?? undefined,
     colorHex: row.color_hex ?? undefined,
+    discount: row.discount,
     stock: row.stock,
     sku: row.sku ?? undefined,
     createdAt: row.created_at,
@@ -161,6 +182,34 @@ export async function getProducts(
   if (error) throw error;
 
   const products = (data ?? []).map(mapProduct);
+
+  // Merge discount info from discounted_products view when available
+  const productIds = products.map((p) => p.id).filter(Boolean);
+  if (productIds.length > 0) {
+    const { data: discountedRows, error: discountError } = await supabase
+      .from('discounted_products')
+      .select('*')
+      .in('id', productIds);
+
+    if (!discountError && discountedRows) {
+      const discountMap = new Map(
+        discountedRows.map((r: DiscountedProductRow) => [
+          r.id,
+          { effectivePrice: r.effective_price, variantDiscountPercent: r.max_discount, comparePrice: r.compare_price },
+        ]),
+      );
+
+      for (const product of products) {
+        const discount = discountMap.get(product.id);
+        if (discount && (discount.variantDiscountPercent ?? 0) > 0) {
+          product.effectivePrice = discount.effectivePrice ?? undefined;
+          product.variantDiscountPercent = discount.variantDiscountPercent ?? undefined;
+          product.comparePrice = discount.comparePrice ?? undefined;
+        }
+      }
+    }
+  }
+
   return buildPaginatedResponse(products, count ?? 0, pagination);
 }
 
@@ -195,4 +244,23 @@ export async function getProductBySlug(
     ...computeVariantDiscounts(product, variants),
     variants,
   };
+}
+
+/**
+ * Fetch active products that have at least one variant with discount > 0.
+ * Includes computed effectivePrice and variantDiscountPercent.
+ */
+export async function getDiscountedProducts(
+  params: { limit?: number } = {},
+): Promise<Product[]> {
+  const { limit = 8 } = params;
+
+  const { data, error } = await supabase
+    .from('discounted_products')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data ?? []).map(mapDiscountedProduct);
 }

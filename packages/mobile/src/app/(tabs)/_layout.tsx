@@ -12,6 +12,7 @@ import { Tabs } from 'expo-router';
 import { View, Text } from 'react-native';
 import { useAuth } from '../../features/auth/context/AuthContext';
 import { useCart } from '../../features/cart/hooks/use-cart';
+import { BrandHeader } from '../../components/BrandHeader';
 
 function TabIcon({
   name,
@@ -68,17 +69,17 @@ export default function TabsLayout() {
         },
         headerStyle: {
           backgroundColor: '#FFFFFF',
-        },
+          height: 140,
+        } as any,
         headerTintColor: '#1A1A1A',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
+        headerTitleAlign: 'center',
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Inicio',
+          headerTitle: () => <BrandHeader subtitle="Estilo casual para todos tus días" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="home" focused={focused} />
           ),
@@ -88,6 +89,7 @@ export default function TabsLayout() {
         name="catalogo"
         options={{
           title: 'Catálogo',
+          headerTitle: () => <BrandHeader subtitle="Descubrí nuestra colección" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="catalog" focused={focused} />
           ),
@@ -97,6 +99,7 @@ export default function TabsLayout() {
         name="carrito"
         options={{
           title: 'Carrito',
+          headerTitle: () => <BrandHeader subtitle="Tu carrito de compras" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="cart" focused={focused} badge={totalItems} />
           ),
@@ -105,10 +108,25 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="perfil"
         options={{
-          title: user ? 'Perfil' : 'Ingresar',
+          title: 'Perfil',
+          headerTitle: () => <BrandHeader subtitle="Tu cuenta personal" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="profile" focused={focused} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="preguntas"
+        options={{
+          href: null, // hidden from tab bar
+          title: 'Mis Preguntas',
+        }}
+      />
+      <Tabs.Screen
+        name="mensajes"
+        options={{
+          href: null, // hidden from tab bar
+          title: 'Mensajes',
         }}
       />
     </Tabs>

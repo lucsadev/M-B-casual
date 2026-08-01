@@ -22,24 +22,28 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { Stack, Link, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useLogin } from '../hooks/use-login';
 
 export default function LoginScreen() {
-  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { login, isPending, error, clearError } = useLogin();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Redirect on successful login
   useEffect(() => {
     if (user) {
-      router.replace('/(tabs)');
+      if (user.app_metadata?.role === 'admin') {
+        router.replace('/(admin)');
+      } else {
+        router.replace('/(tabs)');
+      }
     }
   }, [user]);
 
@@ -72,7 +76,7 @@ export default function LoginScreen() {
   const displayError = validationError || error;
 
   return (
-    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-[#FFFFFF]">
       <Stack.Screen options={{ title: 'Iniciar sesión' }} />
 
       <KeyboardAvoidingView
@@ -85,7 +89,31 @@ export default function LoginScreen() {
         >
           {/* Header */}
           <View className="items-center mb-10">
-            <Text className="text-4xl mb-2">👤</Text>
+            <View className="items-center mb-4">
+              <Text
+                style={{
+                  fontFamily: 'CormorantGaramond',
+                  fontSize: 48,
+                  fontWeight: '700',
+                  color: '#1A1A1A',
+                  lineHeight: 50,
+                }}
+              >
+                M&B
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontSize: 14,
+                  fontWeight: '300',
+                  color: '#1A1A1A',
+                  letterSpacing: 12,
+                  lineHeight: 18,
+                }}
+              >
+                CASUAL
+              </Text>
+            </View>
             <Text className="text-2xl font-bold text-[#1A1A1A]">
               Iniciar sesión
             </Text>
@@ -129,19 +157,32 @@ export default function LoginScreen() {
             <Text className="text-sm font-medium text-[#1A1A1A] mb-1.5">
               Contraseña
             </Text>
-            <TextInput
-              value={password}
-              onChangeText={(val) => {
-                setPassword(val);
-                if (validationError) setValidationError(null);
-                if (error) clearError();
-              }}
-              placeholder="••••••••"
-              secureTextEntry
-              autoComplete="password"
-              editable={!isPending}
-              className="bg-white border border-[#E8E4D9] rounded-lg px-4 py-3 text-base text-[#1A1A1A]"
-            />
+            <View>
+              <TextInput
+                value={password}
+                onChangeText={(val) => {
+                  setPassword(val);
+                  if (validationError) setValidationError(null);
+                  if (error) clearError();
+                }}
+                placeholder="••••••••"
+                secureTextEntry={!showPassword}
+                autoComplete="password"
+                editable={!isPending}
+                className="bg-white border border-[#E8E4D9] rounded-lg pl-4 pr-12 py-3 text-base text-[#1A1A1A]"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-0 bottom-0 justify-center"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Feather
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={20}
+                  color="#1A1A1A/40"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Submit */}

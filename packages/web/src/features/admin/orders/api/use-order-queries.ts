@@ -20,16 +20,6 @@ type ProductRow = Database['public']['Tables']['products']['Row'];
 
 const ADMIN_ORDERS_KEY = ['admin', 'orders'] as const;
 
-async function notifyPendingOrder(orderId: string): Promise<void> {
-  const { error } = await supabase.functions.invoke('notify-sale-whatsapp', {
-    body: { order_id: orderId },
-  });
-
-  if (error) {
-    console.warn('Pending order WhatsApp notification failed', error);
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -111,10 +101,6 @@ async function fetchAdminOrders(
     shipping_address: row.shipping_address,
     created_at: row.created_at,
     updated_at: row.updated_at,
-    whatsapp_pending_notification_status: row.whatsapp_pending_notification_status,
-    whatsapp_pending_notification_attempted_at: row.whatsapp_pending_notification_attempted_at,
-    whatsapp_pending_notified_at: row.whatsapp_pending_notified_at,
-    whatsapp_pending_notification_error: row.whatsapp_pending_notification_error,
     customer_name: row.customer_name ?? 'Cuenta eliminada',
     item_count: row.order_items?.length ?? 0,
   }));
@@ -187,6 +173,70 @@ export function useAdminOrder(id: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Status helpers
+// ---------------------------------------------------------------------------
+
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pendiente',
+  confirmed: 'Confirmada',
+  processing: 'En proceso',
+  shipped: 'Enviada',
+  delivered: 'Entregada',
+  cancelled: 'Cancelada',
+};
+
+const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pendiente',
+  paid: 'Pagado',
+  refunded: 'Reembolsado',
+  cancelled: 'Cancelado',
+};
+
+// ---------------------------------------------------------------------------
+// Send a message to the customer about an order/payment status change
+// ---------------------------------------------------------------------------
+
+async function sendOrderStatusMessage(orderId: string, newStatus?: string, newPaymentStatus?: string): Promise<void> {
+  // Fetch the order to get customer_id
+  const { data: order, error: orderError } = await supabase
+    .from('orders')
+    .select('customer_id')
+    .eq('id', orderId)
+    .single<{ customer_id: string }>();
+
+  if (orderError || !order) {
+    console.error('Could not send status message: order not found', orderError);
+    return;
+  }
+
+  // Send order status message
+  if (newStatus) {
+    const label = ORDER_STATUS_LABELS[newStatus] ?? newStatus;
+    const { error: msgError } = await supabase.from('messages').insert({
+      customer_id: order.customer_id,
+      order_id: orderId,
+      type: 'order_status',
+      title: `Pedido actualizado a ${label}`,
+      body: `El estado de tu pedido cambió a "${label}".`,
+    } as never);
+    if (msgError) console.error('Failed to send order status message:', msgError);
+  }
+
+  // Send payment status message
+  if (newPaymentStatus) {
+    const label = PAYMENT_STATUS_LABELS[newPaymentStatus] ?? newPaymentStatus;
+    const { error: msgError } = await supabase.from('messages').insert({
+      customer_id: order.customer_id,
+      order_id: orderId,
+      type: 'payment_status',
+      title: `Estado de pago actualizado a ${label}`,
+      body: `El estado del pago de tu pedido cambió a "${label}".`,
+    } as never);
+    if (msgError) console.error('Failed to send payment status message:', msgError);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Update order status
 // ---------------------------------------------------------------------------
 
@@ -202,12 +252,24 @@ async function updateOrderStatus({ id, status, payment_status, notes }: UpdateOr
   if (payment_status !== undefined) updateData.payment_status = payment_status;
   if (notes !== undefined) updateData.notes = notes;
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('orders')
     .update(updateData as never)
-    .eq('id', id);
+    .eq('id', id)
+    .select('id, status, payment_status')
+    .maybeSingle<{ id: string; status: string; payment_status: string }>();
 
   if (error) throw error;
+  if (!data) {
+    throw new Error(
+      'No se pudo actualizar la orden. Verificá que tu sesión tenga permisos de administrador.',
+    );
+  }
+
+  // Send message to customer about status change (fire and forget)
+  sendOrderStatusMessage(id, status, payment_status).catch((err) =>
+    console.error('Failed to send status message:', err),
+  );
 }
 
 export function useUpdateOrderStatus() {
@@ -287,10 +349,6 @@ async function createAdminOrder(input: CreateAdminOrderInput) {
     if (itemsError) throw itemsError;
   }
 
-  if ((input.status ?? 'pending') === 'pending') {
-    void notifyPendingOrder(order.id);
-  }
-
   return order;
 }
 
@@ -312,3 +370,4 @@ export function useCreateAdminOrder() {
     },
   });
 }
+

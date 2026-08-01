@@ -19,3 +19,4 @@ export type {
 } from './catalog.ts';
 export type { CartItem, ShippingAddress, CartSummary } from './cart.ts';
 export type { ProductQuestion, CreateQuestionInput, AnswerInput, QuestionsFilter } from './product-question.ts';
+export type { Message, CreateMessageInput } from './message.ts';

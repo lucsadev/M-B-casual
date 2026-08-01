@@ -21,6 +21,9 @@ import { GuestRoute, ProtectedRoute } from '@/features/auth/index.js';
 import { LoginPage } from '@/features/auth/pages/LoginPage.js';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage.js';
 import { ProfilePage } from '@/features/customers/pages/ProfilePage.js';
+import { UserQuestionsPage } from '@/features/customers/pages/UserQuestionsPage.js';
+import { UserMessagesPage } from '@/features/customers/pages/UserMessagesPage.js';
+import { UserOrderDetailPage } from '@/features/customers/pages/UserOrderDetailPage.js';
 
 // Finance pages (PR 3 — new feature-based pages replacing old app/pages/)
 import { DashboardPage } from '@/features/finance/pages/dashboard-page.js';
@@ -68,6 +71,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'preguntas',
+        element: (
+          <ProtectedRoute>
+            <UserQuestionsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'mensajes',
+        element: (
+          <ProtectedRoute>
+            <UserMessagesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'orden/:id',
+        element: (
+          <ProtectedRoute>
+            <UserOrderDetailPage />
           </ProtectedRoute>
         ),
       },

@@ -23,12 +23,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { Stack, Link, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useRegister } from '../hooks/use-register';
 
 export default function RegisterScreen() {
-  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { register, isPending, error, clearError } = useRegister();
 
@@ -43,7 +41,11 @@ export default function RegisterScreen() {
   // Redirect on successful registration (if user is already set)
   useEffect(() => {
     if (user) {
-      router.replace('/(tabs)');
+      if (user.app_metadata?.role === 'admin') {
+        router.replace('/(admin)');
+      } else {
+        router.replace('/(tabs)');
+      }
     }
   }, [user]);
 
@@ -99,7 +101,7 @@ export default function RegisterScreen() {
   const displayError = validationError || error;
 
   return (
-    <View className="flex-1 bg-[#FFFFFF]" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-[#FFFFFF]">
       <Stack.Screen options={{ title: 'Crear cuenta' }} />
 
       <KeyboardAvoidingView
