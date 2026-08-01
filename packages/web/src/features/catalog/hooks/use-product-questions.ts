@@ -75,7 +75,12 @@ function buildOptimisticQuestion(
 export function useCreateQuestion(productId: string) {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, Omit<CreateQuestionInput, 'productId'>>({
+  return useMutation<
+    void,
+    Error,
+    Omit<CreateQuestionInput, 'productId'>,
+    { previous?: ProductQuestion[] }
+  >({
     mutationFn: (input) =>
       createQuestion({ ...input, productId }),
     onMutate: async (input) => {

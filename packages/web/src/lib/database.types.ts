@@ -40,6 +40,7 @@ export interface Database {
           sort_order?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       products: {
         Row: {
@@ -84,6 +85,15 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'products_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       product_variants: {
         Row: {
@@ -119,6 +129,36 @@ export interface Database {
           sku?: string | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'product_variants_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'discounted_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_variants_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_profitability';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_variants_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_variants_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'top_products';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       product_questions: {
         Row: {
@@ -163,6 +203,50 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'product_questions_customer_id_fkey';
+            columns: ['customer_id'];
+            isOneToOne: false;
+            referencedRelation: 'customer_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_questions_customer_id_fkey';
+            columns: ['customer_id'];
+            isOneToOne: false;
+            referencedRelation: 'customers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_questions_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'discounted_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_questions_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_profitability';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_questions_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_questions_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'top_products';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       cart_items: {
         Row: {
@@ -192,6 +276,43 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'cart_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'discounted_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cart_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_profitability';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cart_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cart_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'top_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cart_items_variant_id_fkey';
+            columns: ['variant_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_variants';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       customers: {
         Row: {
@@ -221,6 +342,7 @@ export interface Database {
           address?: Record<string, unknown> | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       orders: {
         Row: {
@@ -265,6 +387,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       order_items: {
         Row: {
@@ -294,6 +417,50 @@ export interface Database {
           unit_price?: number;
           subtotal?: number;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'order_items_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: false;
+            referencedRelation: 'orders';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'discounted_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_profitability';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'top_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_items_variant_id_fkey';
+            columns: ['variant_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_variants';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       purchases: {
         Row: {
@@ -323,6 +490,7 @@ export interface Database {
           purchase_date?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       purchase_items: {
         Row: {
@@ -352,6 +520,50 @@ export interface Database {
           unit_cost?: number;
           subtotal?: number;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'discounted_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_profitability';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'purchase_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'top_products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'purchase_items_purchase_id_fkey';
+            columns: ['purchase_id'];
+            isOneToOne: false;
+            referencedRelation: 'purchases';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'purchase_items_variant_id_fkey';
+            columns: ['variant_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_variants';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       expenses: {
         Row: {
@@ -384,6 +596,7 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       messages: {
         Row: {
@@ -416,6 +629,29 @@ export interface Database {
           is_read?: boolean;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'messages_customer_id_fkey';
+            columns: ['customer_id'];
+            isOneToOne: false;
+            referencedRelation: 'customer_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'messages_customer_id_fkey';
+            columns: ['customer_id'];
+            isOneToOne: false;
+            referencedRelation: 'customers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'messages_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: false;
+            referencedRelation: 'orders';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       cash_movements: {
         Row: {
@@ -451,6 +687,7 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: {
@@ -461,6 +698,7 @@ export interface Database {
           revenue: number;
           avg_ticket: number;
         };
+        Relationships: [];
       };
       low_stock: {
         Row: {
@@ -469,6 +707,7 @@ export interface Database {
           color: string | null;
           stock: number;
         };
+        Relationships: [];
       };
       daily_sales: {
         Row: {
@@ -477,6 +716,7 @@ export interface Database {
           revenue: number;
           unique_customers: number;
         };
+        Relationships: [];
       };
       top_products: {
         Row: {
@@ -487,6 +727,7 @@ export interface Database {
           order_count: number;
           total_revenue: number;
         };
+        Relationships: [];
       };
       product_profitability: {
         Row: {
@@ -499,6 +740,7 @@ export interface Database {
           margin_percent: number;
           gross_profit: number;
         };
+        Relationships: [];
       };
       customer_summary: {
         Row: {
@@ -511,6 +753,7 @@ export interface Database {
           total_spent: number;
           last_order_date: string | null;
         };
+        Relationships: [];
       };
       discounted_products: {
         Row: {
@@ -529,6 +772,7 @@ export interface Database {
           effective_price: number | null;
           max_discount: number | null;
         };
+        Relationships: [];
       };
     };
     Functions: {
