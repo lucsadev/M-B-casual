@@ -14,7 +14,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { formatPrice } from '@mbt/shared';
+import {
+  formatPrice,
+  getAvailableSizes,
+  getAvailableColors,
+  resolveInStockVariantId,
+  resolveDefaultSelection,
+  resolveNextSizeOnColorChange,
+  resolveNextSizeOnSizeTap,
+} from '@mbt/shared';
 import { useProduct } from '../hooks/use-product';
 import { useCategories } from '../hooks/use-categories';
 import { useCartContext } from '@/features/cart/context/CartContext';
@@ -42,16 +50,50 @@ export function ProductDetailPage() {
     setSelectedColor(null);
   }, [slug]);
 
-  // Pre-select a default in-stock variant so the user starts with a valid choice
+  // Pre-select a default in-stock variant so the user starts with a valid
+  // choice. Shared with mobile via resolveDefaultSelection so both platforms
+  // highlight the same default chips regardless of variant array order.
   useEffect(() => {
     if (!product) return;
     if (selectedSize || selectedColor) return;
-    const defaultVariant = product.variants.find((v) => v.stock > 0);
-    if (defaultVariant) {
-      setSelectedSize(defaultVariant.size ?? null);
-      setSelectedColor(defaultVariant.color ?? null);
+    const { size, color } = resolveDefaultSelection(product.variants);
+    if (size) {
+      setSelectedSize(size);
+      setSelectedColor(color);
     }
   }, [product, selectedSize, selectedColor]);
+
+  // When the selected color changes, keep the current size when it is still in
+  // stock in the new color, otherwise auto-select the first in-stock size of
+  // that color. Delegates to the same pure resolver as mobile
+  // (resolveNextSizeOnColorChange) so both platforms behave identically.
+  // Self-terminating: a kept or auto-selected size is in the color's in-stock
+  // set, so the effect returns on its next run.
+  useEffect(() => {
+    if (!product || !selectedColor) return;
+    // Dead-color repair: a background refetch may zero ALL stock of the
+    // currently selected color, leaving a highlighted chip for a color that no
+    // longer renders. When that happens, re-resolve BOTH size and color via the
+    // shared default selection so a chip stays highlighted whenever data
+    // allows. Self-terminating: the re-resolved color is in-stock by
+    // construction, so the includes-check passes on the next run.
+    if (!getAvailableColors(product.variants).includes(selectedColor)) {
+      const { size, color } = resolveDefaultSelection(product.variants);
+      if (size) {
+        setSelectedSize(size);
+        setSelectedColor(color);
+      }
+      return;
+    }
+    const nextSize = resolveNextSizeOnColorChange(
+      product.variants,
+      selectedSize,
+      selectedColor,
+    );
+    if (nextSize !== selectedSize) {
+      setSelectedSize(nextSize);
+    }
+  }, [product, selectedColor, selectedSize]);
 
   // SEO title — moved to <SEO /> component in the JSX below
 
@@ -104,13 +146,8 @@ export function ProductDetailPage() {
 
   // Filter variants with stock
   const variantsInStock = product.variants.filter((v) => v.stock > 0);
-  const sizes = (
-    [...new Set(variantsInStock.map((v) => v.size).filter(Boolean))] as string[]
-  ).sort((a, b) => {
-    const order = ['S', 'M', 'L', 'XL', 'XXL', 'Único', 'unico'];
-    return order.indexOf(a) - order.indexOf(b);
-  });
-  const colors = [...new Set(variantsInStock.map((v) => v.color).filter(Boolean))] as string[];
+  const sizes = getAvailableSizes(product.variants, selectedColor);
+  const colors = getAvailableColors(product.variants);
   const colorHexMap = new Map(
     variantsInStock
       .filter((v) => v.color && v.colorHex)
@@ -119,17 +156,12 @@ export function ProductDetailPage() {
 
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 
-  // Resolve variant_id from selected size+color (fall back to first in-stock variant)
-  const selectedVariantId = (() => {
-    if (!selectedSize && !selectedColor) {
-      return product.variants.find((v) => v.stock > 0)?.id ?? null;
-    }
-    return product.variants.find((v) => {
-      const sizeMatch = !selectedSize || v.size === selectedSize;
-      const colorMatch = !selectedColor || v.color === selectedColor;
-      return sizeMatch && colorMatch;
-    })?.id ?? null;
-  })();
+  // Resolve variant_id from selected size+color (never a 0-stock variant)
+  const selectedVariantId = resolveInStockVariantId(
+    product.variants,
+    selectedSize,
+    selectedColor,
+  );
 
   // Resolve selected variant object (for discount computation)
   const selectedVariant = selectedVariantId
@@ -304,7 +336,17 @@ export function ProductDetailPage() {
                 {sizes.map((size) => (
                   <button
                     key={size}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => {
+                      // Same no-toggle semantics as mobile: tapping the
+                      // already-selected size keeps it selected.
+                      const next = resolveNextSizeOnSizeTap(
+                        product.variants,
+                        selectedSize,
+                        size,
+                        selectedColor,
+                      );
+                      if (next !== null) setSelectedSize(next);
+                    }}
                     className={cn(
                       'min-w-[3rem] rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
                       selectedSize === size
@@ -375,14 +417,19 @@ export function ProductDetailPage() {
           {/* Add to cart button */}
           <Button
             size="lg"
-            disabled={totalStock === 0 || isAddingToCart}
-            onClick={() =>
+            disabled={totalStock === 0 || isAddingToCart || !selectedVariantId}
+            onClick={() => {
+              // Defense-in-depth: never call addToCart without a resolved
+              // in-stock variant. The disabled prop is the primary guard; this
+              // covers race conditions where the selection cleared between the
+              // render and the click.
+              if (!selectedVariantId) return;
               addToCart({
                 product_id: product.id,
                 variant_id: selectedVariantId,
                 quantity: 1,
-              })
-            }
+              });
+            }}
             className="w-full bg-[#E8836B] text-white hover:bg-[#E8836B]/90 sm:w-auto disabled:opacity-50"
           >
             {isAddingToCart ? (
