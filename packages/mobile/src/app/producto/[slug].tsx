@@ -23,7 +23,7 @@ import {
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { formatPrice } from '@mbt/shared';
+import { formatPrice, resolveInStockVariantId } from '@mbt/shared';
 import { useProduct } from '../../features/catalog/hooks/use-product';
 import { useCategories } from '../../features/catalog/hooks/use-categories';
 import { VariantSelector } from '../../features/catalog/components/VariantSelector';
@@ -41,23 +41,27 @@ export default function ProductDetailScreen() {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [questionsSheetVisible, setQuestionsSheetVisible] = useState(false);
 
-  // Reset selection when product changes
+  // Reset the image gallery when the product (slug) changes. The variant
+  // selection mirror is intentionally NOT reset here: VariantSelector is keyed
+  // by product.id and remounts per product, self-selecting the first in-stock
+  // variant and propagating it back through onSizeChange/onColorChange. Nulling
+  // the mirror here would clobber that propagation when a cached product
+  // remounts in the same commit as the slug change, leaving the mirror out of
+  // sync with the highlighted chip.
   useEffect(() => {
     setSelectedImageIndex(0);
-    setSelectedSize(null);
-    setSelectedColor(null);
   }, [slug]);
 
   const selectedVariantId = product
-    ? product.variants.find((v) => {
-        const sizeMatch = !selectedSize || v.size === selectedSize;
-        const colorMatch = !selectedColor || v.color === selectedColor;
-        return sizeMatch && colorMatch;
-      })?.id ?? null
+    ? resolveInStockVariantId(product.variants, selectedSize, selectedColor)
     : null;
 
   const handleAddToCart = useCallback(() => {
     if (!product) return;
+    // Defense-in-depth: never call addToCart without a resolved in-stock
+    // variant. The disabled prop is the primary guard; this covers race
+    // conditions where the selection cleared between the render and the tap.
+    if (!selectedVariantId) return;
 
     addToCart(
       {
@@ -239,8 +243,10 @@ export default function ProductDetailScreen() {
             </View>
           )}
 
-          {/* Variant selector */}
+          {/* Variant selector — remounts per product so internal state never
+              survives a slug change without a screen remount */}
           <VariantSelector
+            key={product.id}
             variants={product.variants}
             onSizeChange={setSelectedSize}
             onColorChange={setSelectedColor}
@@ -277,10 +283,10 @@ export default function ProductDetailScreen() {
 
           {/* Add to cart button */}
           <TouchableOpacity
-            disabled={totalStock === 0 || isAddingToCart}
+            disabled={totalStock === 0 || isAddingToCart || !selectedVariantId}
             onPress={handleAddToCart}
             className={`w-full py-3 rounded-md items-center flex-row justify-center gap-2 ${
-              totalStock === 0 || isAddingToCart
+              totalStock === 0 || isAddingToCart || !selectedVariantId
                 ? 'bg-neutral-300'
                 : 'bg-[#D4A853] active:bg-[#D4A853]/80'
             }`}
