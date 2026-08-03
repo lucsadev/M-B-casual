@@ -46,7 +46,6 @@ const productFormSchema = z.object({
       id: z.string().uuid().optional(),
       size: z.string().optional(),
       color: z.string().optional(),
-      color_hex: z.string().optional(),
       discount: z.coerce.number().int().min(0).max(100).default(0),
       stock: z.coerce.number().int().min(0).default(0),
     }),
@@ -102,7 +101,6 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
         id: v.id,
         size: v.size ?? '',
         color: v.color ?? '',
-        color_hex: v.colorHex ?? '',
         discount: v.discount ?? 0,
         stock: v.stock,
       })) ?? [],
@@ -149,31 +147,17 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
             Información básica
           </h3>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <Label htmlFor="name">Nombre</Label>
-              <Input
-                id="name"
-                {...register('name')}
-                onChange={handleNameChange}
-                placeholder="Camisa Oversize Blanca"
-              />
-              {errors.name && (
-                <p className="text-xs text-red-500">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                {...register('slug')}
-                placeholder="camisa-oversize-blanca"
-              />
-              {errors.slug && (
-                <p className="text-xs text-red-500">{errors.slug.message}</p>
-              )}
-            </div>
+          <div className="space-y-1">
+            <Label htmlFor="name">Nombre</Label>
+            <Input
+              id="name"
+              {...register('name')}
+              onChange={handleNameChange}
+              placeholder="Camisa Oversize Blanca"
+            />
+            {errors.name && (
+              <p className="text-xs text-red-500">{errors.name.message}</p>
+            )}
           </div>
 
           <div className="space-y-1">

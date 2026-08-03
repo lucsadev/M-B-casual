@@ -2,9 +2,10 @@
  * VariantManager — Inline CRUD for product variants.
  *
  * Uses react-hook-form useFieldArray to manage a dynamic list of
- * variant rows. Each row has: talle, color, color_hex, stock.
+ * variant rows. Each row has: talle, color, stock.
  */
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,25 +19,7 @@ export function VariantManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-base">Variantes</Label>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            append({
-              size: '',
-              color: '',
-              color_hex: '#000000',
-              discount: 0,
-              stock: 0,
-            })
-          }
-        >
-          + Agregar variante
-        </Button>
-      </div>
+      <Label className="text-base">Variantes</Label>
 
       {fields.length === 0 && (
         <p className="text-sm text-[#1A1A1A]/50">
@@ -49,14 +32,14 @@ export function VariantManager() {
         {fields.map((field, index) => (
           <div
             key={field.id}
-            className="flex flex-wrap items-end gap-3 rounded-md border border-[#E2E2DC] p-4"
+            className="flex w-fit flex-nowrap items-end gap-2 rounded-md border border-[#E2E2DC] p-3"
           >
             <div className="space-y-1">
               <Label className="text-xs">Talle</Label>
               <Input
                 {...register(`variants.${index}.size`)}
                 placeholder="S, M, L, XL..."
-                className="w-20"
+                className="w-20!"
               />
             </div>
 
@@ -65,16 +48,7 @@ export function VariantManager() {
               <Input
                 {...register(`variants.${index}.color`)}
                 placeholder="Negro, Blanco..."
-                className="w-28"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">Hex</Label>
-              <Input
-                type="color"
-                {...register(`variants.${index}.color_hex`)}
-                className="h-9 w-14 p-1"
+                className="w-28!"
               />
             </div>
 
@@ -88,7 +62,7 @@ export function VariantManager() {
                   valueAsNumber: true,
                 })}
                 placeholder="0"
-                className="w-16"
+                className="w-16!"
               />
             </div>
 
@@ -98,7 +72,7 @@ export function VariantManager() {
                 type="number"
                 {...register(`variants.${index}.stock`, { valueAsNumber: true })}
                 placeholder="0"
-                className="w-20"
+                className="w-20!"
               />
             </div>
 
@@ -108,12 +82,29 @@ export function VariantManager() {
               size="sm"
               className="text-red-500 hover:text-red-700"
               onClick={() => remove(index)}
+              aria-label={`Eliminar variante ${index + 1}`}
             >
-              ×
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         ))}
       </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() =>
+          append({
+            size: '',
+            color: '',
+            discount: 0,
+            stock: 0,
+          })
+        }
+      >
+        + Agregar variante
+      </Button>
     </div>
   );
 }

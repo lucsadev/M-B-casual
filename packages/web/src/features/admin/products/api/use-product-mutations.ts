@@ -40,7 +40,6 @@ interface CreateProductInput {
   variants: {
     size?: string | null;
     color?: string | null;
-    color_hex?: string | null;
     discount?: number;
     stock: number;
   }[];
@@ -135,7 +134,6 @@ interface UpdateProductInput {
     id?: string;
     size?: string | null;
     color?: string | null;
-    color_hex?: string | null;
     discount?: number;
     stock: number;
   }[];
@@ -209,7 +207,6 @@ async function updateProduct({ id, product, variants }: UpdateProductInput) {
         id: v.id,
         size: v.size ?? null,
         color: v.color ?? null,
-        color_hex: v.color_hex ?? null,
         discount: v.discount ?? 0,
         stock: v.stock ?? 0,
         sku: existingSkuMap.get(v.id) ?? null,
@@ -231,7 +228,6 @@ async function updateProduct({ id, product, variants }: UpdateProductInput) {
     return {
       size: v.size ?? null,
       color: v.color ?? null,
-      color_hex: v.color_hex ?? null,
       discount: v.discount ?? 0,
       stock: v.stock ?? 0,
       sku,

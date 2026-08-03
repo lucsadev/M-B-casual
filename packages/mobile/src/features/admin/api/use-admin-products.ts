@@ -115,7 +115,6 @@ export function useCreateProduct() {
       variants: {
         size?: string | null;
         color?: string | null;
-        color_hex?: string | null;
         discount?: number;
         stock: number;
       }[];
@@ -201,7 +200,6 @@ export function useUpdateProduct() {
         id?: string;
         size?: string | null;
         color?: string | null;
-        color_hex?: string | null;
         discount?: number;
         stock: number;
       }[];
@@ -270,7 +268,6 @@ export function useUpdateProduct() {
             id: v.id,
             size: v.size ?? null,
             color: v.color ?? null,
-            color_hex: v.color_hex ?? null,
             discount: v.discount ?? 0,
             stock: v.stock ?? 0,
             sku: existingSkuMap.get(v.id) ?? null,
@@ -292,7 +289,6 @@ export function useUpdateProduct() {
         return {
           size: v.size ?? null,
           color: v.color ?? null,
-          color_hex: v.color_hex ?? null,
           discount: v.discount ?? 0,
           stock: v.stock ?? 0,
           sku,

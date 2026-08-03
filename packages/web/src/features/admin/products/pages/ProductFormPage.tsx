@@ -53,7 +53,6 @@ export function ProductFormPage() {
           id: v.id,
           size: v.size || null,
           color: v.color || null,
-          color_hex: v.color_hex || null,
           discount: v.discount ?? 0,
           stock: v.stock,
         })),
@@ -73,7 +72,6 @@ export function ProductFormPage() {
         variants: values.variants.map((v) => ({
           size: v.size || null,
           color: v.color || null,
-          color_hex: v.color_hex || null,
           discount: v.discount ?? 0,
           stock: v.stock,
         })),
