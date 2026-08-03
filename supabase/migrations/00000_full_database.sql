@@ -18,7 +18,8 @@
 --   00013_drop_compare_price.sql, 00014_product_questions.sql, 00015_fix_product_questions_rls.sql,
 --   00016_loosen_question_text_check.sql, 00017_messages.sql,
 --   20260709220149_harden_admin_security.sql, 20260710155334_populate_google_customer_names.sql,
---   20260710155842_populate_google_customer_contact.sql, 20260719003521_enable_order_realtime_notifications.sql
+--   20260710155842_populate_google_customer_contact.sql, 20260719003521_enable_order_realtime_notifications.sql,
+--   00002_sku_autofill_trigger.sql
 -- =============================================================================
 
 -- =============================================================================
@@ -898,6 +899,104 @@ $$;
 
 comment on function sync_order_customer_name is 'Keeps orders.customer_name in sync when a customer renames';
 
+-- ---------------------------------------------------------------------------
+-- 5.18 variant_sku_base(product_id, size, color) — deterministic SKU base
+--      {CAT_SLUG}-{PRODUCT_SLUG}-{SIZE}-{COLOR3?}, mirrors generateSku() in
+--      packages/shared/src/utils/sku.ts. Reconciled from
+--      00002_sku_autofill_trigger.sql for fresh environments.
+-- ---------------------------------------------------------------------------
+create or replace function public.variant_sku_base(p_product_id uuid, p_size text, p_color text)
+returns text
+language plpgsql
+as $$
+declare
+  v_cat       text;
+  v_prod      text;
+  v_size      text;
+  v_color_seg text := '';   -- '-XXX' or ''
+begin
+  -- category/product slugs are pre-sanitized via generateSlug at creation, so
+  -- lower() is idempotent and matches the util's generateSlug(slug) call.
+  select lower(c.slug), lower(p.slug)
+    into v_cat, v_prod
+  from products p
+  join categories c on c.id = p.category_id
+  where p.id = p_product_id;
+
+  -- SIZE: UNI for NULL/empty or "Único"/"Única" (diacritic-insensitive); else
+  -- slugify + UPPER, diacritics PRESERVED ([[:alnum:]] is Unicode-aware here).
+  if p_size is null or trim(p_size) = '' then
+    v_size := 'UNI';
+  elsif lower(trim(p_size)) in ('único', 'única', 'unico', 'unica') then
+    v_size := 'UNI';
+  else
+    v_size := upper(btrim(regexp_replace(lower(trim(p_size)), '[^[:alnum:]]+', '-', 'g'), '-'));
+  end if;
+
+  -- COLOR3: 3-char slugify + UPPER, diacritics PRESERVED; omitted when absent
+  -- (per spec — not the design draft's "GEN" fallback).
+  if p_color is not null and trim(p_color) <> '' then
+    v_color_seg := '-' || upper(left(btrim(regexp_replace(lower(trim(p_color)), '[^[:alnum:]]+', '-', 'g'), '-'), 3));
+  end if;
+
+  return v_cat || '-' || v_prod || '-' || v_size || v_color_seg;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 5.19 gen_variant_sku(product_id, size, color) — full SKU builder.
+--     Ordinal = per-product sequence (existing count + 1), bumped on collision
+--     up to 100 attempts (RAISE), mirroring generateSku's MAX_RETRY_ATTEMPTS.
+-- ---------------------------------------------------------------------------
+create or replace function public.gen_variant_sku(p_product_id uuid, p_size text, p_color text)
+returns text
+language plpgsql
+as $$
+declare
+  v_base     text;
+  v_ordinal  int;
+  v_sku      text;
+  v_attempts int := 0;
+begin
+  v_base := public.variant_sku_base(p_product_id, p_size, p_color);
+
+  -- next 1-based position within this product's variants (NEW row not counted).
+  select count(*) + 1 into v_ordinal
+  from product_variants
+  where product_id = p_product_id;
+
+  v_sku := v_base || '-' || lpad(v_ordinal::text, 3, '0');
+
+  -- collision resolution against existing SKUs (max 100 attempts).
+  while exists (select 1 from product_variants where sku = v_sku) loop
+    v_attempts := v_attempts + 1;
+    if v_attempts > 100 then
+      raise exception 'SKU generation exceeded max retry attempts (100) for product %', p_product_id;
+    end if;
+    v_ordinal := v_ordinal + 1;
+    v_sku := v_base || '-' || lpad(v_ordinal::text, 3, '0');
+  end loop;
+
+  return v_sku;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 5.20 trg_variant_sku_autofill() — trigger wrapper that fills NEW.sku via
+--      gen_variant_sku() when it is NULL.
+-- ---------------------------------------------------------------------------
+create or replace function public.trg_variant_sku_autofill()
+returns trigger
+language plpgsql
+as $$
+begin
+  if NEW.sku is null then
+    NEW.sku := public.gen_variant_sku(NEW.product_id, NEW.size, NEW.color);
+  end if;
+  return NEW;
+end;
+$$;
+
 -- =============================================================================
 -- 6. TRIGGERS
 -- =============================================================================
@@ -979,6 +1078,16 @@ create trigger trg_sync_order_customer_name
   after update of first_name, last_name on customers
   for each row
   execute function sync_order_customer_name();
+
+-- ---------------------------------------------------------------------------
+-- 6.11 Auto-fill NULL variant SKU on insert/update (reconciled from 00002).
+--      WHEN (NEW.sku IS NULL) preserves existing SKUs on edits (spec scenario 4).
+-- ---------------------------------------------------------------------------
+create trigger trg_variant_sku_autofill
+  before insert or update on product_variants
+  for each row
+  when (NEW.sku is null)
+  execute function public.trg_variant_sku_autofill();
 
 -- =============================================================================
 -- 7. VIEWS
