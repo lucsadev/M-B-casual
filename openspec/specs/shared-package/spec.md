@@ -50,7 +50,15 @@ The package MUST export `CATEGORIES`, `COLORS`, `SIZES`, `ORDER_STATUS`, and `PA
 
 ### Requirement: Format utilities
 
-The package MUST export `formatPrice` (ARS currency), `formatDate` (locale-aware), and `generateSlug` (lowercase, hyphenated).
+The package MUST export `formatPrice` (ARS currency), `formatDate` (locale-aware), `generateSlug` (lowercase, hyphenated), and `generateSku` (deterministic SKU generation from category/product/size/color/ordinal tokens). `generateSku` MUST be re-exported via `utils/index.ts` and accept `{ categorySlug, productSlug, size?, color?, ordinal, used? }`, returning a SKU string conforming to `skuStringSchema`.
+
+> *Delta from `auto-sku-generation`: previously `formatPrice`, `formatDate`, `generateSlug` were exported; no SKU util existed. Now `packages/shared/src/utils/sku.ts` adds `generateSku`, `slugifyToken`, `truncateToken`, and `MAX_RETRY_ATTEMPTS` (cap=100, mirrors DB trigger). `generateSlug` is reused for CAT/PROD slugification (idempotent on clean DB slugs); `slugifyToken` is Unicode-aware (preserves diacritics) for SIZE/COLOR3 tokens.*
+
+#### Scenario: generateSku produces deterministic output
+
+- GIVEN the same input params { categorySlug: "mujer", productSlug: "camisa-oversize", size: "M", color: "Blanco", ordinal: 1 }
+- WHEN `generateSku` is called twice
+- THEN both calls return the identical string `mujer-camisa-oversize-M-BLA-001`
 
 #### Scenario: formatPrice formats correctly
 
@@ -58,12 +66,25 @@ The package MUST export `formatPrice` (ARS currency), `formatDate` (locale-aware
 - WHEN `formatPrice(1500.5)` is called
 - THEN it returns a string formatted as Argentinian pesos
 
+### Requirement: SKU validation schema
+
+> *Delta from `auto-sku-generation` (ADDED).* The package MUST export `skuStringSchema` (Zod string, `.max(100)` with regex `/^[a-z0-9]+(?:-[a-z0-9]+)*-[a-z0-9]+(?:-[a-z0-9]+)*-[A-Z0-9]+(?:-[A-Z]{3})?-\d{3}$/`) and `productVariantCreateSchema` (Zod object). `productVariantCreateSchema` MUST carry `id?` (uuid, optional), `size?` (string, optional), `color?` (string, optional), `discount?` (int 0–100, default 0), `stock` (int ≥ 0, default 0), `sku?` (string, optional — carried for upsert preservation, ignored on new create). Both MUST be re-exported via `validators/index.ts`.
+
+> **Limitation (WARNING W1)**: `skuStringSchema` is ASCII-only and rejects diacritic color tokens (e.g. `…-ÍND-…`). Currently not applied to generated SKUs at any call site — latent only. See `sku-generation` spec for full note.
+
+#### Scenario: Valid variant input passes schema
+
+- GIVEN a variant object { size: "S", color: "Blanco", stock: 10 }
+- WHEN validated with `productVariantCreateSchema`
+- THEN it returns success (sku is auto-generated downstream, not validated here)
+
 ## Acceptance Criteria
 
 - [ ] All 9 entity interfaces and Zod schemas defined
 - [ ] `import { Product, ProductSchema } from '@mbt/shared'` works
 - [ ] Constants match the database enum values
 - [ ] Format utilities produce correct output for AR locale
+- [ ] `generateSku` + `skuStringSchema` + `productVariantCreateSchema` exported from `@mbt/shared`
 
 ## Dependencies
 
