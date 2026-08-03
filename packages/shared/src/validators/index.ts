@@ -1,4 +1,10 @@
-export { productSchema, productCreateSchema, productVariantSchema } from './product.ts';
+export {
+  productSchema,
+  productCreateSchema,
+  productVariantSchema,
+  productVariantCreateSchema,
+  skuStringSchema,
+} from './product.ts';
 export { categorySchema, categoryCreateSchema } from './category.ts';
 export { orderSchema, orderCreateSchema, orderItemSchema } from './order.ts';
 export { customerSchema, customerCreateSchema, profileUpdateSchema } from './customer.ts';

@@ -47,3 +47,30 @@ export const productVariantSchema = z.object({
   sku: z.string().optional(),
   createdAt: z.string().datetime(),
 });
+
+/**
+ * Schema that every `generateSku` output MUST conform to.
+ *
+ * Format: `{cat}-{product}-{SIZE}(-{COLOR3})-{NNN}` where SIZE is uppercase
+ * alphanumeric, COLOR3 is an optional 3-letter uppercase segment, and NNN is a
+ * 3-digit ordinal. The `sku text unique` DB constraint is the binding guard.
+ */
+export const skuStringSchema = z.string()
+  .max(100)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*-[a-z0-9]+(?:-[a-z0-9]+)*-[A-Z0-9]+(?:-[A-Z]{3})?-\d{3}$/);
+
+/**
+ * Input schema for creating a new product variant.
+ *
+ * SKU is OPTIONAL and ignored on create — it is auto-generated downstream by
+ * `generateSku`. The `sku` field is carried only so existing SKUs survive an
+ * upsert-by-variant flow (matching on `id`), never to be manually entered.
+ */
+export const productVariantCreateSchema = z.object({
+  id: z.string().uuid().optional(),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  discount: z.number().int().min(0).max(100).default(0),
+  stock: z.number().int().min(0).default(0),
+  sku: z.string().optional(),
+});
