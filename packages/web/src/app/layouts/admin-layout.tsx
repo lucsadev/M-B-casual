@@ -183,6 +183,26 @@ function IconChart({ active }: { active: boolean }) {
   );
 }
 
+function IconCategory({ active }: { active: boolean }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={active ? 'text-[#FFFFFF]' : 'text-[#1A1A1A]/60'}
+    >
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </svg>
+  );
+}
+
 function IconQuestion({ active }: { active: boolean }) {
   return (
     <svg
@@ -219,6 +239,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: '/admin', label: 'Dashboard', end: true, Icon: IconDashboard },
   { to: '/admin/productos', label: 'Productos', end: false, Icon: IconProduct },
+  { to: '/admin/categorias', label: 'Categorías', end: false, Icon: IconCategory },
   { to: '/admin/ordenes', label: 'Órdenes', end: false, Icon: IconOrder },
   { to: '/admin/clientes', label: 'Usuarios', end: false, Icon: IconCustomer },
   { to: '/admin/preguntas', label: 'Preguntas', end: false, Icon: IconQuestion, Badge: QuestionsNavBadge },
@@ -235,6 +256,7 @@ const NAV_ITEMS: NavItem[] = [
 const ROUTE_LABELS: Record<string, string> = {
   admin: 'Administración',
   productos: 'Productos',
+  categorias: 'Categorías',
   ordenes: 'Órdenes',
   clientes: 'Usuarios',
   preguntas: 'Preguntas',

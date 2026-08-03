@@ -11,9 +11,17 @@ node_modules/
 dist/
 build/
 target/
+*.tsbuildinfo
+
+# Expo
+.expo/
+packages/mobile/.expo/
 
 # Package manager
 package-lock.json
+
+# Local tool caches
+.pnpm-store/
 
 # IDE files
 .vscode/

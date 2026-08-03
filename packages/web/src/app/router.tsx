@@ -17,6 +17,7 @@ import { NotFoundPage } from './pages/not-found.js';
 import { AdminGuard } from '@/features/admin/guards/AdminGuard.js';
 import { ProductListPage } from '@/features/admin/products/pages/ProductListPage.js';
 import { ProductFormPage } from '@/features/admin/products/pages/ProductFormPage.js';
+import { CategoriesListPage } from '@/features/admin/products/pages/CategoriesListPage.js';
 import { GuestRoute, ProtectedRoute } from '@/features/auth/index.js';
 import { LoginPage } from '@/features/auth/pages/LoginPage.js';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage.js';
@@ -112,6 +113,7 @@ export const router = createBrowserRouter([
       { path: 'productos', element: <ProductListPage /> },
       { path: 'productos/nuevo', element: <ProductFormPage /> },
       { path: 'productos/:id/editar', element: <ProductFormPage /> },
+      { path: 'categorias', element: <CategoriesListPage /> },
       { path: 'ordenes', element: <AdminOrdersPage /> },
       { path: 'ordenes/:id', element: <OrderDetailPage /> },
       { path: 'clientes', element: <AdminCustomersPage /> },
