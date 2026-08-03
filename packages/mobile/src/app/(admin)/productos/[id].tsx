@@ -55,7 +55,7 @@ export default function AdminEditProductScreen() {
   const [categoryId, setCategoryId] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [variants, setVariants] = useState<Array<{
-    size: string; color: string; color_hex: string; stock: string; discount: string; sku: string;
+    id?: string; size: string; color: string; color_hex: string; stock: string; discount: string;
   }>>([]);
   const [saving, setSaving] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
@@ -70,12 +70,12 @@ export default function AdminEditProductScreen() {
       setIsActive(product.is_active ?? true);
       setVariants(
         (product.product_variants ?? []).map((v: any) => ({
+          id: v.id,
           size: v.size ?? '',
           color: v.color ?? '',
           color_hex: v.color_hex ?? '',
           stock: String(v.stock ?? 0),
           discount: String(v.discount ?? 0),
-          sku: v.sku ?? '',
         })),
       );
     }
@@ -97,12 +97,12 @@ export default function AdminEditProductScreen() {
         is_active: isActive,
       };
       const variantData = variants.map((v) => ({
+        id: v.id,
         size: v.size || null,
         color: v.color || null,
         color_hex: v.color_hex || null,
         stock: Number(v.stock) || 0,
         discount: Number(v.discount) || 0,
-        sku: v.sku || null,
       }));
 
       if (isNew) {
@@ -119,7 +119,7 @@ export default function AdminEditProductScreen() {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { size: '', color: '', color_hex: '', stock: '0', discount: '0', sku: '' }]);
+    setVariants([...variants, { size: '', color: '', color_hex: '', stock: '0', discount: '0' }]);
   };
 
   const removeVariant = (i: number) => {
@@ -286,12 +286,6 @@ export default function AdminEditProductScreen() {
                 onChangeText={(t) => updateVariant(i, 'discount', t)}
                 placeholder="Dto %"
                 keyboardType="numeric"
-                className="flex-1 rounded-md border border-[#E2E2DC] px-2.5 py-2 text-xs"
-              />
-              <TextInput
-                value={v.sku}
-                onChangeText={(t) => updateVariant(i, 'sku', t)}
-                placeholder="SKU"
                 className="flex-1 rounded-md border border-[#E2E2DC] px-2.5 py-2 text-xs"
               />
             </View>

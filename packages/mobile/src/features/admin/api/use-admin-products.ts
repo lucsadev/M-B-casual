@@ -8,7 +8,7 @@ import type {
   PaginationParams,
   PaginatedResponse,
 } from '@mbt/shared';
-import { buildPagination, buildPaginatedResponse } from '@mbt/shared';
+import { buildPagination, buildPaginatedResponse, generateSku } from '@mbt/shared';
 
 type ProductRow = Database['public']['Tables']['products']['Row'];
 type VariantRow = Database['public']['Tables']['product_variants']['Row'];
@@ -118,9 +118,21 @@ export function useCreateProduct() {
         color_hex?: string | null;
         discount?: number;
         stock: number;
-        sku?: string | null;
       }[];
     }) => {
+      // Fetch category slug — needed to generate deterministic SKUs that match
+      // the product's category namespace.
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('categories')
+        .select('slug')
+        .eq('id', input.product.category_id)
+        .single<{ slug: string }>();
+
+      if (categoryError) throw categoryError;
+
+      const categorySlug = categoryData.slug;
+      const productSlug = input.product.slug;
+
       const { data: productData, error: productError } = await supabase
         .from('products')
         .insert(input.product as never)
@@ -128,11 +140,29 @@ export function useCreateProduct() {
         .single<{ id: string }>();
       if (productError) throw productError;
 
+      // Generate SKUs and insert variants
       if (input.variants.length > 0) {
-        const variantRows = input.variants.map((v) => ({
-          ...v,
-          product_id: productData.id,
-        }));
+        const used = new Set<string>();
+        const variantRows = input.variants.map((v, index) => {
+          const sku = generateSku({
+            categorySlug,
+            productSlug,
+            size: v.size,
+            color: v.color,
+            ordinal: index + 1,
+            used,
+          });
+          used.add(sku);
+          return {
+            size: v.size ?? null,
+            color: v.color ?? null,
+            discount: v.discount ?? 0,
+            stock: v.stock ?? 0,
+            product_id: productData.id,
+            sku,
+          };
+        });
+
         const { error: variantError } = await supabase
           .from('product_variants')
           .insert(variantRows as never);
@@ -168,12 +198,12 @@ export function useUpdateProduct() {
         is_active?: boolean;
       };
       variants: {
+        id?: string;
         size?: string | null;
         color?: string | null;
         color_hex?: string | null;
         discount?: number;
         stock: number;
-        sku?: string | null;
       }[];
     }) => {
       const { error: productError } = await supabase
@@ -182,27 +212,115 @@ export function useUpdateProduct() {
         .eq('id', input.id);
       if (productError) throw productError;
 
-      // Replace variants
-      const { error: deleteError } = await supabase
-        .from('product_variants')
-        .delete()
-        .eq('product_id', input.id);
-      if (deleteError) throw deleteError;
+      // Resolve category slug and product slug for SKU generation.
+      // These may be absent from a partial update payload, so fall back to the
+      // existing product row.
+      let productSlug: string | undefined = input.product.slug;
+      let categoryId: string | undefined = input.product.category_id;
 
-      if (input.variants.length > 0) {
-        const variantRows = input.variants.map((v) => ({
+      if (!productSlug || !categoryId) {
+        const { data: existingProduct, error: existingError } = await supabase
+          .from('products')
+          .select('slug, category_id')
+          .eq('id', input.id)
+          .single<{ slug: string; category_id: string }>();
+
+        if (existingError) throw existingError;
+        productSlug = productSlug ?? existingProduct.slug;
+        categoryId = categoryId ?? existingProduct.category_id;
+      }
+
+      // Fetch category slug for SKU generation
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('categories')
+        .select('slug')
+        .eq('id', categoryId!)
+        .single<{ slug: string }>();
+
+      if (categoryError) throw categoryError;
+      const categorySlug = categoryData.slug;
+
+      // Fetch existing variants so we can (a) preserve their SKUs on upsert and
+      // (b) build a `used` set for collision avoidance when generating new SKUs.
+      const { data: existingVariants, error: existingVariantsError } = await (supabase
+        .from('product_variants') as any)
+        .select('id, sku')
+        .eq('product_id', input.id);
+
+      if (existingVariantsError) throw existingVariantsError;
+
+      const existingSkuMap = new Map<string, string | null>();
+      const used = new Set<string>();
+      for (const ev of existingVariants ?? []) {
+        existingSkuMap.set(ev.id, ev.sku ?? null);
+        if (ev.sku) used.add(ev.sku);
+      }
+
+      // Track which existing variant IDs were submitted (for orphan deletion)
+      const submittedIds: string[] = [];
+      let newVariantOrdinal = 1;
+
+      // Build upsert rows: existing variants preserve their SKU; new variants
+      // get an auto-generated SKU.
+      const variantRows = input.variants.map((v) => {
+        if (v.id) {
+          // Existing variant — preserve existing SKU, pass it through unchanged
+          submittedIds.push(v.id);
+          return {
+            id: v.id,
+            size: v.size ?? null,
+            color: v.color ?? null,
+            color_hex: v.color_hex ?? null,
+            discount: v.discount ?? 0,
+            stock: v.stock ?? 0,
+            sku: existingSkuMap.get(v.id) ?? null,
+            product_id: input.id,
+          };
+        }
+
+        // New variant — generate a fresh SKU
+        const sku = generateSku({
+          categorySlug,
+          productSlug: productSlug!,
+          size: v.size,
+          color: v.color,
+          ordinal: newVariantOrdinal,
+          used,
+        });
+        used.add(sku);
+        newVariantOrdinal += 1;
+        return {
           size: v.size ?? null,
           color: v.color ?? null,
           color_hex: v.color_hex ?? null,
           discount: v.discount ?? 0,
           stock: v.stock ?? 0,
-          sku: v.sku ?? null,
+          sku,
           product_id: input.id,
-        }));
-        const { error: insertError } = await supabase
+        };
+      });
+
+      // Upsert variants: rows with `id` match on conflict (preserve); rows
+      // without `id` are inserted as new variants.
+      if (variantRows.length > 0) {
+        const { error: upsertError } = await supabase
           .from('product_variants')
-          .insert(variantRows as never);
-        if (insertError) throw insertError;
+          .upsert(variantRows as never, { onConflict: 'id' });
+
+        if (upsertError) throw upsertError;
+      }
+
+      // Delete orphan variants that existed in the DB but were removed from the form
+      const existingIds = (existingVariants ?? []).map((v: { id: string }) => v.id);
+      const orphanIds = existingIds.filter((vid: string) => !submittedIds.includes(vid));
+
+      if (orphanIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('product_variants')
+          .delete()
+          .in('id', orphanIds);
+
+        if (deleteError) throw deleteError;
       }
     },
     onSuccess: () => {
