@@ -43,12 +43,12 @@ const productFormSchema = z.object({
   images: z.array(z.string()).default([]),
   variants: z.array(
     z.object({
+      id: z.string().uuid().optional(),
       size: z.string().optional(),
       color: z.string().optional(),
       color_hex: z.string().optional(),
       discount: z.coerce.number().int().min(0).max(100).default(0),
       stock: z.coerce.number().int().min(0).default(0),
-      sku: z.string().optional(),
     }),
   ).default([]),
 });
@@ -99,12 +99,12 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
     images: product?.images ?? [],
     variants:
       product?.variants?.map((v) => ({
+        id: v.id,
         size: v.size ?? '',
         color: v.color ?? '',
         color_hex: v.colorHex ?? '',
         discount: v.discount ?? 0,
         stock: v.stock,
-        sku: v.sku ?? '',
       })) ?? [],
   };
 

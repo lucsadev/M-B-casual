@@ -2,7 +2,7 @@
  * VariantManager — Inline CRUD for product variants.
  *
  * Uses react-hook-form useFieldArray to manage a dynamic list of
- * variant rows. Each row has: talle, color, color_hex, stock, SKU.
+ * variant rows. Each row has: talle, color, color_hex, stock.
  */
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,6 @@ export function VariantManager() {
               color_hex: '#000000',
               discount: 0,
               stock: 0,
-              sku: '',
             })
           }
         >
@@ -100,15 +99,6 @@ export function VariantManager() {
                 {...register(`variants.${index}.stock`, { valueAsNumber: true })}
                 placeholder="0"
                 className="w-20"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">SKU</Label>
-              <Input
-                {...register(`variants.${index}.sku`)}
-                placeholder="MBT-001"
-                className="w-28"
               />
             </div>
 

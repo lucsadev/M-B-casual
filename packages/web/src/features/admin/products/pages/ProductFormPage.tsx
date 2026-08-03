@@ -50,12 +50,12 @@ export function ProductFormPage() {
           is_active: values.isActive,
         },
         variants: values.variants.map((v) => ({
+          id: v.id,
           size: v.size || null,
           color: v.color || null,
           color_hex: v.color_hex || null,
           discount: v.discount ?? 0,
           stock: v.stock,
-          sku: v.sku || null,
         })),
       });
     } else {
@@ -76,7 +76,6 @@ export function ProductFormPage() {
           color_hex: v.color_hex || null,
           discount: v.discount ?? 0,
           stock: v.stock,
-          sku: v.sku || null,
         })),
       });
     }
