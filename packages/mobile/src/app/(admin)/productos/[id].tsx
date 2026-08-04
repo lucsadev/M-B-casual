@@ -55,7 +55,7 @@ export default function AdminEditProductScreen() {
   const [categoryId, setCategoryId] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [variants, setVariants] = useState<Array<{
-    id?: string; size: string; color: string; color_hex: string; stock: string; discount: string;
+    id?: string; size: string; color: string; stock: string; discount: string;
   }>>([]);
   const [saving, setSaving] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
@@ -73,7 +73,6 @@ export default function AdminEditProductScreen() {
           id: v.id,
           size: v.size ?? '',
           color: v.color ?? '',
-          color_hex: v.color_hex ?? '',
           stock: String(v.stock ?? 0),
           discount: String(v.discount ?? 0),
         })),
@@ -100,7 +99,6 @@ export default function AdminEditProductScreen() {
         id: v.id,
         size: v.size || null,
         color: v.color || null,
-        color_hex: v.color_hex || null,
         stock: Number(v.stock) || 0,
         discount: Number(v.discount) || 0,
       }));
@@ -119,7 +117,7 @@ export default function AdminEditProductScreen() {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { size: '', color: '', color_hex: '', stock: '0', discount: '0' }]);
+    setVariants([...variants, { size: '', color: '', stock: '0', discount: '0' }]);
   };
 
   const removeVariant = (i: number) => {

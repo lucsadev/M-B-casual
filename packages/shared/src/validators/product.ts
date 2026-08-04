@@ -42,7 +42,6 @@ export const productVariantSchema = z.object({
   productId: z.string().uuid(),
   size: z.string().optional(),
   color: z.string().optional(),
-  colorHex: z.string().optional(),
   stock: z.number().int().min(0, 'Stock must be non-negative'),
   sku: z.string().optional(),
   createdAt: z.string().datetime(),
