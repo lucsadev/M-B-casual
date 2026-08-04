@@ -48,8 +48,6 @@ export interface ProductVariant {
   size?: string;
   /** Color name: 'Negro', 'Marfil', 'Beige', etc. */
   color?: string;
-  /** Hex color code for UI swatches (e.g., '#1A1A1A') */
-  colorHex?: string;
   /** Discount percentage applied on top of product.price (0-100) */
   discount?: number;
   /** Current stock count */

@@ -4,7 +4,7 @@
 
 ### Requirement: Variant management
 
-Each product MUST support multiple variants with size, color, color_hex, stock, and SKU. Admins MUST add, edit, and remove variants inline. Stock is updated by admin edits AND by purchase confirmations — increments from purchase items MUST atomically add to the current stock value.
+Each product MUST support multiple variants with size, color, stock, and SKU. Admins MUST add, edit, and remove variants inline. Stock is updated by admin edits AND by purchase confirmations — increments from purchase items MUST atomically add to the current stock value.
 (Previously: Stock was only updated via manual admin variant edits)
 
 #### Scenario: Add variant with stock (unchanged)

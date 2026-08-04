@@ -20,7 +20,7 @@ interface OrderItemResult {
   unit_price: number;
   subtotal: number;
   products: { name: string; images: string[] } | null;
-  product_variants: { size: string | null; color: string | null; color_hex: string | null; sku: string | null } | null;
+  product_variants: { size: string | null; color: string | null; sku: string | null } | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -91,7 +91,7 @@ function useOrder(id: string) {
           unit_price,
           subtotal,
           products(name, images),
-          product_variants(size, color, color_hex, sku)
+          product_variants(size, color, sku)
         `)
         .eq('order_id', id);
 
@@ -207,12 +207,6 @@ export function UserOrderDetailPage() {
                       {item.product_variants.size && item.product_variants.color && ' · '}
                       {item.product_variants.color && (
                         <span className="inline-flex items-center gap-1">
-                          {item.product_variants.color_hex && (
-                            <span
-                              className="inline-block h-2.5 w-2.5 rounded-full border border-[#E2E2DC]"
-                              style={{ backgroundColor: item.product_variants.color_hex }}
-                            />
-                          )}
                           {item.product_variants.color}
                         </span>
                       )}
