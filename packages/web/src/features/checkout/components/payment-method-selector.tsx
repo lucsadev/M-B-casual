@@ -2,7 +2,7 @@
  * PaymentMethodSelector — Radio group for selecting payment method.
  *
  * Uses inline payment method definitions aligned with the checkoutSchema enum
- * values ('transferencia', 'efectivo', 'mercado_pago').
+ * values ('transferencia', 'efectivo').
  */
 import type { PaymentMethodId } from '@mbt/shared';
 
@@ -15,7 +15,6 @@ interface PaymentMethodSelectorProps {
 const METHODS: Array<{ id: PaymentMethodId; label: string; icon: string }> = [
   { id: 'transferencia', label: 'Transferencia Bancaria', icon: 'bank' },
   { id: 'efectivo', label: 'Efectivo', icon: 'cash' },
-  { id: 'mercado_pago', label: 'Mercado Pago', icon: 'credit-card' },
 ];
 
 function PaymentIcon({ icon }: { icon: string }) {
@@ -37,12 +36,6 @@ function PaymentIcon({ icon }: { icon: string }) {
         <rect x="2" y="6" width="20" height="12" rx="2" />
         <circle cx="12" cy="12" r="2" />
         <path d="M6 12h.01M18 12h.01" />
-      </svg>
-    ),
-    'credit-card': (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-        <rect x="1" y="4" width="22" height="16" rx="2" />
-        <path d="M1 10h22" />
       </svg>
     ),
   };
