@@ -136,8 +136,16 @@ export function SupplierDetailDialog({
                       <span className="font-medium text-[#1A1A1A]">
                         {product.name}
                       </span>
-                      <span className="text-sm text-[#1A1A1A]/60">
-                        ${product.price.toLocaleString('es-AR')}
+                      <span className="flex items-center gap-3 text-right">
+                        <span className="text-sm text-[#1A1A1A]/60">
+                          ${product.price.toLocaleString('es-AR')}
+                        </span>
+                        <span className="text-sm text-[#1A1A1A]/40">
+                          Costo:{' '}
+                          {product.cost != null
+                            ? `$${product.cost.toLocaleString('es-AR')}`
+                            : '—'}
+                        </span>
                       </span>
                     </li>
                   ))}

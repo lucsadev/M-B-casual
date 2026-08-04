@@ -46,6 +46,7 @@ export interface SupplierProduct {
   name: string;
   slug: string;
   price: number;
+  cost?: number;
   isActive: boolean;
 }
 
@@ -53,7 +54,7 @@ type ProductRow = Database['public']['Tables']['products']['Row'];
 
 type SupplierProductRow = Pick<
   ProductRow,
-  'id' | 'name' | 'slug' | 'price' | 'is_active'
+  'id' | 'name' | 'slug' | 'price' | 'cost' | 'is_active'
 >;
 
 function mapSupplierProduct(row: SupplierProductRow): SupplierProduct {
@@ -62,6 +63,7 @@ function mapSupplierProduct(row: SupplierProductRow): SupplierProduct {
     name: row.name,
     slug: row.slug,
     price: row.price,
+    cost: row.cost ?? undefined,
     isActive: row.is_active,
   };
 }
@@ -123,7 +125,7 @@ async function fetchSupplierProducts(supplierId: string): Promise<SupplierProduc
 
   const { data, error } = await supabase
     .from('products')
-    .select('id, name, slug, price, is_active')
+    .select('id, name, slug, price, cost, is_active')
     .in('id', productIds);
 
   if (error) throw error;

@@ -81,7 +81,7 @@ describe('SupplierDetailDialog', () => {
   it('renders product rows when products exist', () => {
     useSupplierProductsMock.mockReturnValue({
       data: [
-        { id: 'p1', name: 'Camisa Oversize Blanca', slug: 'camisa-oversize', price: 15000, isActive: true },
+        { id: 'p1', name: 'Camisa Oversize Blanca', slug: 'camisa-oversize', price: 15000, cost: 9000, isActive: true },
         { id: 'p2', name: 'Jean Clásico', slug: 'jean-clasico', price: 25000, isActive: true },
       ],
       isLoading: false,
@@ -101,6 +101,9 @@ describe('SupplierDetailDialog', () => {
     expect(screen.getByText('Jean Clásico')).toBeInTheDocument();
     expect(screen.getByText('$15.000')).toBeInTheDocument();
     expect(screen.getByText('$25.000')).toBeInTheDocument();
+    // Costo shown when present, fallback '—' when absent
+    expect(screen.getByText('Costo: $9.000')).toBeInTheDocument();
+    expect(screen.getByText('Costo: —')).toBeInTheDocument();
   });
 
   it('shows empty state when no products', () => {
