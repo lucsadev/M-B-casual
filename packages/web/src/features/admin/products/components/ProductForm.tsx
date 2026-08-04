@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Select,
   SelectTrigger,
@@ -24,6 +25,10 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { useCategories } from '@/features/catalog';
+import {
+  useSupplierOptions,
+  useProductSupplierIds,
+} from '@/features/admin/suppliers/api/use-supplier-queries';
 import { VariantManager } from './VariantManager';
 import { ImageUploader } from './ImageUploader';
 import type { Product, ProductVariant } from '@mbt/shared';
@@ -37,6 +42,7 @@ const productFormSchema = z.object({
   slug: z.string().min(1, 'El slug es obligatorio'),
   description: z.string().optional(),
   categoryId: z.string().min(1, 'La categoría es obligatoria'),
+  supplierIds: z.array(z.string()).default([]),
   price: z.coerce.number().min(0, 'El precio debe ser mayor o igual a 0'),
   tags: z.string().optional(),
   isActive: z.boolean().default(true),
@@ -86,12 +92,15 @@ interface ProductFormProps {
 
 export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProps) {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { data: supplierOptions } = useSupplierOptions();
+  const { data: productSupplierIds } = useProductSupplierIds(product?.id);
 
   const defaultValues: ProductFormInputValues = {
     name: product?.name ?? '',
     slug: product?.slug ?? '',
     description: product?.description ?? '',
     categoryId: product?.categoryId ?? '',
+    supplierIds: [],
     price: product?.price ?? 0,
     tags: product?.tags?.join(', ') ?? '',
     isActive: product?.isActive ?? true,
@@ -134,9 +143,13 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
   // Reset form when product data changes (edit mode)
   useEffect(() => {
     if (product) {
-      reset(defaultValues);
+      reset({
+        ...defaultValues,
+        // Prefill suppliers once the product's linked supplier ids arrive
+        supplierIds: productSupplierIds ?? [],
+      });
     }
-  }, [product?.id]);
+  }, [product?.id, productSupplierIds]);
 
   return (
     <FormProvider {...form}>
@@ -213,6 +226,29 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
               </p>
             </div>
           </div>
+        </section>
+
+        {/* Suppliers */}
+        <section className="space-y-4">
+          <h3 className="text-lg font-semibold text-[#1A1A1A]">Proveedores</h3>
+          <Controller
+            name="supplierIds"
+            control={form.control}
+            render={({ field }) => (
+              <MultiSelect
+                value={field.value ?? []}
+                onChange={field.onChange}
+                options={
+                  supplierOptions?.map((s) => ({
+                    value: s.id,
+                    label: s.name,
+                  })) ?? []
+                }
+                placeholder="Seleccionar proveedores"
+                emptyMessage="No hay proveedores activos. Creá proveedores desde el panel de administración."
+              />
+            )}
+          />
         </section>
 
         {/* Pricing */}

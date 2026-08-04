@@ -6,6 +6,7 @@ export {
   skuStringSchema,
 } from './product.ts';
 export { categorySchema, categoryCreateSchema } from './category.ts';
+export { supplierSchema, supplierFormSchema } from './supplier.ts';
 export { orderSchema, orderCreateSchema, orderItemSchema } from './order.ts';
 export { customerSchema, customerCreateSchema, profileUpdateSchema } from './customer.ts';
 // ProfileUpdateInput is re-exported from types/index.ts — avoid duplicate
