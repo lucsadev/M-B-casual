@@ -101,7 +101,6 @@ export interface Database {
           product_id: string;
           size: string | null;
           color: string | null;
-          color_hex: string | null;
           discount: number;
           stock: number;
           sku: string | null;
@@ -112,7 +111,6 @@ export interface Database {
           product_id: string;
           size?: string | null;
           color?: string | null;
-          color_hex?: string | null;
           discount?: number;
           stock?: number;
           sku?: string | null;
@@ -123,7 +121,6 @@ export interface Database {
           product_id?: string;
           size?: string | null;
           color?: string | null;
-          color_hex?: string | null;
           discount?: number;
           stock?: number;
           sku?: string | null;
@@ -686,6 +683,27 @@ export interface Database {
           movement_date?: string;
           created_by?: string | null;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      shipping_settings: {
+        Row: {
+          id: boolean;
+          free_shipping_min: number;
+          shipping_cost: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: boolean;
+          free_shipping_min?: number;
+          shipping_cost?: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: boolean;
+          free_shipping_min?: number;
+          shipping_cost?: number;
+          updated_at?: string;
         };
         Relationships: [];
       };

@@ -19,6 +19,7 @@ import { useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { CartItem, CartSummary } from '@mbt/shared';
 import { calculateTotal } from '@mbt/shared';
+import { useShippingSettings } from '@/features/shipping/hooks/use-shipping-settings';
 import {
   getCart,
   addItem,
@@ -66,6 +67,7 @@ export interface UseCartReturn {
  * (subtotal, shipping, total, item_count).
  */
 export function useCart(): UseCartReturn {
+  const shippingSettings = useShippingSettings();
   const {
     data: rawItems = [],
     isLoading,
@@ -87,7 +89,7 @@ export function useCart(): UseCartReturn {
       (sum, item) => sum + item.unit_price * item.quantity,
       0,
     );
-    const { shipping, total } = calculateTotal(subtotal);
+    const { shipping, total } = calculateTotal(subtotal, shippingSettings);
     const summary: CartSummary = {
       subtotal,
       shipping_cost: shipping,
@@ -106,7 +108,7 @@ export function useCart(): UseCartReturn {
       error,
       refetch,
     };
-  }, [rawItems, isLoading, isError, error, refetch]);
+  }, [rawItems, shippingSettings, isLoading, isError, error, refetch]);
 }
 
 // ---------------------------------------------------------------------------
@@ -277,6 +279,7 @@ export function useRemoveItem() {
  * Re-computes whenever the cart query data changes.
  */
 export function useCartSummary(): CartSummary {
+  const shippingSettings = useShippingSettings();
   const { data = [] } = useQuery<CartItem[]>({
     queryKey: CART_QUERY_KEY,
     enabled: false, // Don't fetch — piggyback on useCart's query
@@ -287,7 +290,7 @@ export function useCartSummary(): CartSummary {
     (sum, item) => sum + item.unit_price * item.quantity,
     0,
   );
-  const { subtotal: _, shipping, total } = calculateTotal(subtotal);
+  const { shipping, total } = calculateTotal(subtotal, shippingSettings);
 
   return {
     subtotal,

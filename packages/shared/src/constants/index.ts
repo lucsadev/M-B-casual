@@ -10,5 +10,6 @@ export { PAYMENT_METHODS } from './payment.ts';
 export type { PaymentMethodId } from './payment.ts';
 export { SORT_OPTIONS } from './sort-options.ts';
 export type { SortOption } from './sort-options.ts';
-export { SHIPPING_COST, FREE_SHIPPING_MIN, calculateTotal } from './shipping.ts';
+export { calculateTotal, DEFAULT_SHIPPING_SETTINGS } from './shipping.ts';
+export type { ShippingSettings } from './shipping.ts';
 export * from './payment.ts';
