@@ -38,6 +38,37 @@ function mapSupplier(row: SupplierRow): Supplier {
 }
 
 // ---------------------------------------------------------------------------
+// Supplier product types & mapper
+// ---------------------------------------------------------------------------
+
+export interface SupplierProduct {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  cost?: number;
+  isActive: boolean;
+}
+
+type ProductRow = Database['public']['Tables']['products']['Row'];
+
+type SupplierProductRow = Pick<
+  ProductRow,
+  'id' | 'name' | 'slug' | 'price' | 'cost' | 'is_active'
+>;
+
+function mapSupplierProduct(row: SupplierProductRow): SupplierProduct {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    price: row.price,
+    cost: row.cost ?? undefined,
+    isActive: row.is_active,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Fetch functions
 // ---------------------------------------------------------------------------
 
@@ -73,6 +104,32 @@ async function fetchProductSupplierIds(productId: string): Promise<string[]> {
 
   if (error) throw error;
   return (data ?? []).map((row) => row.supplier_id);
+}
+
+/**
+ * Fetch the list of products linked to a supplier (reverse of
+ * fetchProductSupplierIds). Two-step: resolve product ids from
+ * product_suppliers, then fetch those products.
+ */
+async function fetchSupplierProducts(supplierId: string): Promise<SupplierProduct[]> {
+  const { data: links, error: linksError } = await supabase
+    .from('product_suppliers')
+    .select('product_id')
+    .eq('supplier_id', supplierId);
+
+  if (linksError) throw linksError;
+
+  const productIds = (links ?? []).map((row) => row.product_id);
+
+  if (productIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, name, slug, price, cost, is_active')
+    .in('id', productIds);
+
+  if (error) throw error;
+  return (data ?? []).map(mapSupplierProduct);
 }
 
 // ---------------------------------------------------------------------------
@@ -111,5 +168,16 @@ export function useProductSupplierIds(productId?: string) {
     queryKey: ['product', productId, 'suppliers'],
     queryFn: () => fetchProductSupplierIds(productId!),
     enabled: !!productId,
+  });
+}
+
+/**
+ * Products linked to a supplier (supplier detail dialog).
+ */
+export function useSupplierProducts(supplierId?: string) {
+  return useQuery<SupplierProduct[]>({
+    queryKey: ['admin', 'suppliers', supplierId, 'products'],
+    queryFn: () => fetchSupplierProducts(supplierId!),
+    enabled: !!supplierId,
   });
 }

@@ -44,6 +44,11 @@ const productFormSchema = z.object({
   categoryId: z.string().min(1, 'La categoría es obligatoria'),
   supplierIds: z.array(z.string()).default([]),
   price: z.coerce.number().min(0, 'El precio debe ser mayor o igual a 0'),
+  cost: z
+    .coerce
+    .number()
+    .min(0, 'El costo debe ser mayor o igual a 0')
+    .optional(),
   tags: z.string().optional(),
   isActive: z.boolean().default(true),
   images: z.array(z.string()).default([]),
@@ -102,6 +107,7 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
     categoryId: product?.categoryId ?? '',
     supplierIds: [],
     price: product?.price ?? 0,
+    cost: product?.cost ?? undefined,
     tags: product?.tags?.join(', ') ?? '',
     isActive: product?.isActive ?? true,
     images: product?.images ?? [],
@@ -272,6 +278,21 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
               )}
             </div>
 
+            <div className="space-y-1">
+              <Label htmlFor="cost">Costo ($)</Label>
+              <Input
+                id="cost"
+                type="number"
+                step="0.01"
+                {...register('cost')}
+                placeholder="9000"
+              />
+              {errors.cost && (
+                <p className="text-xs text-red-500">
+                  {errors.cost.message}
+                </p>
+              )}
+            </div>
 
           </div>
         </section>

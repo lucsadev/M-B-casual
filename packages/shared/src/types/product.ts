@@ -15,6 +15,8 @@ export interface Product {
   description?: string;
   /** Current selling price in ARS */
   price: number;
+  /** Purchase price from supplier (used to compute margins). Optional. */
+  cost?: number;
   /** Original price before discount (for showing savings). Computed from variant discounts: equals product.price when any variant has a discount. */
   comparePrice?: number;
   /** URLs to product images in Supabase Storage */
