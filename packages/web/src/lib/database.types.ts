@@ -710,6 +710,75 @@ export interface Database {
         };
         Relationships: [];
       };
+      suppliers: {
+        Row: {
+          id: string;
+          name: string;
+          contact_name: string | null;
+          email: string | null;
+          phone: string | null;
+          address: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          contact_name?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          address?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          contact_name?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          address?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      product_suppliers: {
+        Row: {
+          product_id: string;
+          supplier_id: string;
+          created_at: string;
+        };
+        Insert: {
+          product_id: string;
+          supplier_id: string;
+          created_at?: string;
+        };
+        Update: {
+          product_id?: string;
+          supplier_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'product_suppliers_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_suppliers_supplier_id_fkey';
+            columns: ['supplier_id'];
+            isOneToOne: false;
+            referencedRelation: 'suppliers';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       monthly_sales: {
