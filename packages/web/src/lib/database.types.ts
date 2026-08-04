@@ -50,6 +50,7 @@ export interface Database {
           slug: string;
           description: string | null;
           price: number;
+          cost: number | null;
           compare_price: number | null;
           images: string[];
           tags: string[];
@@ -64,6 +65,7 @@ export interface Database {
           slug: string;
           description?: string | null;
           price: number;
+          cost?: number | null;
           compare_price?: number | null;
           images?: string[];
           tags?: string[];
@@ -78,6 +80,7 @@ export interface Database {
           slug?: string;
           description?: string | null;
           price?: number;
+          cost?: number | null;
           compare_price?: number | null;
           images?: string[];
           tags?: string[];
