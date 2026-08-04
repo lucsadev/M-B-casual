@@ -145,14 +145,8 @@ export function ProductDetailPage() {
   const { addToCart, isAddingToCart } = useCartContext();
 
   // Filter variants with stock
-  const variantsInStock = product.variants.filter((v) => v.stock > 0);
   const sizes = getAvailableSizes(product.variants, selectedColor);
   const colors = getAvailableColors(product.variants);
-  const colorHexMap = new Map(
-    variantsInStock
-      .filter((v) => v.color && v.colorHex)
-      .map((v) => [v.color!, v.colorHex!]),
-  );
 
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 
@@ -368,29 +362,20 @@ export function ProductDetailPage() {
                 Color
               </h2>
               <div className="flex flex-wrap gap-2">
-                {colors.map((color) => {
-                  const hex = colorHexMap.get(color);
-                  return (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={cn(
-                        'flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
-                        selectedColor === color
-                          ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
-                          : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
-                      )}
-                    >
-                      {hex && (
-                        <span
-                          className="inline-block h-4 w-4 rounded-full border border-[#E2E2DC]"
-                          style={{ backgroundColor: hex }}
-                        />
-                      )}
-                      {color}
-                    </button>
-                  );
-                })}
+                {colors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+                      selectedColor === color
+                        ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
+                        : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
+                    )}
+                  >
+                    {color}
+                  </button>
+                ))}
               </div>
             </div>
           )}

@@ -64,11 +64,11 @@ const product: Product & { variants: ProductVariant[] } = {
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-06-15T12:00:00Z',
   variants: [
-    variant({ id: 'v1', size: 'S', color: 'Negro', colorHex: '#111111', stock: 3 }),
-    variant({ id: 'v2', size: 'M', color: 'Negro', colorHex: '#111111', stock: 5 }),
-    variant({ id: 'v3', size: 'L', color: 'Negro', colorHex: '#111111', stock: 0 }),
-    variant({ id: 'v4', size: 'M', color: 'Blanco', colorHex: '#FFFFFF', stock: 2 }),
-    variant({ id: 'v5', size: 'XL', color: 'Blanco', colorHex: '#FFFFFF', stock: 0 }),
+    variant({ id: 'v1', size: 'S', color: 'Negro', stock: 3 }),
+    variant({ id: 'v2', size: 'M', color: 'Negro', stock: 5 }),
+    variant({ id: 'v3', size: 'L', color: 'Negro', stock: 0 }),
+    variant({ id: 'v4', size: 'M', color: 'Blanco', stock: 2 }),
+    variant({ id: 'v5', size: 'XL', color: 'Blanco', stock: 0 }),
   ],
 };
 
@@ -262,9 +262,9 @@ describe('ProductDetailPage variant selector', () => {
       data: {
         ...product,
         variants: [
-          variant({ id: 'v1', size: 'S', color: 'Negro', colorHex: '#111111', stock: 0 }),
-          variant({ id: 'v2', size: 'M', color: 'Negro', colorHex: '#111111', stock: 0 }),
-          variant({ id: 'v4', size: 'M', color: 'Blanco', colorHex: '#FFFFFF', stock: 2 }),
+          variant({ id: 'v1', size: 'S', color: 'Negro', stock: 0 }),
+          variant({ id: 'v2', size: 'M', color: 'Negro', stock: 0 }),
+          variant({ id: 'v4', size: 'M', color: 'Blanco', stock: 2 }),
         ],
       },
       isLoading: false,

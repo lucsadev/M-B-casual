@@ -3,7 +3,7 @@
  *
  * Features:
  * - Size buttons in a horizontal row
- * - Color swatches with hex preview circles
+ * - Color chips with the color name (text-only)
  * - Highlights selected variant
  * - Only shows variants with stock > 0
  */
@@ -32,14 +32,8 @@ export function VariantSelector({
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
-  const variantsInStock = variants.filter((v) => v.stock > 0);
   const sizes = getAvailableSizes(variants, selectedColor);
   const colors = getAvailableColors(variants);
-  const colorHexMap = new Map(
-    variantsInStock
-      .filter((v) => v.color && v.colorHex)
-      .map((v) => [v.color!, v.colorHex!]),
-  );
 
   // Pre-select the default in-stock variant ONCE per mount via the shared
   // resolveDefaultSelection helper (first canonical-order size + that size's
@@ -182,36 +176,27 @@ export function VariantSelector({
             Color
           </Text>
           <View className="flex-row flex-wrap gap-2">
-            {colors.map((color) => {
-              const hex = colorHexMap.get(color);
-              return (
-                <TouchableOpacity
-                  key={color}
-                  onPress={() => handleColorSelect(color)}
-                  className={`flex-row items-center gap-2 px-3 py-1.5 rounded-md border ${
+            {colors.map((color) => (
+              <TouchableOpacity
+                key={color}
+                onPress={() => handleColorSelect(color)}
+                className={`flex-row items-center gap-2 px-3 py-1.5 rounded-md border ${
+                  selectedColor === color
+                    ? 'bg-[#D4A853]/10 border-[#D4A853]'
+                    : 'bg-white border-[#E8E4D9]'
+                }`}
+              >
+                <Text
+                  className={`text-sm font-medium ${
                     selectedColor === color
-                      ? 'bg-[#D4A853]/10 border-[#D4A853]'
-                      : 'bg-white border-[#E8E4D9]'
+                      ? 'text-[#D4A853]'
+                      : 'text-[#1A1A1A]'
                   }`}
                 >
-                  {hex && (
-                    <View
-                      className="w-4 h-4 rounded-full border border-[#E8E4D9]"
-                      style={{ backgroundColor: hex }}
-                    />
-                  )}
-                  <Text
-                    className={`text-sm font-medium ${
-                      selectedColor === color
-                        ? 'text-[#D4A853]'
-                        : 'text-[#1A1A1A]'
-                    }`}
-                  >
-                    {color}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+                  {color}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       )}

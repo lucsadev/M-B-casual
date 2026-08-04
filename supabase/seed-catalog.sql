@@ -160,58 +160,58 @@ insert into products (id, category_id, name, slug, description, price, images, t
 -- 5. VARIANTS
 -- =============================================================
 -- Camisa Oversize Blanca — 3 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000001', 'S', 'Blanco', '#FFFFFF', 10, 'CAM-OVS-S'),
-  ('p0000000-0000-0000-0000-000000000001', 'M', 'Blanco', '#FFFFFF', 15, 'CAM-OVS-M'),
-  ('p0000000-0000-0000-0000-000000000001', 'L', 'Blanco', '#FFFFFF', 5, 'CAM-OVS-L');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000001', 'S', 'Blanco', 10, 'CAM-OVS-S'),
+  ('p0000000-0000-0000-0000-000000000001', 'M', 'Blanco', 15, 'CAM-OVS-M'),
+  ('p0000000-0000-0000-0000-000000000001', 'L', 'Blanco', 5, 'CAM-OVS-L');
 
 -- Vestido Midax Negro — 3 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000002', 'S', 'Negro', '#1A1A1A', 8, 'VES-MID-S'),
-  ('p0000000-0000-0000-0000-000000000002', 'M', 'Negro', '#1A1A1A', 12, 'VES-MID-M'),
-  ('p0000000-0000-0000-0000-000000000002', 'L', 'Negro', '#1A1A1A', 6, 'VES-MID-L');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000002', 'S', 'Negro', 8, 'VES-MID-S'),
+  ('p0000000-0000-0000-0000-000000000002', 'M', 'Negro', 12, 'VES-MID-M'),
+  ('p0000000-0000-0000-0000-000000000002', 'L', 'Negro', 6, 'VES-MID-L');
 
 -- Blazer Beige — 3 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000003', 'S', 'Beige', '#E8E4D9', 7, 'BLA-BEI-S'),
-  ('p0000000-0000-0000-0000-000000000003', 'M', 'Beige', '#E8E4D9', 9, 'BLA-BEI-M'),
-  ('p0000000-0000-0000-0000-000000000003', 'L', 'Beige', '#E8E4D9', 4, 'BLA-BEI-L');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000003', 'S', 'Beige', 7, 'BLA-BEI-S'),
+  ('p0000000-0000-0000-0000-000000000003', 'M', 'Beige', 9, 'BLA-BEI-M'),
+  ('p0000000-0000-0000-0000-000000000003', 'L', 'Beige', 4, 'BLA-BEI-L');
 
 -- Remón Básico — 4 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000004', 'S', 'Negro', '#1A1A1A', 20, 'REM-BAS-S'),
-  ('p0000000-0000-0000-0000-000000000004', 'M', 'Negro', '#1A1A1A', 25, 'REM-BAS-M'),
-  ('p0000000-0000-0000-0000-000000000004', 'L', 'Negro', '#1A1A1A', 18, 'REM-BAS-L'),
-  ('p0000000-0000-0000-0000-000000000004', 'XL', 'Negro', '#1A1A1A', 10, 'REM-BAS-XL');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000004', 'S', 'Negro', 20, 'REM-BAS-S'),
+  ('p0000000-0000-0000-0000-000000000004', 'M', 'Negro', 25, 'REM-BAS-M'),
+  ('p0000000-0000-0000-0000-000000000004', 'L', 'Negro', 18, 'REM-BAS-L'),
+  ('p0000000-0000-0000-0000-000000000004', 'XL', 'Negro', 10, 'REM-BAS-XL');
 
 -- Pollera Tabla Marfil — 2 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000005', 'S', 'Marfil', '#FFFFF7', 6, 'POL-TAB-S'),
-  ('p0000000-0000-0000-0000-000000000005', 'M', 'Marfil', '#FFFFF7', 8, 'POL-TAB-M');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000005', 'S', 'Marfil', 6, 'POL-TAB-S'),
+  ('p0000000-0000-0000-0000-000000000005', 'M', 'Marfil', 8, 'POL-TAB-M');
 
 -- Camisa Slim Fit Celeste — 3 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000006', 'S', 'Celeste', '#87CEEB', 12, 'CAM-SLI-S'),
-  ('p0000000-0000-0000-0000-000000000006', 'M', 'Celeste', '#87CEEB', 14, 'CAM-SLI-M'),
-  ('p0000000-0000-0000-0000-000000000006', 'L', 'Celeste', '#87CEEB', 8, 'CAM-SLI-L');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000006', 'S', 'Celeste', 12, 'CAM-SLI-S'),
+  ('p0000000-0000-0000-0000-000000000006', 'M', 'Celeste', 14, 'CAM-SLI-M'),
+  ('p0000000-0000-0000-0000-000000000006', 'L', 'Celeste', 8, 'CAM-SLI-L');
 
 -- Chomba Lacoste Blanca — 3 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000007', 'M', 'Blanco', '#FFFFFF', 15, 'CHO-LAC-M'),
-  ('p0000000-0000-0000-0000-000000000007', 'L', 'Blanco', '#FFFFFF', 12, 'CHO-LAC-L'),
-  ('p0000000-0000-0000-0000-000000000007', 'XL', 'Blanco', '#FFFFFF', 6, 'CHO-LAC-XL');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000007', 'M', 'Blanco', 15, 'CHO-LAC-M'),
+  ('p0000000-0000-0000-0000-000000000007', 'L', 'Blanco', 12, 'CHO-LAC-L'),
+  ('p0000000-0000-0000-0000-000000000007', 'XL', 'Blanco', 6, 'CHO-LAC-XL');
 
 -- Jean Recto Clásico — 4 talles
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000008', 'S', 'Índigo', '#3F51B5', 10, 'JEA-REC-S'),
-  ('p0000000-0000-0000-0000-000000000008', 'M', 'Índigo', '#3F51B5', 18, 'JEA-REC-M'),
-  ('p0000000-0000-0000-0000-000000000008', 'L', 'Índigo', '#3F51B5', 12, 'JEA-REC-L'),
-  ('p0000000-0000-0000-0000-000000000008', 'XL', 'Índigo', '#3F51B5', 5, 'JEA-REC-XL');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000008', 'S', 'Índigo', 10, 'JEA-REC-S'),
+  ('p0000000-0000-0000-0000-000000000008', 'M', 'Índigo', 18, 'JEA-REC-M'),
+  ('p0000000-0000-0000-0000-000000000008', 'L', 'Índigo', 12, 'JEA-REC-L'),
+  ('p0000000-0000-0000-0000-000000000008', 'XL', 'Índigo', 5, 'JEA-REC-XL');
 
 -- Cinto Cuero Negro — único talle
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000009', 'Único', 'Negro', '#1A1A1A', 20, 'CIN-CUE-UNI');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000009', 'Único', 'Negro', 20, 'CIN-CUE-UNI');
 
 -- Cartera Bandolera — única
-insert into product_variants (product_id, size, color, color_hex, stock, sku) values
-  ('p0000000-0000-0000-0000-000000000010', 'Único', 'Marrón', '#8B4513', 8, 'CAR-BAN-UNI');
+insert into product_variants (product_id, size, color, stock, sku) values
+  ('p0000000-0000-0000-0000-000000000010', 'Único', 'Marrón', 8, 'CAR-BAN-UNI');

@@ -25,7 +25,6 @@ export interface OrderItemWithProduct extends OrderItem {
   variant: {
     size: string | null;
     color: string | null;
-    color_hex: string | null;
     sku: string | null;
   } | null;
 }
@@ -153,7 +152,7 @@ export async function getAdminOrder(id: string): Promise<OrderDetail | null> {
 
   const { data: itemRows, error: itemsError } = await supabase
     .from('order_items')
-    .select('*, products(name), product_variants(size, color, color_hex, sku)')
+    .select('*, products(name), product_variants(size, color, sku)')
     .eq('order_id', id);
 
   if (itemsError) throw itemsError;
@@ -165,7 +164,6 @@ export async function getAdminOrder(id: string): Promise<OrderDetail | null> {
       ? {
           size: item.product_variants.size ?? null,
           color: item.product_variants.color ?? null,
-          color_hex: item.product_variants.color_hex ?? null,
           sku: item.product_variants.sku ?? null,
         }
       : null,
