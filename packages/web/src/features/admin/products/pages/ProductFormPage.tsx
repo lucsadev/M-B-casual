@@ -56,6 +56,7 @@ export function ProductFormPage() {
           discount: v.discount ?? 0,
           stock: v.stock,
         })),
+        supplierIds: values.supplierIds,
       });
     } else {
       await createMutation.mutateAsync({
@@ -75,6 +76,7 @@ export function ProductFormPage() {
           discount: v.discount ?? 0,
           stock: v.stock,
         })),
+        supplierIds: values.supplierIds,
       });
     }
 

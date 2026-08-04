@@ -203,8 +203,29 @@ function IconCategory({ active }: { active: boolean }) {
   );
 }
 
-function IconShipping({ active }: { active: boolean }) {
+function IconSupplier({ active }: { active: boolean }) {
   return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={active ? 'text-[#FFFFFF]' : 'text-[#1A1A1A]/60'}
+    >
+      <path d="M3 9l1.5-5.5A1 1 0 0 1 5.5 3h13a1 1 0 0 1 1 .5L21 9" />
+      <path d="M3 9v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9" />
+      <path d="M3 9h18" />
+      <path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6" />
+    </svg>
+  );
+}
+
+function IconShipping({ active }: { active: boolean }) {  return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="18"
@@ -263,6 +284,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/admin', label: 'Dashboard', end: true, Icon: IconDashboard },
   { to: '/admin/productos', label: 'Productos', end: false, Icon: IconProduct },
   { to: '/admin/categorias', label: 'Categorías', end: false, Icon: IconCategory },
+  { to: '/admin/proveedores', label: 'Proveedores', end: false, Icon: IconSupplier },
   { to: '/admin/ordenes', label: 'Órdenes', end: false, Icon: IconOrder },
   { to: '/admin/clientes', label: 'Usuarios', end: false, Icon: IconCustomer },
   { to: '/admin/preguntas', label: 'Preguntas', end: false, Icon: IconQuestion, Badge: QuestionsNavBadge },
@@ -281,6 +303,7 @@ const ROUTE_LABELS: Record<string, string> = {
   admin: 'Administración',
   productos: 'Productos',
   categorias: 'Categorías',
+  proveedores: 'Proveedores',
   ordenes: 'Órdenes',
   clientes: 'Usuarios',
   preguntas: 'Preguntas',

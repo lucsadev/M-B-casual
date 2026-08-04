@@ -1,5 +1,6 @@
 export type { Product, ProductVariant } from './product.ts';
 export type { Category } from './category.ts';
+export type { Supplier, SupplierOption } from './supplier.ts';
 export type { Order, OrderItem, OrderStatus } from './order.ts';
 export type { Customer, CustomerProfile, ProfileUpdateInput } from './customer.ts';
 export type {

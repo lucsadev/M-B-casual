@@ -43,9 +43,10 @@ interface CreateProductInput {
     discount?: number;
     stock: number;
   }[];
+  supplierIds?: string[];
 }
 
-async function createProduct({ product, variants }: CreateProductInput) {
+async function createProduct({ product, variants, supplierIds }: CreateProductInput) {
   // Fetch category slug — needed to generate deterministic SKUs that match
   // the product's category namespace.
   const { data: categoryData, error: categoryError } = await supabase
@@ -95,6 +96,20 @@ async function createProduct({ product, variants }: CreateProductInput) {
     if (variantError) throw variantError;
   }
 
+  // Insert product-supplier join rows
+  if (supplierIds && supplierIds.length > 0) {
+    const supplierRows = supplierIds.map((supplier_id) => ({
+      product_id: productData.id,
+      supplier_id,
+    }));
+
+    const { error: suppliersError } = await supabase
+      .from('product_suppliers')
+      .insert(supplierRows as unknown as never);
+
+    if (suppliersError) throw suppliersError;
+  }
+
   return productData;
 }
 
@@ -137,9 +152,10 @@ interface UpdateProductInput {
     discount?: number;
     stock: number;
   }[];
+  supplierIds?: string[];
 }
 
-async function updateProduct({ id, product, variants }: UpdateProductInput) {
+async function updateProduct({ id, product, variants, supplierIds }: UpdateProductInput) {
   // Update product
   const { error: productError } = await supabase
     .from('products')
@@ -254,6 +270,47 @@ async function updateProduct({ id, product, variants }: UpdateProductInput) {
       .from('product_variants')
       .delete()
       .in('id', orphanIds);
+
+    if (deleteError) throw deleteError;
+  }
+
+  // Sync product-supplier links: insert missing, delete removed
+  const nextSupplierIds = supplierIds ?? [];
+
+  const { data: existingSupplierLinks, error: existingSuppliersError } = await supabase
+    .from('product_suppliers')
+    .select('supplier_id')
+    .eq('product_id', id);
+
+  if (existingSuppliersError) throw existingSuppliersError;
+
+  const existingSupplierIds = (existingSupplierLinks ?? []).map((row) => row.supplier_id);
+
+  const suppliersToInsert = nextSupplierIds.filter(
+    (sid) => !existingSupplierIds.includes(sid),
+  );
+  if (suppliersToInsert.length > 0) {
+    const { error: insertError } = await supabase
+      .from('product_suppliers')
+      .insert(
+        suppliersToInsert.map((supplier_id) => ({
+          product_id: id,
+          supplier_id,
+        })) as unknown as never,
+      );
+
+    if (insertError) throw insertError;
+  }
+
+  const suppliersToDelete = existingSupplierIds.filter(
+    (sid) => !nextSupplierIds.includes(sid),
+  );
+  if (suppliersToDelete.length > 0) {
+    const { error: deleteError } = await supabase
+      .from('product_suppliers')
+      .delete()
+      .eq('product_id', id)
+      .in('supplier_id', suppliersToDelete);
 
     if (deleteError) throw deleteError;
   }
