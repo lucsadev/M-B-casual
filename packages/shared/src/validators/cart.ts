@@ -18,7 +18,7 @@ export const shippingAddressSchema = z.object({
 
 export const checkoutSchema = z.object({
   shipping_address: shippingAddressSchema,
-  payment_method: z.enum(['transferencia', 'efectivo', 'mercado_pago']),
+  payment_method: z.enum(['transferencia', 'efectivo']),
 });
 
 export type CartItemInput = z.infer<typeof cartItemSchema>;

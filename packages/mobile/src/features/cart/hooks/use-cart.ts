@@ -14,6 +14,7 @@ import {
 import { supabase } from '../../../lib/supabase';
 import type { CartItem, CartSummary } from '@mbt/shared';
 import { calculateTotal } from '@mbt/shared';
+import { useShippingSettings } from '../../shipping/hooks/use-shipping-settings';
 import {
   getCart,
   addItem,
@@ -55,6 +56,7 @@ export interface UseCartReturn {
 }
 
 export function useCart(): UseCartReturn {
+  const shippingSettings = useShippingSettings();
   const {
     data: items = [],
     isLoading,
@@ -75,7 +77,7 @@ export function useCart(): UseCartReturn {
     (sum, item) => sum + item.unit_price * item.quantity,
     0,
   );
-  const { subtotal: _, shipping, total } = calculateTotal(subtotal);
+  const { shipping, total } = calculateTotal(subtotal, shippingSettings);
   const summary: CartSummary = {
     subtotal,
     shipping_cost: shipping,
@@ -247,6 +249,7 @@ export function useRemoveItem() {
 // ---------------------------------------------------------------------------
 
 export function useCartSummary(): CartSummary {
+  const shippingSettings = useShippingSettings();
   const { data = [] } = useQuery<CartItem[]>({
     queryKey: CART_QUERY_KEY,
     enabled: false,
@@ -257,7 +260,7 @@ export function useCartSummary(): CartSummary {
     (sum, item) => sum + item.unit_price * item.quantity,
     0,
   );
-  const { subtotal: _, shipping, total } = calculateTotal(subtotal);
+  const { shipping, total } = calculateTotal(subtotal, shippingSettings);
 
   return {
     subtotal,

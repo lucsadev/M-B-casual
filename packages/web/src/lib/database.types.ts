@@ -689,6 +689,27 @@ export interface Database {
         };
         Relationships: [];
       };
+      shipping_settings: {
+        Row: {
+          id: boolean;
+          free_shipping_min: number;
+          shipping_cost: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: boolean;
+          free_shipping_min?: number;
+          shipping_cost?: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: boolean;
+          free_shipping_min?: number;
+          shipping_cost?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       monthly_sales: {

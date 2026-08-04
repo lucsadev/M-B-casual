@@ -18,6 +18,7 @@ import {
 import type { CartItem, CartSummary } from '@mbt/shared';
 import { calculateTotal } from '@mbt/shared';
 import { useAuth } from '@/features/auth/context/AuthContext';
+import { useShippingSettings } from '@/features/shipping/hooks/use-shipping-settings';
 import {
   useCart,
   useAddToCart,
@@ -63,6 +64,7 @@ interface CartProviderProps {
 export function CartProvider({ children }: CartProviderProps) {
   const { user } = useAuth();
   const isAuthenticated = !!user;
+  const shippingSettings = useShippingSettings();
 
   // Server cart (authenticated)
   const serverCart: UseCartReturn = useCart();
@@ -83,7 +85,7 @@ export function CartProvider({ children }: CartProviderProps) {
   // Compute summary for anonymous cart (server cart already has summary)
   const anonymousSummary = useMemo<CartSummary>(() => {
     const subtotal = anonymousCart.subtotal;
-    const { shipping, total } = calculateTotal(subtotal);
+    const { shipping, total } = calculateTotal(subtotal, shippingSettings);
     return {
       subtotal,
       shipping_cost: shipping,
@@ -91,7 +93,7 @@ export function CartProvider({ children }: CartProviderProps) {
       total,
       item_count: totalItems,
     };
-  }, [anonymousCart.subtotal, totalItems]);
+  }, [anonymousCart.subtotal, totalItems, shippingSettings]);
 
   const summary = isAuthenticated ? serverCart.summary : anonymousSummary;
 

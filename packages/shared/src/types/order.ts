@@ -22,7 +22,7 @@ export interface Order {
   shippingCost: number;
   /** Discount applied to the order */
   discount: number;
-  /** Payment method used: 'transferencia', 'efectivo', 'mp' */
+  /** Payment method used: 'transferencia', 'efectivo' */
   paymentMethod?: string;
   /** Payment resolution status */
   paymentStatus: string;
