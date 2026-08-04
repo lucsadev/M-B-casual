@@ -197,7 +197,6 @@ create table product_variants (
   product_id uuid not null references products(id) on delete cascade,
   size       text,                       -- 'S', 'M', 'L', 'XL', 'Único'
   color      text,                       -- 'Negro', 'Marfil', 'Beige'
-  color_hex  text,                       -- '#000000' para mostrar swatch
   stock      int not null default 0,
   sku        text unique,                -- Código interno
   created_at timestamptz not null default now()

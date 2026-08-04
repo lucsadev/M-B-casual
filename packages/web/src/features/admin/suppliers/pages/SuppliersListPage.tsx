@@ -32,6 +32,7 @@ import {
 import { useDeleteSupplier } from '../api/use-supplier-mutations';
 import { CreateSupplierDialog } from '../components/CreateSupplierDialog';
 import { EditSupplierDialog } from '../components/EditSupplierDialog';
+import { SupplierDetailDialog } from '../components/SupplierDetailDialog';
 import { buildPagination } from '@mbt/shared';
 import type { Supplier } from '@mbt/shared';
 import type { Database } from '@/lib/database.types';
@@ -104,6 +105,7 @@ export function SuppliersListPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteName, setDeleteName] = useState('');
   const [editSupplier, setEditSupplier] = useState<Supplier | null>(null);
+  const [detailSupplier, setDetailSupplier] = useState<Supplier | null>(null);
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -135,6 +137,14 @@ export function SuppliersListPage() {
 
   function closeEditDialog() {
     setEditSupplier(null);
+  }
+
+  function openDetailDialog(supplier: Supplier) {
+    setDetailSupplier(supplier);
+  }
+
+  function closeDetailDialog() {
+    setDetailSupplier(null);
   }
 
   return (
@@ -202,7 +212,11 @@ export function SuppliersListPage() {
             )}
 
             {data?.suppliers.map((supplier) => (
-              <TableRow key={supplier.id}>
+              <TableRow
+                key={supplier.id}
+                onClick={() => openDetailDialog(supplier)}
+                className="cursor-pointer"
+              >
                 <TableCell className="font-medium">{supplier.name}</TableCell>
                 <TableCell className="text-[#1A1A1A]/60">
                   {supplier.contactName || '—'}
@@ -224,7 +238,10 @@ export function SuppliersListPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => openEditDialog(supplier)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditDialog(supplier);
+                      }}
                       aria-label="Editar proveedor"
                     >
                       <Edit className="h-4 w-4" />
@@ -233,7 +250,10 @@ export function SuppliersListPage() {
                       variant="ghost"
                       size="icon"
                       className="text-red-500 hover:text-red-700"
-                      onClick={() => openDeleteDialog(supplier.id, supplier.name)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteDialog(supplier.id, supplier.name);
+                      }}
                       aria-label="Eliminar proveedor"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -319,6 +339,15 @@ export function SuppliersListPage() {
           if (!open) closeEditDialog();
         }}
         initialSupplier={editSupplier}
+      />
+
+      {/* Supplier detail dialog */}
+      <SupplierDetailDialog
+        open={!!detailSupplier}
+        onOpenChange={(open) => {
+          if (!open) closeDetailDialog();
+        }}
+        supplier={detailSupplier}
       />
 
       {/* Create supplier dialog (main entry point) */}

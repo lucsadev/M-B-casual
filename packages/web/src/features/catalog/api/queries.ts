@@ -82,7 +82,6 @@ function mapVariant(row: VariantRow): ProductVariant {
     productId: row.product_id,
     size: row.size ?? undefined,
     color: row.color ?? undefined,
-    colorHex: row.color_hex ?? undefined,
     discount: row.discount,
     stock: row.stock,
     sku: row.sku ?? undefined,

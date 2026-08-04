@@ -251,15 +251,9 @@ export default function AdminOrderDetailScreen() {
                     <Text className="text-xs text-[#1A1A1A]/60">Talle: {item.variant.size}</Text>
                   )}
                   {item.variant?.color && (
-                    <View className="flex-row items-center gap-1">
-                      {item.variant.color_hex && (
-                        <View
-                          className="w-3 h-3 rounded-full border border-[#E2E2DC]"
-                          style={{ backgroundColor: item.variant.color_hex }}
-                        />
-                      )}
-                      <Text className="text-xs text-[#1A1A1A]/60">{item.variant.color}</Text>
-                    </View>
+                    <Text className="text-xs text-[#1A1A1A]/60">
+                      {item.variant.color}
+                    </Text>
                   )}
                 </View>
                 <View className="flex-row justify-between mt-1">

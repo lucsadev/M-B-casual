@@ -34,7 +34,6 @@ const mockProduct = {
       productId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
       size: 'M',
       color: 'Blanco',
-      colorHex: '#FFFFFF',
       stock: 10,
       sku: 'CAM-OVS-BLA-M',
       createdAt: '2026-01-01T00:00:00Z',

@@ -131,12 +131,6 @@ export function OrderDetailPage() {
                           )}
                           {item.variant.color && (
                             <span className="inline-flex items-center gap-1 text-[#1A1A1A]/70">
-                              {item.variant.color_hex && (
-                                <span
-                                  className="inline-block h-3 w-3 rounded-full border border-[#E2E2DC]"
-                                  style={{ backgroundColor: item.variant.color_hex }}
-                                />
-                              )}
                               {item.variant.color}
                             </span>
                           )}
