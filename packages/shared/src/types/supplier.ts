@@ -7,8 +7,10 @@ export interface Supplier {
   id: string;
   /** Display name (e.g., "Textil Ríos") */
   name: string;
-  /** Contact person name within the supplier (optional) */
-  contactName?: string;
+  /** Web address (optional) */
+  website?: string;
+  /** Instagram profile (optional) */
+  instagram?: string;
   /** Contact email (optional) */
   email?: string;
   /** Contact phone (optional) */

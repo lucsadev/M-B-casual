@@ -36,7 +36,8 @@ export function CreateSupplierDialog({
   onOpenChange,
 }: CreateSupplierDialogProps) {
   const [name, setName] = useState('');
-  const [contactName, setContactName] = useState('');
+  const [website, setWebsite] = useState('');
+  const [instagram, setInstagram] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -50,7 +51,8 @@ export function CreateSupplierDialog({
 
     const parsed = supplierFormSchema.safeParse({
       name,
-      contactName: contactName || undefined,
+      website: website || undefined,
+      instagram: instagram || undefined,
       email: email || undefined,
       phone: phone || undefined,
       address: address || undefined,
@@ -73,7 +75,8 @@ export function CreateSupplierDialog({
       await createSupplier.mutateAsync(parsed.data);
       // Reset fields and close on success — the mutation's toast fires
       setName('');
-      setContactName('');
+      setWebsite('');
+      setInstagram('');
       setEmail('');
       setPhone('');
       setAddress('');
@@ -96,10 +99,11 @@ export function CreateSupplierDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <SupplierFormFields
-            values={{ name, contactName, email, phone, address, isActive }}
+            values={{ name, website, instagram, email, phone, address, isActive }}
             onChange={(patch) => {
               if (patch.name !== undefined) setName(patch.name);
-              if (patch.contactName !== undefined) setContactName(patch.contactName);
+              if (patch.website !== undefined) setWebsite(patch.website);
+              if (patch.instagram !== undefined) setInstagram(patch.instagram);
               if (patch.email !== undefined) setEmail(patch.email);
               if (patch.phone !== undefined) setPhone(patch.phone);
               if (patch.address !== undefined) setAddress(patch.address);

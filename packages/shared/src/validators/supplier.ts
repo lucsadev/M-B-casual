@@ -6,7 +6,8 @@ import { z } from 'zod';
 export const supplierSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, 'Name is required'),
-  contactName: z.string().optional(),
+  website: z.string().optional(),
+  instagram: z.string().optional(),
   email: z.string().email('Invalid email').optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
@@ -24,7 +25,8 @@ export const supplierSchema = z.object({
  */
 export const supplierFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  contactName: z.string().optional(),
+  website: z.string().optional(),
+  instagram: z.string().optional(),
   email: z
     .union([z.string().email('Invalid email'), z.literal('')])
     .transform((value) => (value === '' ? undefined : value))
