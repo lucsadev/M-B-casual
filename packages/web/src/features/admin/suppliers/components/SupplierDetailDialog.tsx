@@ -65,9 +65,15 @@ export function SupplierDetailDialog({
             {/* Supplier details */}
             <dl className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
               <div>
-                <dt className="text-sm text-[#1A1A1A]/50">Contacto</dt>
+                <dt className="text-sm text-[#1A1A1A]/50">Web</dt>
                 <dd className="font-medium text-[#1A1A1A]">
-                  {supplier.contactName || '—'}
+                  {supplier.website || '—'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-sm text-[#1A1A1A]/50">Instagram</dt>
+                <dd className="font-medium text-[#1A1A1A]">
+                  {supplier.instagram || '—'}
                 </dd>
               </div>
               <div>

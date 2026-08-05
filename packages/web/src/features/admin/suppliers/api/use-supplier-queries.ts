@@ -27,7 +27,8 @@ function mapSupplier(row: SupplierRow): Supplier {
   return {
     id: row.id,
     name: row.name,
-    contactName: row.contact_name ?? undefined,
+    website: row.website ?? undefined,
+    instagram: row.instagram ?? undefined,
     email: row.email ?? undefined,
     phone: row.phone ?? undefined,
     address: row.address ?? undefined,
@@ -75,7 +76,7 @@ function mapSupplierProduct(row: SupplierProductRow): SupplierProduct {
 async function fetchSuppliers(): Promise<Supplier[]> {
   const { data, error } = await supabase
     .from('suppliers')
-    .select('id, name, contact_name, email, phone, address, is_active, created_at, updated_at')
+    .select('id, name, website, instagram, email, phone, address, is_active, created_at, updated_at')
     .order('name', { ascending: true });
 
   if (error) throw error;

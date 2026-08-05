@@ -58,7 +58,8 @@ function mapSupplier(row: SupplierRow): Supplier {
   return {
     id: row.id,
     name: row.name,
-    contactName: row.contact_name ?? undefined,
+    website: row.website ?? undefined,
+    instagram: row.instagram ?? undefined,
     email: row.email ?? undefined,
     phone: row.phone ?? undefined,
     address: row.address ?? undefined,
@@ -177,7 +178,8 @@ export function SuppliersListPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
-              <TableHead>Contacto</TableHead>
+              <TableHead>Web</TableHead>
+              <TableHead>Instagram</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Estado</TableHead>
@@ -188,7 +190,7 @@ export function SuppliersListPage() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={7}>
+                <TableCell colSpan={8}>
                   <div className="space-y-2 py-4">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Skeleton key={i} className="h-8 w-full" />
@@ -201,7 +203,7 @@ export function SuppliersListPage() {
             {!isLoading && data && data.suppliers.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="py-12 text-center text-[#1A1A1A]/50"
                 >
                   {search
@@ -219,7 +221,10 @@ export function SuppliersListPage() {
               >
                 <TableCell className="font-medium">{supplier.name}</TableCell>
                 <TableCell className="text-[#1A1A1A]/60">
-                  {supplier.contactName || '—'}
+                  {supplier.website || '—'}
+                </TableCell>
+                <TableCell className="text-[#1A1A1A]/60">
+                  {supplier.instagram || '—'}
                 </TableCell>
                 <TableCell className="text-[#1A1A1A]/60">
                   {supplier.email || '—'}

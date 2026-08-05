@@ -113,7 +113,8 @@ describe('EditSupplierDialog', () => {
   const mockSupplier: Supplier = {
     id: 'test-id-1',
     name: 'Textil Ríos',
-    contactName: 'Juan Pérez',
+    website: 'https://textilrios.com',
+    instagram: 'https://instagram.com/textilrios',
     email: 'ventas@textilrios.com',
     phone: '11 5555 1234',
     address: 'Av. Corrientes 1234, CABA',

@@ -18,7 +18,8 @@ import { SUPPLIERS_KEY } from './use-supplier-queries';
 
 interface CreateSupplierInput {
   name: string;
-  contactName?: string;
+  website?: string;
+  instagram?: string;
   email?: string;
   phone?: string;
   address?: string;
@@ -27,7 +28,8 @@ interface CreateSupplierInput {
 
 async function createSupplier({
   name,
-  contactName,
+  website,
+  instagram,
   email,
   phone,
   address,
@@ -37,7 +39,8 @@ async function createSupplier({
     .from('suppliers')
     .insert({
       name,
-      contact_name: contactName ?? null,
+      website: website ?? null,
+      instagram: instagram ?? null,
       email: email ?? null,
       phone: phone ?? null,
       address: address ?? null,
@@ -73,7 +76,8 @@ export function useCreateSupplier() {
 interface UpdateSupplierInput {
   id: string;
   name?: string;
-  contactName?: string;
+  website?: string;
+  instagram?: string;
   email?: string;
   phone?: string;
   address?: string;
@@ -84,7 +88,8 @@ async function updateSupplier({ id, ...input }: UpdateSupplierInput) {
   const updates: any = {};
 
   if (input.name !== undefined) updates.name = input.name;
-  if (input.contactName !== undefined) updates.contact_name = input.contactName ?? null;
+  if (input.website !== undefined) updates.website = input.website ?? null;
+  if (input.instagram !== undefined) updates.instagram = input.instagram ?? null;
   if (input.email !== undefined) updates.email = input.email ?? null;
   if (input.phone !== undefined) updates.phone = input.phone ?? null;
   if (input.address !== undefined) updates.address = input.address ?? null;

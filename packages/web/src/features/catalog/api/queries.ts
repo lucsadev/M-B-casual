@@ -48,6 +48,7 @@ function mapProduct(row: ProductRow): Product {
     slug: row.slug,
     description: row.description ?? undefined,
     price: row.price,
+    cost: row.cost ?? undefined,
     images: row.images ?? [],
     tags: row.tags ?? [],
     isActive: row.is_active,

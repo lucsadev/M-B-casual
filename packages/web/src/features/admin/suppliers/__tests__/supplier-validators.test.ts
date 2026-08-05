@@ -12,7 +12,8 @@ describe('supplierFormSchema', () => {
   it('accepts a valid supplier input', () => {
     const result = supplierFormSchema.safeParse({
       name: 'Textil Ríos',
-      contactName: 'Juan Pérez',
+      website: 'https://textilrios.com',
+      instagram: 'https://instagram.com/textilrios',
       email: 'ventas@textilrios.com',
       phone: '11 5555 1234',
       address: 'Av. Corrientes 1234',
@@ -68,7 +69,8 @@ describe('supplierSchema', () => {
     const result = supplierSchema.safeParse({
       id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
       name: 'Textil Ríos',
-      contactName: 'Juan Pérez',
+      website: 'https://textilrios.com',
+      instagram: 'https://instagram.com/textilrios',
       email: 'ventas@textilrios.com',
       phone: '11 5555 1234',
       address: 'Av. Corrientes 1234',
