@@ -1,12 +1,15 @@
 /**
- * CategoryFilter — Horizontal category chips/tabs for filtering products.
+ * CategoryFilter — Category selector for the catalog.
  *
- * Desktop: horizontal scrollable row of category chips.
- * Mobile: dropdown <select> that takes full width.
- * Active category is highlighted based on the URL ?category=slug param.
- * Modern design with rounded pills, shadows, and smooth transitions.
+ * Categories render as image-backed chips that keep their original compact size. Each
+ * chip shows a background image (object-cover) with bold white title text with a
+ * soft drop shadow, matching the home page's typography and shadow. Desktop row
+ * as chips; mobile as a dropdown select.
+ *
+ * Active category is highlighted by a coral ring.
  */
 import { useCategories } from '../hooks/use-categories';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/utils';
 
 interface CategoryFilterProps {
@@ -14,10 +17,7 @@ interface CategoryFilterProps {
   onCategoryChange: (slug: string) => void;
 }
 
-export function CategoryFilter({
-  activeCategory,
-  onCategoryChange,
-}: CategoryFilterProps) {
+export function CategoryFilter({ activeCategory, onCategoryChange }: CategoryFilterProps) {
   const { data: categories, isLoading, isError } = useCategories();
 
   // Loading skeleton
@@ -25,10 +25,7 @@ export function CategoryFilter({
     return (
       <div className="flex gap-2 overflow-x-auto pb-2">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-10 w-28 animate-pulse rounded-full bg-[#F0F0EC]"
-          />
+          <div key={i} className="h-10 w-28 animate-pulse rounded-full bg-[#F0F0EC]" />
         ))}
       </div>
     );
@@ -41,7 +38,7 @@ export function CategoryFilter({
 
   return (
     <div>
-      {/* Desktop: horizontal chips */}
+      {/* Desktop: image-backed chips */}
       <div className="hidden gap-2 overflow-x-auto py-2 sm:flex">
         <button
           onClick={() => onCategoryChange('')}
@@ -60,14 +57,21 @@ export function CategoryFilter({
             key={cat.id}
             onClick={() => onCategoryChange(cat.slug)}
             className={cn(
-              'whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200',
+              'relative overflow-hidden whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200',
               'shadow-sm hover:shadow-md hover:-translate-y-0.5',
-              activeCategory === cat.slug
-                ? 'bg-gradient-to-r from-[#E8836B] to-[#E8836B]/90 text-white shadow-md'
-                : 'bg-white text-[#1A1A1A] border border-[#E2E2DC] hover:border-[#E8836B] hover:text-[#E8836B]',
+              activeCategory === cat.slug ? 'ring-2 ring-[#E8836B]' : '',
             )}
           >
-            {cat.name}
+            {/* Background image — fills the chip */}
+            {cat.imageUrl && (
+              <span className="absolute inset-0">
+                <OptimizedImage src={cat.imageUrl} alt="" className="h-full w-full object-cover" />
+              </span>
+            )}
+            {/* Title — over the image, bold white with drop shadow */}
+            <span className="relative z-10 text-white drop-shadow-[0_3px_6px_rgba(0,0,0,0.9)]">
+              {cat.name}
+            </span>
           </button>
         ))}
       </div>
