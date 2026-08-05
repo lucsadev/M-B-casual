@@ -42,7 +42,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 const mockSupplier: Supplier = {
   id: 'supplier-1',
   name: 'Textil Ríos',
-  contactName: 'Juan Pérez',
+  website: 'https://textilrios.com',
+  instagram: 'https://instagram.com/textilrios',
   email: 'ventas@textilrios.com',
   phone: '11 5555 1234',
   address: 'Av. Corrientes 1234, CABA',
@@ -70,7 +71,8 @@ describe('SupplierDetailDialog', () => {
     );
 
     expect(screen.getByText('Textil Ríos')).toBeInTheDocument();
-    expect(screen.getByText('Juan Pérez')).toBeInTheDocument();
+    expect(screen.getByText('https://textilrios.com')).toBeInTheDocument();
+    expect(screen.getByText('https://instagram.com/textilrios')).toBeInTheDocument();
     expect(screen.getByText('ventas@textilrios.com')).toBeInTheDocument();
     expect(screen.getByText('11 5555 1234')).toBeInTheDocument();
     expect(screen.getByText('Av. Corrientes 1234, CABA')).toBeInTheDocument();

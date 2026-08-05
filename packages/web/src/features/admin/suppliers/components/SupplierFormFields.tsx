@@ -14,7 +14,8 @@ import { Label } from '@/components/ui/label';
 
 export interface SupplierFormValues {
   name: string;
-  contactName: string;
+  website: string;
+  instagram: string;
   email: string;
   phone: string;
   address: string;
@@ -55,16 +56,6 @@ export function SupplierFormFields({
         {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="supplier-contact-name">Persona de contacto</Label>
-        <Input
-          id="supplier-contact-name"
-          value={values.contactName}
-          onChange={(e) => onChange({ contactName: e.target.value })}
-          placeholder="Nombre y apellido"
-        />
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <Label htmlFor="supplier-email">Email</Label>
@@ -85,6 +76,29 @@ export function SupplierFormFields({
             value={values.phone}
             onChange={(e) => onChange({ phone: e.target.value })}
             placeholder="11 5555 1234"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="supplier-website">Web</Label>
+          <Input
+            id="supplier-website"
+            type="url"
+            value={values.website}
+            onChange={(e) => onChange({ website: e.target.value })}
+            placeholder="https://textilrios.com"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="supplier-instagram">Instagram</Label>
+          <Input
+            id="supplier-instagram"
+            value={values.instagram}
+            onChange={(e) => onChange({ instagram: e.target.value })}
+            placeholder="https://instagram.com/textilrios"
           />
         </div>
       </div>
