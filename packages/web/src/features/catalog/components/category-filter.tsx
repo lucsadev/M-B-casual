@@ -43,8 +43,8 @@ export function CategoryFilter({ activeCategory, onCategoryChange }: CategoryFil
         <button
           onClick={() => onCategoryChange('')}
           className={cn(
-            'whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200',
-            'shadow-sm hover:shadow-md hover:-translate-y-0.5',
+            'whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-100',
+            'shadow-[0_3px_0_rgba(0,0,0,0.2)] active:translate-y-[2px] active:shadow-[0_1px_0_rgba(0,0,0,0.2)]',
             !activeCategory
               ? 'bg-gradient-to-r from-[#E8836B] to-[#E8836B]/90 text-white shadow-md'
               : 'bg-white text-[#1A1A1A] border border-[#E2E2DC] hover:border-[#E8836B] hover:text-[#E8836B]',
@@ -57,8 +57,8 @@ export function CategoryFilter({ activeCategory, onCategoryChange }: CategoryFil
             key={cat.id}
             onClick={() => onCategoryChange(cat.slug)}
             className={cn(
-              'relative overflow-hidden whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-200',
-              'shadow-sm hover:shadow-md hover:-translate-y-0.5',
+              'relative overflow-hidden whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-100',
+              'shadow-[0_3px_0_rgba(0,0,0,0.25)] active:translate-y-[2px] active:shadow-[0_1px_0_rgba(0,0,0,0.25)]',
               activeCategory === cat.slug ? 'ring-2 ring-[#E8836B]' : '',
             )}
           >
