@@ -123,3 +123,16 @@ body {
   color: var(--foreground);
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+/* Titiling banner glow — soft pulse used by hero shipping banner */
+@keyframes banner-glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+.animate-banner-glow {
+  animation: banner-glow 1.8s ease-in-out infinite;
+}
