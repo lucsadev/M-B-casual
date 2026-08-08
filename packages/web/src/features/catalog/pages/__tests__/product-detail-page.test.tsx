@@ -294,3 +294,95 @@ describe('ProductDetailPage variant selector', () => {
     expect(screen.queryByRole('button', { name: 'Negro' })).not.toBeInTheDocument();
   });
 });
+
+describe('ProductDetailPage image swipe/drag', () => {
+  beforeEach(() => {
+    vi.mocked(useProduct).mockReturnValue({
+      data: product,
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useProduct>);
+    vi.mocked(useCategories).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useCategories>);
+    vi.mocked(useCartContext).mockReturnValue({
+      items: [],
+      totalItems: 0,
+      summary: { subtotal: 0, shipping_cost: 0, discount: 0, total: 0, item_count: 0 },
+      isLoading: false,
+      isError: false,
+      addToCart: mockAddToCart,
+      isAddingToCart: false,
+      refetchCart: vi.fn(),
+    } as unknown as ReturnType<typeof useCartContext>);
+  });
+
+  function mainImageEl() {
+    return screen.getByLabelText(
+      'Imágenes del producto: mantené presionado y arrastrá para cambiar',
+    );
+  }
+
+  function swipe(startX: number, endX: number) {
+    const el = mainImageEl();
+    fireEvent.pointerDown(el, { pointerId: 1, clientX: startX });
+    fireEvent.pointerMove(el, { pointerId: 1, clientX: endX });
+    fireEvent.pointerUp(el, { pointerId: 1, clientX: endX });
+    // jsdom does not run CSS transitions, so the cloned-wrap swap that happens
+    // in the real transitionend must be dispatched manually.
+    fireEvent.transitionEnd(el);
+  }
+
+  it('swipes left to the next image (2 / 2)', () => {
+    renderPage();
+    const counter = () => screen.getByText(/\/ 2$/);
+    expect(counter()).toHaveTextContent('1 / 2');
+
+    // Drag left by 200px (> 25% of the 320px fallback width) to go next.
+    swipe(200, 0);
+
+    expect(counter()).toHaveTextContent('2 / 2');
+  });
+
+  it('swipes right to go back to the previous image', () => {
+    renderPage();
+    const counter = () => screen.getByText(/\/ 2$/);
+
+    swipe(200, 0); // forward
+    expect(counter()).toHaveTextContent('2 / 2');
+
+    swipe(0, 200); // back
+    expect(counter()).toHaveTextContent('1 / 2');
+  });
+
+  it('does not flip when the drag is below the threshold', () => {
+    renderPage();
+    const counter = () => screen.getByText(/\/ 2$/);
+
+    // Drag left but only 20px — below the 80px threshold, stays on 1 / 2.
+    swipe(100, 80);
+
+    expect(counter()).toHaveTextContent('1 / 2');
+  });
+
+  it('wraps from the last image back to the first', () => {
+    renderPage();
+    const counter = () => screen.getByText(/\/ 2$/);
+
+    swipe(200, 0); // 1 → 2
+    expect(counter()).toHaveTextContent('2 / 2');
+
+    swipe(200, 0); // 2 → 1 (wrap)
+    expect(counter()).toHaveTextContent('1 / 2');
+  });
+
+  it('wraps from the first image forward to the last', () => {
+    renderPage();
+    const counter = () => screen.getByText(/\/ 2$/);
+
+    swipe(0, 200); // 1 → 2 (wrap backward)
+    expect(counter()).toHaveTextContent('2 / 2');
+  });
+});
