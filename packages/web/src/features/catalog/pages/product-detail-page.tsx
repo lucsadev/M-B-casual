@@ -25,6 +25,7 @@ import {
 } from '@mbt/shared';
 import { useProduct } from '../hooks/use-product';
 import { useCategories } from '../hooks/use-categories';
+import { useImageDrag } from '../hooks/use-image-drag';
 import { useCartContext } from '@/features/cart/context/CartContext';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ProductQuestions } from '../components/product-questions';
@@ -95,6 +96,23 @@ export function ProductDetailPage() {
     }
   }, [product, selectedColor, selectedSize]);
 
+  // Swipe/drag the main image to flip between product photos. Moved BEFORE
+  // every early return: hooks must run unconditionally on every render.
+  const productImages =
+    product?.images.length ? product.images : ['/placeholder-product.svg'];
+  const {
+    containerRef,
+    dx,
+    dragging,
+    trackIndex,
+    noTransition,
+    handlers: swipeHandlers,
+  } = useImageDrag({
+    count: productImages.length,
+    index: selectedImageIndex,
+    onIndexChange: setSelectedImageIndex,
+  });
+
   // SEO title — moved to <SEO /> component in the JSX below
 
   // Loading state
@@ -138,9 +156,6 @@ export function ProductDetailPage() {
 
   // Resolve category name for breadcrumb
   const category = categories?.find((c) => c.id === product.categoryId);
-  const productImages = product.images.length > 0
-    ? product.images
-    : ['/placeholder-product.svg'];
 
   const { addToCart, isAddingToCart } = useCartContext();
 
@@ -168,7 +183,7 @@ export function ProductDetailPage() {
       : product.price;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8">
+    <section className="mx-auto max-w-7xl px-4 py-4 md:py-6">
       {/* SEO: title, OG, JSON-LD */}
       <SEO
         title={`${product.name} — M & B Casual`}
@@ -200,7 +215,7 @@ export function ProductDetailPage() {
       </Helmet>
 
       {/* Breadcrumbs */}
-      <nav className="mb-6 text-sm text-[#1A1A1A]/50" aria-label="Breadcrumb">
+      <nav className="mb-3 text-sm text-[#1A1A1A]/50 md:mb-4" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
           <li>
             <Link to="/" className="hover:text-[#E8836B]">
@@ -231,16 +246,72 @@ export function ProductDetailPage() {
         </ol>
       </nav>
 
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 md:gap-8">
         {/* Image gallery */}
         <div className="space-y-3">
-          <div className="aspect-[3/4] overflow-hidden rounded-lg bg-[#F0F0EC]">
-            <OptimizedImage
-              src={productImages[selectedImageIndex]}
-              alt={product.name}
-              className="h-full w-full object-contain"
-              priority
-            />
+          <div
+            ref={containerRef}
+            {...swipeHandlers}
+            className={cn(
+              'relative aspect-[3/4] touch-pan-y select-none overflow-hidden rounded-lg bg-[#F0F0EC] md:aspect-auto md:h-[calc(100dvh-15rem)] md:min-h-[24rem]',
+              productImages.length > 1 && (dragging ? 'cursor-grabbing' : 'cursor-grab'),
+            )}
+            aria-label="Imágenes del producto: mantené presionado y arrastrá para cambiar"
+          >
+            {/* Sliding track — cloned slides so the wrap animates forward:
+                [clone(last), slide0..slideN-1, clone(first)]. The active logical
+                slide is positioned at trackIndex = selectedImageIndex + 1.
+                Rendered only when there is more than one image; a single image
+                gets a plain static <OptimizedImage> instead. */}
+            {productImages.length > 1 ? (
+              <div
+                className="flex h-full"
+                style={{
+                  transform: `translateX(calc(${-trackIndex * 100}% + ${dx}px))`,
+                  transition:
+                    dragging || noTransition ? 'none' : 'transform 300ms ease-out',
+                }}
+              >
+                {[
+                  productImages[productImages.length - 1],
+                  ...productImages,
+                  productImages[0],
+                ].map((url, slideIndex) => {
+                  // Map track position back to the logical index for alt/priority:
+                  // 0 = clone of the last, count+1 = clone of the first.
+                  const logicalIndex =
+                    slideIndex === 0
+                      ? productImages.length - 1
+                      : slideIndex === productImages.length + 1
+                        ? 0
+                        : slideIndex - 1;
+                  return (
+                    <div key={`${url}-${slideIndex}`} className="h-full w-full flex-shrink-0">
+                      <OptimizedImage
+                        src={url}
+                        alt={`${product.name} - ${logicalIndex + 1}`}
+                        className="h-full w-full object-contain"
+                        priority={logicalIndex === selectedImageIndex}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <OptimizedImage
+                src={productImages[0]}
+                alt={product.name}
+                className="h-full w-full object-contain"
+                priority
+              />
+            )}
+
+            {/* Image counter */}
+            {productImages.length > 1 && (
+              <span className="absolute right-3 bottom-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white">
+                {selectedImageIndex + 1} / {productImages.length}
+              </span>
+            )}
           </div>
 
           {productImages.length > 1 && (

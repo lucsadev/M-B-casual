@@ -10,7 +10,7 @@
  * - Error state with retry message
  * - Modern design with improved spacing and visual hierarchy
  */
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import type { CatalogFilters } from '@mbt/shared';
 import { useProducts } from '../hooks/use-products';
 import { ProductCard } from './product-card';
@@ -46,6 +46,22 @@ export function ProductGrid({ category, search }: ProductGridProps) {
 
   // Intersection Observer for infinite scroll
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // When the filters change, bring the list back to the first result so the
+  // viewport starts at the top of the new category/search instead of staying
+  // wherever the user had scrolled (often the last item of the old list).
+  const prevFiltersRef = useRef<{ category: string; search: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    const prev = prevFiltersRef.current;
+    prevFiltersRef.current = { category, search };
+    // Skip the initial mount — no need to scroll when the page first loads.
+    if (!prev) return;
+    if (prev.category === category && prev.search === search) return;
+    resultsRef.current?.scrollIntoView({ block: 'start' });
+  }, [category, search]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -146,7 +162,7 @@ export function ProductGrid({ category, search }: ProductGridProps) {
   }
 
   return (
-    <div>
+    <div ref={resultsRef}>
       {/* Results count */}
       <p className="mb-6 text-sm font-medium text-[#1A1A1A]/50">
         {totalCount} {totalCount === 1 ? 'producto encontrado' : 'productos encontrados'}
