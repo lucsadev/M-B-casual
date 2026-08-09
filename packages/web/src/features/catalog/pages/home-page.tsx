@@ -12,14 +12,16 @@ import { Link } from 'react-router-dom';
 import { useProducts } from '../hooks/use-products';
 import { useDiscountedProducts } from '../hooks/use-discounted-products';
 import { useCategories } from '../hooks/use-categories';
+import { useShippingSettings } from '@/features/shipping/hooks/use-shipping-settings';
 import { ProductCard } from '../components/product-card';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO } from '@/lib/seo';
-import { type CatalogFilters } from '@mbt/shared';
+import { formatPrice, type CatalogFilters } from '@mbt/shared';
 import Marquee from 'react-fast-marquee';
 
 export function HomePage() {
+  const { freeShippingMin } = useShippingSettings();
   // Fetch featured products (tagged as 'destacado')
   const featuredFilters: Omit<CatalogFilters, 'page'> = {
     tags: 'destacado',
@@ -52,7 +54,7 @@ export function HomePage() {
           autoFill
         >
           <span className="flex items-center gap-3 text-white font-medium text-sm md:text-base px-4 whitespace-nowrap">
-            Envío gratis a partir de $50000
+            Envío gratis a partir de {formatPrice(freeShippingMin)}
           </span>
         </Marquee>
       </section>
