@@ -42,7 +42,7 @@ export function HomePage() {
       />
 
       {/* Marquee banner */}
-      <section className="w-full overflow-hidden bg-[oklch(29.3%_0.066_243.157)] py-2" aria-label="Envío gratis">
+      <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[oklch(29.3%_0.066_243.157)] py-2" aria-label="Envío gratis">
         <div className="flex whitespace-nowrap animate-marquee">
           <span className="flex items-center gap-3 text-white font-medium text-sm md:text-base px-4">
             Envío gratis a partir de $50000
