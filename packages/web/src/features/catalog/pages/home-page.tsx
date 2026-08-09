@@ -47,9 +47,6 @@ export function HomePage() {
           <span className="flex items-center gap-3 text-white font-medium text-sm md:text-base px-4">
             Envío gratis a partir de $50000
           </span>
-          <span className="flex items-center gap-3 text-white font-medium text-sm md:text-base px-4">
-            Envío gratis a partir de $50000
-          </span>
         </div>
       </section>
 
