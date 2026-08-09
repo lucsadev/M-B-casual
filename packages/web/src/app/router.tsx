@@ -34,6 +34,9 @@ import { ExpensesPage } from '@/features/finance/pages/expenses-page.js';
 import { PurchasesPage } from '@/features/finance/pages/purchases-page.js';
 import { CashMovementsPage } from '@/features/finance/pages/cash-movements-page.js';
 
+// In-person sales page
+import { InPersonSalesPage } from '@/features/admin/sales/pages/InPersonSalesPage.js';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -128,6 +131,7 @@ export const router = createBrowserRouter([
       { path: 'gastos', element: <ExpensesPage /> },
       { path: 'caja', element: <CashMovementsPage /> },
       { path: 'finanzas', element: <DashboardPage /> },
+      { path: 'ventas-presencial', element: <InPersonSalesPage /> },
     ],
   },
   {

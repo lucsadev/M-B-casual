@@ -785,6 +785,144 @@ export interface Database {
           },
         ];
       };
+      in_person_customers: {
+        Row: {
+          id: string;
+          name: string;
+          phone: string | null;
+          email: string | null;
+          address: string | null;
+          notes: string | null;
+          balance: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
+          balance?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
+          balance?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      in_person_sales: {
+        Row: {
+          id: string;
+          customer_id: string | null;
+          total: number;
+          discount: number;
+          amount_paid: number;
+          balance_used: number;
+          payment_method: string;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          customer_id?: string | null;
+          total: number;
+          discount?: number;
+          amount_paid: number;
+          balance_used?: number;
+          payment_method: string;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          customer_id?: string | null;
+          total?: number;
+          discount?: number;
+          amount_paid?: number;
+          balance_used?: number;
+          payment_method?: string;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'in_person_sales_customer_id_fkey';
+            columns: ['customer_id'];
+            isOneToOne: false;
+            referencedRelation: 'in_person_customers';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      in_person_sale_items: {
+        Row: {
+          id: string;
+          sale_id: string;
+          product_id: string;
+          variant_id: string | null;
+          quantity: number;
+          unit_price: number;
+          discount: number;
+          subtotal: number;
+        };
+        Insert: {
+          id?: string;
+          sale_id: string;
+          product_id: string;
+          variant_id?: string | null;
+          quantity: number;
+          unit_price: number;
+          discount?: number;
+          subtotal: number;
+        };
+        Update: {
+          id?: string;
+          sale_id?: string;
+          product_id?: string;
+          variant_id?: string | null;
+          quantity?: number;
+          unit_price?: number;
+          discount?: number;
+          subtotal?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'in_person_sale_items_sale_id_fkey';
+            columns: ['sale_id'];
+            isOneToOne: false;
+            referencedRelation: 'in_person_sales';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'in_person_sale_items_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'in_person_sale_items_variant_id_fkey';
+            columns: ['variant_id'];
+            isOneToOne: false;
+            referencedRelation: 'product_variants';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       monthly_sales: {
