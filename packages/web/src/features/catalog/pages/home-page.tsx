@@ -41,6 +41,17 @@ export function HomePage() {
         path="/"
       />
 
+      {/* Logo section */}
+      <section className="mx-auto max-w-7xl px-4 py-12 md:py-16">
+        <div className="flex justify-center">
+          <img
+            src="/logo-hero.jpg"
+            alt="M & B Casual"
+            className="max-w-xs md:max-w-sm lg:max-w-md h-auto object-contain"
+          />
+        </div>
+      </section>
+
       {/* Featured products — hidden entirely when empty */}
       {featuredLoading || featuredProducts.length > 0 ? (
         <section className="mx-auto max-w-7xl px-4 py-16">
