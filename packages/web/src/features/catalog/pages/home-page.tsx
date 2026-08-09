@@ -17,7 +17,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO } from '@/lib/seo';
 import { type CatalogFilters } from '@mbt/shared';
-import { Marquee } from 'react-fast-marquee';
+import Marquee from 'react-fast-marquee';
 
 export function HomePage() {
   // Fetch featured products (tagged as 'destacado')
@@ -47,8 +47,9 @@ export function HomePage() {
         <Marquee
           speed={40}
           gradient={false}
-          reverse={false}
+          direction="left"
           pauseOnHover={false}
+          autoFill
         >
           <span className="flex items-center gap-3 text-white font-medium text-sm md:text-base px-4 whitespace-nowrap">
             Envío gratis a partir de $50000
