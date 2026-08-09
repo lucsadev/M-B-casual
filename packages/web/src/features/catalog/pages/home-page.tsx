@@ -42,8 +42,9 @@ export function HomePage() {
       />
 
       {/* Logo section */}
-      <section className="mx-auto max-w-7xl px-4 py-12 md:py-16">
-        <div className="flex justify-center">
+      <section className="relative w-full py-12 md:py-16 bg-[#FFFFFF]">
+        <div className="absolute inset-0 bg-[#FFFFFF]" aria-hidden="true" />
+        <div className="relative mx-auto max-w-7xl px-4 flex justify-center">
           <img
             src="/logo-hero.jpg"
             alt="M & B Casual"
