@@ -3,8 +3,8 @@
  *
  * Route: /
  * Features:
- * - Hero section with call-to-action
  * - Featured products grid (uses useProducts hook)
+ * - Discounted products section
  * - Category cards navigation
  * - SEO title: "M & B Casual — Indumentaria y Accesorios"
  */
@@ -12,15 +12,13 @@ import { Link } from 'react-router-dom';
 import { useProducts } from '../hooks/use-products';
 import { useDiscountedProducts } from '../hooks/use-discounted-products';
 import { useCategories } from '../hooks/use-categories';
-import { useShippingSettings } from '@/features/shipping/hooks/use-shipping-settings';
 import { ProductCard } from '../components/product-card';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO } from '@/lib/seo';
-import { formatPrice, type CatalogFilters } from '@mbt/shared';
+import { type CatalogFilters } from '@mbt/shared';
 
 export function HomePage() {
-  const { freeShippingMin } = useShippingSettings();
   // Fetch featured products (tagged as 'destacado')
   const featuredFilters: Omit<CatalogFilters, 'page'> = {
     tags: 'destacado',
@@ -42,53 +40,6 @@ export function HomePage() {
         description="Descubrí nuestra colección de indumentaria y accesorios. Moda urbana con personalidad única."
         path="/"
       />
-      {/* Hero section */}
-      <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] text-white">
-        <div className="flex flex-col items-center gap-10 md:flex-row md:items-stretch md:justify-between">
-          {/* Left column — text and CTAs */}
-          <div className="flex items-center px-4 py-10 md:py-0">
-            <div className="max-w-xl">
-            <h1 className="text-3xl font-bold leading-tight md:text-4xl lg:text-5xl">
-              Estilo que
-              <br />
-              <span className="text-[#E8836B]">habla por vos</span>
-            </h1>
-            <p className="mt-3 text-base text-white/70 md:text-lg">
-              Descubrí nuestra colección de indumentaria y accesorios.
-              Moda urbana con personalidad única.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-4">
-              <Link
-                to="/catalogo"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#E8836B] px-8 text-sm font-medium text-white shadow transition-colors hover:bg-[#E8836B]/90"
-              >
-                Ver catálogo
-              </Link>
-              <Link
-                to="/catalogo?category=nuevo"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/20 px-8 text-sm font-medium text-white transition-colors hover:bg-white/10"
-              >
-                Novedades
-              </Link>
-            </div>
-            {/* Shipping banner */}
-            <div className="mt-6 inline-flex animate-banner-glow items-center gap-3 text-xl font-semibold text-[#E8836B] md:text-2xl">
-              <span aria-hidden="true" className="text-2xl md:text-3xl">🚚</span>
-              Envío gratis a partir de {formatPrice(freeShippingMin)}
-            </div>
-          </div>
-          </div>
-
-          {/* Logo — half derecha del hero, sin padding. En mobile va arriba */}
-          <div className="order-first w-full shrink-0 md:order-none md:w-[40%]">
-            <img
-              src="/logo-hero.jpg"
-              alt="M & B Casual"
-              className="h-auto w-full object-contain"
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Featured products — hidden entirely when empty */}
       {featuredLoading || featuredProducts.length > 0 ? (
