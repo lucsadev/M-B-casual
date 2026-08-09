@@ -17,6 +17,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO } from '@/lib/seo';
 import { type CatalogFilters } from '@mbt/shared';
+import { Marquee } from 'react-fast-marquee';
 
 export function HomePage() {
   // Fetch featured products (tagged as 'destacado')
@@ -42,12 +43,17 @@ export function HomePage() {
       />
 
       {/* Marquee banner */}
-      <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[oklch(29.3%_0.066_243.157)] py-2" aria-label="Envío gratis">
-        <div className="flex whitespace-nowrap animate-marquee">
-          <span className="flex items-center gap-3 text-white font-medium text-sm md:text-base px-4">
+      <section className="relative w-screen left-1/2 -translate-x-1/2 bg-[oklch(29.3%_0.066_243.157)] py-2" aria-label="Envío gratis">
+        <Marquee
+          speed={40}
+          gradient={false}
+          reverse={false}
+          pauseOnHover={false}
+        >
+          <span className="flex items-center gap-3 text-white font-medium text-sm md:text-base px-4 whitespace-nowrap">
             Envío gratis a partir de $50000
           </span>
-        </div>
+        </Marquee>
       </section>
 
       {/* Logo section */}
