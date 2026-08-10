@@ -467,6 +467,141 @@ function VariantPickerDialog({
 }
 
 // ---------------------------------------------------------------------------
+// Collect Payment Dialog
+// ---------------------------------------------------------------------------
+
+function CollectPaymentDialog({
+  open,
+  onOpenChange,
+  customer,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  customer: InPersonCustomer | null;
+  onSuccess: () => void;
+}) {
+  const [amount, setAmount] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState<string>('efectivo');
+  const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const collectMutation = useMutation({
+    mutationFn: async ({
+      customerId,
+      amount,
+      paymentMethod,
+      notes,
+    }: {
+      customerId: string;
+      amount: number;
+      paymentMethod: string;
+      notes?: string;
+    }) => {
+      // Update customer balance (reduce debt)
+      const newBalance = customer!.balance - amount;
+      const { error: customerError } = await supabase
+        .from('in_person_customers')
+        .update({ balance: newBalance, updated_at: new Date().toISOString() })
+        .eq('id', customerId);
+
+      if (customerError) throw customerError;
+
+      // Create cash movement
+      const { error: cashError } = await supabase
+        .from('cash_movements')
+        .insert({
+          type: 'income',
+          amount,
+          reference_type: 'debt_collection',
+          reference_id: customerId,
+          description: `Cobro deuda - ${customer!.name}${notes ? ': ' + notes : ''}`,
+          created_at: new Date().toISOString(),
+        });
+
+      if (cashError) throw cashError;
+    },
+    onSuccess: () => {
+      toast.success('Pago registrado correctamente');
+      onSuccess();
+      onOpenChange(false);
+      setAmount(0);
+      setNotes('');
+      setPaymentMethod('efectivo');
+    },
+    onError: (error: any) => {
+      toast.error(`Error al registrar pago: ${error.message}`);
+    },
+  });
+
+  if (!customer) return null;
+
+  const maxAmount = customer.balance;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Cobrar deuda a <span className="font-normal">{customer.name}</span></DialogTitle>
+          <DialogDescription>
+            Deuda actual: <strong>{formatCurrency(customer.balance)}</strong>
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={(e) => { e.preventDefault(); collectMutation.mutate({ customerId: customer.id, amount, paymentMethod, notes: notes.trim() || undefined }); }} className="space-y-4">
+          <div>
+            <Label htmlFor="amount">Monto a cobrar *</Label>
+            <Input
+              id="amount"
+              type="number"
+              min="0.01"
+              max={customer.balance}
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+              placeholder="0.00"
+              required
+            />
+            <p className="text-sm text-[#1A1A1A]/60 mt-1">
+              Deuda actual: {formatCurrency(customer.balance)}
+            </p>
+          </div>
+          <div>
+            <Label>Método de pago</Label>
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="efectivo">Efectivo</SelectItem>
+                <SelectItem value="tarjeta">Tarjeta</SelectItem>
+                <SelectItem value="transferencia">Transferencia</SelectItem>
+                <SelectItem value="mixto">Mixto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="notes">Notas (opcional)</Label>
+            <Input
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Referencia, observaciones..."
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading || amount <= 0 || amount > customer.balance}>
+              {loading ? 'Registrando...' : `Cobrar ${formatCurrency(amount)}`}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // Customer Movements Dialog
 // ---------------------------------------------------------------------------
 
@@ -1045,6 +1180,7 @@ export function InPersonSalesPage() {
   const [createCustomerOpen, setCreateCustomerOpen] = useState(false);
   const [createSaleOpen, setCreateSaleOpen] = useState(false);
   const [movementsCustomer, setMovementsCustomer] = useState<InPersonCustomer | null>(null);
+  const [collectPaymentCustomer, setCollectPaymentCustomer] = useState<InPersonCustomer | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -1064,6 +1200,10 @@ export function InPersonSalesPage() {
 
   const openMovements = (customer: InPersonCustomer) => {
     setMovementsCustomer(customer);
+  };
+
+  const openCollectPayment = (customer: InPersonCustomer) => {
+    setCollectPaymentCustomer(customer);
   };
 
   return (
@@ -1165,6 +1305,21 @@ export function InPersonSalesPage() {
                   )}
                 </TableCell>
                 <TableCell>{formatDate(customer.created_at)}</TableCell>
+                <TableCell className="text-right">
+                  {customer.balance > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openCollectPayment(customer);
+                      }}
+                      className="text-green-600 hover:bg-green-50"
+                    >
+                      Cobrar
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -1189,6 +1344,13 @@ export function InPersonSalesPage() {
         open={!!movementsCustomer}
         onOpenChange={(open) => { if (!open) setMovementsCustomer(null); }}
         customer={movementsCustomer}
+      />
+
+      <CollectPaymentDialog
+        open={!!collectPaymentCustomer}
+        onOpenChange={(open) => { if (!open) setCollectPaymentCustomer(null); }}
+        customer={collectPaymentCustomer}
+        onSuccess={handleSaleCreated}
       />
     </div>
   );
