@@ -520,68 +520,67 @@ function CreateSaleDialog({
           {items.length > 0 && (
             <div className="border rounded-md">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40%]">Producto</TableHead>
-                    <TableHead className="w-[15%]">Cantidad</TableHead>
-                    <TableHead className="w-[15%]">Precio unit.</TableHead>
-                    <TableHead className="w-[10%]">Desc. %</TableHead>
-                    <TableHead className="w-[15%]">Subtotal</TableHead>
-                    <TableHead className="w-10"></TableHead>
-                  </TableRow>
-                </TableHeader>
                 <TableBody>
                   {items.map((item, index) => (
                     <>
-                      {/* Header row for each product */}
-                      <TableRow key={`header-${index}`} className="bg-[#F0F0EC]">
-                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
-                          Producto
+                      {/* Row 1: Product name header + value */}
+                      <TableRow key={`name-${index}`} className="bg-[#F0F0EC]">
+                        <TableCell className="font-medium text-sm text-[#1A1A1A]/70 py-2 px-3 w-[20%]">
+                          Nombre
                         </TableCell>
-                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
-                          Cantidad
-                        </TableCell>
-                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
-                          Precio unit.
-                        </TableCell>
-                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
-                          Desc. %
-                        </TableCell>
-                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
-                          Subtotal
-                        </TableCell>
-                        <TableCell></TableCell>
-                      </TableRow>
-                      {/* Content row for each product */}
-                      <TableRow key={`content-${index}`} className="bg-white">
-                        <TableCell className="font-medium py-3">
+                        <TableCell colSpan={5} className="font-medium py-2 px-3">
                           <div>
                             <span className="text-[#1A1A1A]">{item.productName}</span>
                             <span className="ml-2 text-sm text-[#1A1A1A]/60">{item.variantLabel}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
+                      </TableRow>
+                      {/* Row 2: Sub-headers for controls */}
+                      <TableRow key={`subheader-${index}`} className="bg-[#FAFAF8]">
+                        <TableCell className="hidden"></TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-1 px-2">
+                          Cant.
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-1 px-2">
+                          Prec.Uni
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-1 px-2">
+                          Desc.%
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-1 px-2">
+                          SubTotal
+                        </TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                      {/* Row 3: Actual controls */}
+                      <TableRow key={`controls-${index}`} className="bg-white">
+                        <TableCell className="hidden"></TableCell>
+                        <TableCell className="py-1 px-2">
                           <Input
                             type="number"
                             min="1"
                             value={item.quantity}
                             onChange={(e) => handleUpdateQuantity(index, parseInt(e.target.value) || 1)}
-                            className="w-full max-w-[80px]"
+                            className="w-full max-w-[70px] text-sm"
                           />
                         </TableCell>
-                        <TableCell className="text-[#1A1A1A]/70">{formatCurrency(item.unitPrice)}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-[#1A1A1A]/70 text-sm py-1 px-2">
+                          {formatCurrency(item.unitPrice)}
+                        </TableCell>
+                        <TableCell className="py-1 px-2">
                           <Input
                             type="number"
                             min="0"
                             max="100"
                             value={item.discount}
                             onChange={(e) => handleUpdateItemDiscount(index, parseInt(e.target.value) || 0)}
-                            className="w-full max-w-[70px]"
+                            className="w-full max-w-[60px] text-sm"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-[#1A1A1A]">{formatCurrency(item.subtotal)}</TableCell>
-                        <TableCell className="text-right pr-4">
+                        <TableCell className="font-medium text-[#1A1A1A] text-sm py-1 px-2">
+                          {formatCurrency(item.subtotal)}
+                        </TableCell>
+                        <TableCell className="text-right pr-4 py-1">
                           <Button
                             type="button"
                             variant="ghost"
