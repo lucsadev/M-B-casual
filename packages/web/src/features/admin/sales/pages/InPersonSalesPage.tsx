@@ -598,14 +598,15 @@ function CreateSaleDialog({
               <SelectContent>
                 {customers.map((customer) => (
                   <SelectItem key={customer.id} value={customer.id}>
-                    {customer.name} {customer.balance > 0 && `(Saldo: ${formatCurrency(customer.balance)})`}
+                    {customer.name} {customer.balance > 0 && `(Deuda: ${formatCurrency(customer.balance)})`}
+                    {customer.balance < 0 && `(Saldo a favor: ${formatCurrency(Math.abs(customer.balance))})`}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {selectedCustomer && selectedCustomer.balance > 0 && (
               <p className="text-sm text-[#E8836B] mt-1">
-                Saldo disponible: {formatCurrency(selectedCustomer.balance)}
+                Deuda: {formatCurrency(selectedCustomer.balance)}
               </p>
             )}
           </div>
@@ -754,7 +755,7 @@ function CreateSaleDialog({
             </div>
             {selectedCustomer && selectedCustomer.balance > 0 && (
               <div className="flex justify-between items-center">
-                <span>Usar saldo:</span>
+                <span>Usar deuda:</span>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -765,7 +766,7 @@ function CreateSaleDialog({
                     className="w-32"
                   />
                   <Button type="button" variant="outline" size="sm" onClick={handleUseBalance}>
-                    Usar todo
+                    Usar toda la deuda
                   </Button>
                 </div>
               </div>
@@ -950,7 +951,11 @@ export function InPersonSalesPage() {
                 <TableCell>
                   {customer.balance > 0 ? (
                     <Badge variant="destructive">
-                      {formatCurrency(customer.balance)}
+                      Deuda: {formatCurrency(customer.balance)}
+                    </Badge>
+                  ) : customer.balance < 0 ? (
+                    <Badge variant="success">
+                      A favor: {formatCurrency(Math.abs(customer.balance))}
                     </Badge>
                   ) : (
                     <Badge variant="secondary">$0.00</Badge>
