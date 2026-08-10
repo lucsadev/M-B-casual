@@ -504,9 +504,10 @@ function CreateSaleDialog({
   };
 
   const handleUseBalance = () => {
-    if (selectedCustomer && selectedCustomer.balance > 0) {
-      const maxBalance = Math.min(selectedCustomer.balance, finalTotal);
-      setBalanceUsed(maxBalance);
+    if (selectedCustomer && selectedCustomer.balance < 0) {
+      // Only use credit (negative balance), not debt
+      const maxCredit = Math.min(Math.abs(selectedCustomer.balance), finalTotal);
+      setBalanceUsed(maxCredit);
     }
   };
 
@@ -753,20 +754,20 @@ function CreateSaleDialog({
               <span>Total:</span>
               <span>{formatCurrency(finalTotal)}</span>
             </div>
-            {selectedCustomer && selectedCustomer.balance > 0 && (
+            {selectedCustomer && selectedCustomer.balance < 0 && (
               <div className="flex justify-between items-center">
-                <span>Usar deuda:</span>
+                <span>Usar crédito:</span>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
                     min="0"
-                    max={Math.min(selectedCustomer.balance, finalTotal)}
+                    max={Math.min(Math.abs(selectedCustomer.balance), finalTotal)}
                     value={balanceUsed}
                     onChange={(e) => setBalanceUsed(parseFloat(e.target.value) || 0)}
                     className="w-32"
                   />
                   <Button type="button" variant="outline" size="sm" onClick={handleUseBalance}>
-                    Usar toda la deuda
+                    Usar todo el crédito
                   </Button>
                 </div>
               </div>
