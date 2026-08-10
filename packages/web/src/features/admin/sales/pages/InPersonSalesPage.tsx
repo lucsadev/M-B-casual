@@ -99,6 +99,68 @@ async function fetchCustomers(search: string): Promise<InPersonCustomer[]> {
   return data ?? [];
 }
 
+interface CustomerSale {
+  id: string;
+  total: number;
+  discount: number;
+  amount_paid: number;
+  balance_used: number;
+  payment_method: string;
+  created_at: string;
+  items: Array<{
+    product_name: string;
+    variant_label: string;
+    quantity: number;
+    unit_price: number;
+    subtotal: number;
+  }>;
+}
+
+async function fetchCustomerSales(customerId: string): Promise<CustomerSale[]> {
+  const { data, error } = await supabase
+    .from('in_person_sales')
+    .select(`
+      id,
+      total,
+      discount,
+      amount_paid,
+      balance_used,
+      payment_method,
+      created_at,
+      in_person_sale_items (
+        quantity,
+        unit_price,
+        subtotal,
+        products (name),
+        product_variants (size, color)
+      )
+    `)
+    .eq('customer_id', customerId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((sale) => ({
+    id: sale.id,
+    total: sale.total,
+    discount: sale.discount,
+    amount_paid: sale.amount_paid,
+    balance_used: sale.balance_used,
+    payment_method: sale.payment_method,
+    created_at: sale.created_at,
+    items: (sale.in_person_sale_items ?? []).map((item) => ({
+      product_name: (item.products as any)?.name ?? 'Producto',
+      variant_label: [
+        (item.product_variants as any)?.size,
+        (item.product_variants as any)?.color,
+      ].filter(Boolean).join(' / ') || 'Sin variante',
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      subtotal: item.subtotal,
+    })),
+  }));
+}
+
 // Product with variants for sale builder
 interface ProductWithVariants {
   id: string;
@@ -397,6 +459,121 @@ function VariantPickerDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Customer Movements Dialog
+// ---------------------------------------------------------------------------
+
+function CustomerMovementsDialog({
+  open,
+  onOpenChange,
+  customer,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  customer: InPersonCustomer | null;
+}) {
+  const { data: sales, isLoading } = useQuery({
+    queryKey: ['admin', 'customer-sales', customer?.id],
+    queryFn: () => customer ? fetchCustomerSales(customer.id) : Promise.resolve([]),
+    enabled: open && !!customer,
+  });
+
+  if (!customer) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Movimientos de {customer.name}</DialogTitle>
+          <DialogDescription>
+            Historial de ventas y pagos
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          {/* Balance summary */}
+          <div className="p-4 bg-[#F0F0EC] rounded-md">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-sm text-[#1A1A1A]/60">Deuda actual</p>
+                <p className="font-bold text-lg text-[#E8836B]">
+                  {customer.balance > 0 ? formatCurrency(customer.balance) : '$0.00'}
+                </p>
+                {customer.balance < 0 && (
+                  <p className="text-sm text-green-600 font-bold">
+                    A favor: {formatCurrency(Math.abs(customer.balance))}
+                  </p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-[#1A1A1A]/60">Total compras</p>
+                <p className="font-bold text-lg">
+                  {formatCurrency(sales?.reduce((sum, s) => sum + s.total, 0) ?? 0)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-[#1A1A1A]/60">Total pagado</p>
+                <p className="font-bold text-lg text-green-600">
+                  {formatCurrency(sales?.reduce((sum, s) => sum + s.amount_paid + s.balance_used, 0) ?? 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sales list */}
+          {isLoading && (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && sales && sales.length === 0 && (
+            <p className="text-center text-[#1A1A1A]/50 py-8">
+              No hay ventas registradas para este cliente.
+            </p>
+          )}
+
+          {sales?.map((sale) => (
+            <div key={sale.id} className="border rounded-md overflow-hidden">
+              <div className="bg-[#F0F0EC] px-4 py-3 flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{formatDate(sale.created_at)}</p>
+                  <p className="text-sm text-[#1A1A1A]/60">
+                    {sale.payment_method} · {formatCurrency(sale.amount_paid)} pagado
+                    {sale.balance_used > 0 && ` · ${formatCurrency(sale.balance_used)} crédito`}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatCurrency(sale.total)}</p>
+                  {sale.discount > 0 && (
+                    <p className="text-sm text-[#E8836B]">{sale.discount}% desc.</p>
+                  )}
+                </div>
+              </div>
+              <div className="p-4 space-y-2">
+                {sale.items.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-sm">
+                    <span className="flex-1">
+                      {item.quantity}x {item.product_name} ({item.variant_label})
+                    </span>
+                    <span className="font-medium">{formatCurrency(item.subtotal)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cerrar
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -867,6 +1044,7 @@ export function InPersonSalesPage() {
   const [customerSearch, setCustomerSearch] = useState('');
   const [createCustomerOpen, setCreateCustomerOpen] = useState(false);
   const [createSaleOpen, setCreateSaleOpen] = useState(false);
+  const [movementsCustomer, setMovementsCustomer] = useState<InPersonCustomer | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -882,6 +1060,10 @@ export function InPersonSalesPage() {
   const handleSaleCreated = () => {
     queryClient.invalidateQueries({ queryKey: ['admin', 'in-person-customers'] });
     queryClient.invalidateQueries({ queryKey: ['admin', 'cash-movements'] });
+  };
+
+  const openMovements = (customer: InPersonCustomer) => {
+    setMovementsCustomer(customer);
   };
 
   return (
@@ -954,7 +1136,11 @@ export function InPersonSalesPage() {
             )}
 
             {customers?.map((customer) => (
-              <TableRow key={customer.id}>
+              <TableRow
+                key={customer.id}
+                onClick={() => openMovements(customer)}
+                className="cursor-pointer hover:bg-[#F0F0EC]"
+              >
                 <TableCell className="font-medium">{customer.name}</TableCell>
                 <TableCell className="text-[#1A1A1A]/60">
                   {customer.phone || '—'}
@@ -997,6 +1183,12 @@ export function InPersonSalesPage() {
         onOpenChange={setCreateSaleOpen}
         customers={customers ?? []}
         onSuccess={handleSaleCreated}
+      />
+
+      <CustomerMovementsDialog
+        open={!!movementsCustomer}
+        onOpenChange={(open) => { if (!open) setMovementsCustomer(null); }}
+        customer={movementsCustomer}
       />
     </div>
   );
