@@ -522,31 +522,44 @@ function CreateSaleDialog({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[40%]" rowSpan={2}>Producto</TableHead>
-                    <TableHead className="w-[15%]" rowSpan={2}>Cantidad</TableHead>
-                    <TableHead className="w-[15%]" rowSpan={2}>Precio unit.</TableHead>
-                    <TableHead className="w-[10%]" rowSpan={2}>Desc. %</TableHead>
-                    <TableHead className="w-[15%]" rowSpan={2}>Subtotal</TableHead>
-                    <TableHead className="w-10" rowSpan={2}></TableHead>
+                    <TableHead className="w-[40%]">Producto</TableHead>
+                    <TableHead className="w-[15%]">Cantidad</TableHead>
+                    <TableHead className="w-[15%]">Precio unit.</TableHead>
+                    <TableHead className="w-[10%]">Desc. %</TableHead>
+                    <TableHead className="w-[15%]">Subtotal</TableHead>
+                    <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {items.map((item, index) => (
                     <>
-                      {/* Row 1: Product name */}
-                      <TableRow key={`name-${index}`} className="bg-[#FAFAF8]">
-                        <TableCell colSpan={6} className="font-medium py-3 px-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <span className="text-[#1A1A1A]">{item.productName}</span>
-                              <span className="ml-2 text-sm text-[#1A1A1A]/60">{item.variantLabel}</span>
-                            </div>
+                      {/* Header row for each product */}
+                      <TableRow key={`header-${index}`} className="bg-[#F0F0EC]">
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
+                          Producto
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
+                          Cantidad
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
+                          Precio unit.
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
+                          Desc. %
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-[#1A1A1A]/60 uppercase tracking-wide py-2">
+                          Subtotal
+                        </TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                      {/* Content row for each product */}
+                      <TableRow key={`content-${index}`} className="bg-white">
+                        <TableCell className="font-medium py-3">
+                          <div>
+                            <span className="text-[#1A1A1A]">{item.productName}</span>
+                            <span className="ml-2 text-sm text-[#1A1A1A]/60">{item.variantLabel}</span>
                           </div>
                         </TableCell>
-                      </TableRow>
-                      {/* Row 2: Controls */}
-                      <TableRow key={`controls-${index}`}>
-                        <TableCell className="hidden"></TableCell>
                         <TableCell>
                           <Input
                             type="number"
@@ -580,6 +593,12 @@ function CreateSaleDialog({
                           </Button>
                         </TableCell>
                       </TableRow>
+                      {/* Separator */}
+                      {index < items.length - 1 && (
+                        <TableRow key={`sep-${index}`}>
+                          <TableCell colSpan={6} className="border-t border-[#E2E2DC] py-0" />
+                        </TableRow>
+                      )}
                     </>
                   ))}
                 </TableBody>
