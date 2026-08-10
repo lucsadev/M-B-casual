@@ -142,6 +142,7 @@ async function fetchCustomerSales(customerId: string): Promise<CustomerSale[]> {
 
   return (data ?? []).map((sale) => ({
     id: sale.id,
+    type: 'sale',
     total: sale.total,
     discount: sale.discount,
     amount_paid: sale.amount_paid,
@@ -161,7 +162,34 @@ async function fetchCustomerSales(customerId: string): Promise<CustomerSale[]> {
   }));
 }
 
-// Product with variants for sale builder
+interface CustomerPayment {
+  id: string;
+  type: 'payment';
+  amount: number;
+  payment_method: string;
+  description: string | null;
+  created_at: string;
+}
+
+async function fetchCustomerPayments(customerId: string): Promise<CustomerPayment[]> {
+  const { data, error } = await supabase
+    .from('cash_movements')
+    .select('id, amount, description, created_at')
+    .eq('reference_type', 'debt_collection')
+    .eq('reference_id', customerId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((movement) => ({
+    id: movement.id,
+    type: 'payment' as const,
+    amount: movement.amount,
+    payment_method: 'efectivo', // cash_movements doesn't have payment_method, default to efectivo
+    description: movement.description,
+    created_at: movement.created_at,
+  }));
+}
 interface ProductWithVariants {
   id: string;
   name: string;
@@ -614,11 +642,25 @@ function CustomerMovementsDialog({
   onOpenChange: (open: boolean) => void;
   customer: InPersonCustomer | null;
 }) {
-  const { data: sales, isLoading } = useQuery({
+  const { data: sales, isLoading: salesLoading } = useQuery({
     queryKey: ['admin', 'customer-sales', customer?.id],
     queryFn: () => customer ? fetchCustomerSales(customer.id) : Promise.resolve([]),
     enabled: open && !!customer,
   });
+
+  const { data: payments, isLoading: paymentsLoading } = useQuery({
+    queryKey: ['admin', 'customer-payments', customer?.id],
+    queryFn: () => customer ? fetchCustomerPayments(customer.id) : Promise.resolve([]),
+    enabled: open && !!customer,
+  });
+
+  const isLoading = salesLoading || paymentsLoading;
+
+  // Combine sales and payments into a single timeline sorted by date
+  const allMovements = [
+    ...(sales ?? []).map(s => ({ ...s, type: 'sale' as const })),
+    ...(payments ?? []).map(p => ({ ...p, type: 'payment' as const })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   if (!customer) return null;
 
@@ -628,13 +670,13 @@ function CustomerMovementsDialog({
         <DialogHeader>
           <DialogTitle>Movimientos de {customer.name}</DialogTitle>
           <DialogDescription>
-            Historial de ventas y pagos
+            Historial de ventas y cobros de deuda
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           {/* Balance summary */}
           <div className="p-4 bg-[#F0F0EC] rounded-md">
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-sm text-[#1A1A1A]/60">Deuda actual</p>
                 <p className="font-bold text-lg text-[#E8836B]">
@@ -653,15 +695,21 @@ function CustomerMovementsDialog({
                 </p>
               </div>
               <div>
-                <p className="text-sm text-[#1A1A1A]/60">Total pagado</p>
+                <p className="text-sm text-[#1A1A1A]/60">Pagos en ventas</p>
                 <p className="font-bold text-lg text-green-600">
                   {formatCurrency(sales?.reduce((sum, s) => sum + s.amount_paid + s.balance_used, 0) ?? 0)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-[#1A1A1A]/60">Cobros de deuda</p>
+                <p className="font-bold text-lg text-blue-600">
+                  {formatCurrency(payments?.reduce((sum, p) => sum + p.amount, 0) ?? 0)}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Sales list */}
+          {/* Movements timeline */}
           {isLoading && (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -670,39 +718,57 @@ function CustomerMovementsDialog({
             </div>
           )}
 
-          {!isLoading && sales && sales.length === 0 && (
+          {!isLoading && allMovements.length === 0 && (
             <p className="text-center text-[#1A1A1A]/50 py-8">
-              No hay ventas registradas para este cliente.
+              No hay movimientos registrados para este cliente.
             </p>
           )}
 
-          {sales?.map((sale) => (
-            <div key={sale.id} className="border rounded-md overflow-hidden">
+          {allMovements.map((movement) => (
+            <div key={movement.id} className="border rounded-md overflow-hidden">
               <div className="bg-[#F0F0EC] px-4 py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{formatDate(sale.created_at)}</p>
+                  <p className="font-medium">{formatDate(movement.created_at)}</p>
                   <p className="text-sm text-[#1A1A1A]/60">
-                    {sale.payment_method} · {formatCurrency(sale.amount_paid)} pagado
-                    {sale.balance_used > 0 && ` · ${formatCurrency(sale.balance_used)} crédito`}
+                    {movement.type === 'sale'
+                      ? `${movement.payment_method} · ${formatCurrency(movement.amount_paid)} pagado`
+                      : `Cobro deuda · ${movement.payment_method}`}
+                    {movement.type === 'sale' && movement.balance_used > 0 && (
+                      <> · {' '} <span className="text-green-600">{formatCurrency(movement.balance_used)} crédito</span></>
+                    )}
+                    {movement.type === 'payment' && movement.description && (
+                      <> · {' '} <span className="text-[#1A1A1A]/60">{movement.description}</span></>
+                    )}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold">{formatCurrency(sale.total)}</p>
-                  {sale.discount > 0 && (
-                    <p className="text-sm text-[#E8836B]">{sale.discount}% desc.</p>
+                  {movement.type === 'sale' ? (
+                    <>
+                      <p className="font-bold text-[#E8836B]">{formatCurrency(movement.total)}</p>
+                      {movement.discount > 0 && <p className="text-sm text-[#E8836B]">{movement.discount}% desc.</p>}
+                    </>
+                  ) : (
+                    <p className="font-bold text-blue-600">+{formatCurrency(movement.amount)}</p>
                   )}
                 </div>
               </div>
-              <div className="p-4 space-y-2">
-                {sale.items.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-sm">
-                    <span className="flex-1">
-                      {item.quantity}x {item.product_name} ({item.variant_label})
-                    </span>
-                    <span className="font-medium">{formatCurrency(item.subtotal)}</span>
-                  </div>
-                ))}
-              </div>
+              {movement.type === 'sale' && movement.items && (
+                <div className="p-4 space-y-2">
+                  {movement.items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-sm">
+                      <span className="flex-1">
+                        {item.quantity}x {item.product_name} ({item.variant_label})
+                      </span>
+                      <span className="font-medium">{formatCurrency(item.subtotal)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {movement.type === 'payment' && movement.description && (
+                <div className="px-4 pb-4 text-sm text-[#1A1A1A]/60">
+                  Referencia: {movement.description}
+                </div>
+              )}
             </div>
           ))}
         </div>
