@@ -333,13 +333,27 @@ function VariantPickerDialog({
   onOpenChange,
   product,
   onConfirm,
+  itemsInSale = [],
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: ProductWithVariants | null;
   onConfirm: (product: ProductWithVariants, variant: ProductWithVariants['variants'][0]) => void;
+  itemsInSale?: SaleItem[];
 }) {
   if (!product) return null;
+
+  // Calculate available stock for each variant considering items already in sale
+  const getAvailableStock = (variantId: string) => {
+    const variant = product.variants.find(v => v.id === variantId);
+    if (!variant) return 0;
+    const alreadyInSale = itemsInSale
+      .filter(item => item.variantId === variantId)
+      .reduce((sum, item) => sum + item.quantity, 0);
+    return variant.stock - alreadyInSale;
+  };
+
+  const availableVariants = product.variants.filter(v => getAvailableStock(v.id) > 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -351,28 +365,33 @@ function VariantPickerDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 max-h-60 overflow-y-auto">
-          {product.variants.map((variant) => (
-            <button
-              key={variant.id}
-              type="button"
-              onClick={() => onConfirm(product, variant)}
-              className="w-full p-3 border rounded-md text-left hover:bg-[#F0F0EC] transition-colors flex items-center justify-between"
-            >
-              <div>
-                <div className="font-medium">
-                  {variant.size || 'Único'} {variant.color ? '· ' + variant.color : ''}
+          {availableVariants.map((variant) => {
+            const availableStock = getAvailableStock(variant.id);
+            return (
+              <button
+                key={variant.id}
+                type="button"
+                onClick={() => onConfirm(product, variant)}
+                className="w-full p-3 border rounded-md text-left hover:bg-[#F0F0EC] transition-colors flex items-center justify-between"
+              >
+                <div>
+                  <div className="font-medium">
+                    {variant.size || 'Único'} {variant.color ? '· ' + variant.color : ''}
+                  </div>
+                  <div className="text-sm text-[#1A1A1A]/60">
+                    Stock disponible: {availableStock} {variant.discount > 0 ? ' · ' + variant.discount + '% desc.' : ''}
+                  </div>
                 </div>
-                <div className="text-sm text-[#1A1A1A]/60">
-                  Stock: {variant.stock} {variant.discount > 0 ? ' · ' + variant.discount + '% desc.' : ''}
-                </div>
-              </div>
-              <span className="font-medium">
-                {formatCurrency(product.price * (1 - (variant.discount || 0) / 100))}
-              </span>
-            </button>
-          ))}
-          {product.variants.length === 0 && (
-            <p className="text-center text-[#1A1A1A]/50 py-4">Sin variantes disponibles</p>
+                <span className="font-medium">
+                  {formatCurrency(product.price * (1 - (variant.discount || 0) / 100))}
+                </span>
+              </button>
+            );
+          })}
+          {availableVariants.length === 0 && (
+            <p className="text-center text-[#E8836B] py-4">
+              Sin stock disponible en ninguna variante
+            </p>
           )}
         </div>
         <DialogFooter>
@@ -799,6 +818,7 @@ function CreateSaleDialog({
         onOpenChange={(open) => { if (!open) setSelectingVariants(null); }}
         product={selectingVariants}
         onConfirm={handleConfirmVariant}
+        itemsInSale={items}
       />
     </Dialog>
   );
