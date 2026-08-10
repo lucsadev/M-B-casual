@@ -522,12 +522,12 @@ function CreateSaleDialog({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[40%]">Producto</TableHead>
-                    <TableHead className="w-[15%]">Cantidad</TableHead>
-                    <TableHead className="w-[15%]">Precio unit.</TableHead>
-                    <TableHead className="w-[10%]">Desc. %</TableHead>
-                    <TableHead className="w-[15%]">Subtotal</TableHead>
-                    <TableHead className="w-10"></TableHead>
+                    <TableHead className="w-[40%]" rowSpan={2}>Producto</TableHead>
+                    <TableHead className="w-[15%]" rowSpan={2}>Cantidad</TableHead>
+                    <TableHead className="w-[15%]" rowSpan={2}>Precio unit.</TableHead>
+                    <TableHead className="w-[10%]" rowSpan={2}>Desc. %</TableHead>
+                    <TableHead className="w-[15%]" rowSpan={2}>Subtotal</TableHead>
+                    <TableHead className="w-10" rowSpan={2}></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
