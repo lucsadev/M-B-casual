@@ -419,7 +419,7 @@ function CreateSaleDialog({
 
   const selectedCustomer = customers.find((c) => c.id === customerId);
   const total = items.reduce((sum, item) => sum + item.subtotal, 0);
-  const finalTotal = total - discount;
+  const finalTotal = total * (1 - discount / 100);
   const remaining = finalTotal - amountPaid - balanceUsed;
 
   const handleAddProduct = (product: ProductWithVariants) => {
@@ -700,13 +700,17 @@ function CreateSaleDialog({
             </div>
             <div className="flex justify-between items-center">
               <span>Descuento general:</span>
-              <Input
-                type="number"
-                min="0"
-                value={discount}
-                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                className="w-32"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={discount}
+                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  className="w-32"
+                />
+                <span className="text-[#1A1A1A]/60">%</span>
+              </div>
             </div>
             <div className="flex justify-between font-bold text-lg border-t pt-2">
               <span>Total:</span>
