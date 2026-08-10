@@ -522,55 +522,65 @@ function CreateSaleDialog({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Precio unit.</TableHead>
-                    <TableHead>Desc. %</TableHead>
-                    <TableHead>Subtotal</TableHead>
+                    <TableHead className="w-[40%]">Producto</TableHead>
+                    <TableHead className="w-[15%]">Cantidad</TableHead>
+                    <TableHead className="w-[15%]">Precio unit.</TableHead>
+                    <TableHead className="w-[10%]">Desc. %</TableHead>
+                    <TableHead className="w-[15%]">Subtotal</TableHead>
                     <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {items.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div className="font-medium">{item.productName}</div>
-                        <div className="text-sm text-[#1A1A1A]/60">{item.variantLabel}</div>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateQuantity(index, parseInt(e.target.value) || 1)}
-                          className="w-20"
-                        />
-                      </TableCell>
-                      <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={item.discount}
-                          onChange={(e) => handleUpdateItemDiscount(index, parseInt(e.target.value) || 0)}
-                          className="w-20"
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {formatCurrency(item.subtotal)}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveItem(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                    <>
+                      {/* Row 1: Product name */}
+                      <TableRow key={`name-${index}`} className="bg-[#FAFAF8]">
+                        <TableCell colSpan={6} className="font-medium py-3 px-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-[#1A1A1A]">{item.productName}</span>
+                              <span className="ml-2 text-sm text-[#1A1A1A]/60">{item.variantLabel}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {/* Row 2: Controls */}
+                      <TableRow key={`controls-${index}`}>
+                        <TableCell className="hidden"></TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => handleUpdateQuantity(index, parseInt(e.target.value) || 1)}
+                            className="w-full max-w-[80px]"
+                          />
+                        </TableCell>
+                        <TableCell className="text-[#1A1A1A]/70">{formatCurrency(item.unitPrice)}</TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={item.discount}
+                            onChange={(e) => handleUpdateItemDiscount(index, parseInt(e.target.value) || 0)}
+                            className="w-full max-w-[70px]"
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium text-[#1A1A1A]">{formatCurrency(item.subtotal)}</TableCell>
+                        <TableCell className="text-right pr-4">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveItem(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </>
                   ))}
                 </TableBody>
               </Table>
