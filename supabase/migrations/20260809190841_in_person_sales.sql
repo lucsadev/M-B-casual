@@ -151,16 +151,20 @@ create trigger trg_cash_movement_in_person_sale
 -- -----------------------------------------------------------------------------
 -- 6. TRIGGER: Customer balance update on sale
 -- AFTER INSERT - update customer balance if underpaid
+-- discount is percentage (0-100), so we calculate discount_amount from total
 -- -----------------------------------------------------------------------------
 create or replace function update_customer_balance_on_sale()
 returns trigger as $$
 declare
   balance_change numeric(10,2);
+  discount_amount numeric(10,2);
 begin
   if NEW.customer_id is not null then
-    -- Calculate balance change: total - discount - amount_paid - balance_used
+    -- Calculate discount amount from percentage
+    discount_amount := NEW.total * (NEW.discount / 100);
+    -- Calculate balance change: total - discount_amount - amount_paid - balance_used
     -- Positive = customer owes more, Negative = customer overpaid
-    balance_change := (NEW.total - NEW.discount - NEW.amount_paid - NEW.balance_used);
+    balance_change := (NEW.total - discount_amount - NEW.amount_paid - NEW.balance_used);
 
     if balance_change != 0 then
       update in_person_customers
@@ -210,19 +214,19 @@ create policy "Admins can manage in_person_customers"
   on in_person_customers
   for all
   to authenticated
-  using (auth.jwt() ->> 'role' = 'admin')
-  with check (auth.jwt() ->> 'role' = 'admin');
+  using (is_admin())
+  with check (is_admin());
 
 create policy "Admins can manage in_person_sales"
   on in_person_sales
   for all
   to authenticated
-  using (auth.jwt() ->> 'role' = 'admin')
-  with check (auth.jwt() ->> 'role' = 'admin');
+  using (is_admin())
+  with check (is_admin());
 
 create policy "Admins can manage in_person_sale_items"
   on in_person_sale_items
   for all
   to authenticated
-  using (auth.jwt() ->> 'role' = 'admin')
-  with check (auth.jwt() ->> 'role' = 'admin');
+  using (is_admin())
+  with check (is_admin());
