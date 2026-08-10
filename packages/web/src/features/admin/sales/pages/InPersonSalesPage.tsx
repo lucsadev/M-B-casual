@@ -429,12 +429,19 @@ function CreateSaleDialog({
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectingVariants, setSelectingVariants] = useState<ProductWithVariants | null>(null);
+  const [forceClose, setForceClose] = useState(false);
 
   const { data: products, isLoading: loadingProducts } = useQuery({
     queryKey: ['admin', 'products', 'search', productSearch],
     queryFn: () => fetchProducts(productSearch),
     enabled: open && productSearch.length >= 2,
   });
+
+  const handleForceClose = () => {
+    setForceClose(true);
+    onOpenChange(false);
+    setForceClose(false);
+  };
 
   const selectedCustomer = customers.find((c) => c.id === customerId);
   const total = items.reduce((sum, item) => sum + item.subtotal, 0);
@@ -562,7 +569,17 @@ function CreateSaleDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open && items.length > 0 && !forceClose) {
+          // Prevent closing on overlay click if there are unsaved items
+          // Only allow closing via explicit cancel/save buttons
+          return;
+        }
+        onOpenChange(open);
+      }}
+    >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nueva venta presencial</DialogTitle>
