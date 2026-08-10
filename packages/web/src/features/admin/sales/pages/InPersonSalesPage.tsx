@@ -39,7 +39,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Plus, Search, ShoppingCart, UserPlus, Edit, X } from 'lucide-react';
+import { Plus, Search, ShoppingCart, UserPlus, Edit, X, Eye, HandCoins } from 'lucide-react';
 import type { Database } from '@/lib/database.types';
 
 // ---------------------------------------------------------------------------
@@ -675,34 +675,34 @@ function CustomerMovementsDialog({
         </DialogHeader>
         <div className="space-y-4">
           {/* Balance summary */}
-          <div className="p-4 bg-[#F0F0EC] rounded-md">
-            <div className="grid grid-cols-4 gap-4 text-center">
+          <div className="p-3 md:p-4 bg-[#F0F0EC] rounded-md">
+            <div className="grid grid-cols-2 gap-3 text-center md:grid-cols-4 md:gap-4">
               <div>
-                <p className="text-sm text-[#1A1A1A]/60">Deuda actual</p>
-                <p className="font-bold text-lg text-[#E8836B]">
+                <p className="text-xs text-[#1A1A1A]/60 md:text-sm">Deuda actual</p>
+                <p className="font-bold text-base text-[#E8836B] md:text-lg">
                   {customer.balance > 0 ? formatCurrency(customer.balance) : '$0.00'}
                 </p>
                 {customer.balance < 0 && (
-                  <p className="text-sm text-green-600 font-bold">
+                  <p className="text-xs text-green-600 font-bold md:text-sm">
                     A favor: {formatCurrency(Math.abs(customer.balance))}
                   </p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-[#1A1A1A]/60">Total compras</p>
-                <p className="font-bold text-lg">
+                <p className="text-xs text-[#1A1A1A]/60 md:text-sm">Total compras</p>
+                <p className="font-bold text-base md:text-lg">
                   {formatCurrency(sales?.reduce((sum, s) => sum + s.total, 0) ?? 0)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-[#1A1A1A]/60">Pagos en ventas</p>
-                <p className="font-bold text-lg text-green-600">
+                <p className="text-xs text-[#1A1A1A]/60 md:text-sm">Pagos en ventas</p>
+                <p className="font-bold text-base text-green-600 md:text-lg">
                   {formatCurrency(sales?.reduce((sum, s) => sum + s.amount_paid + s.balance_used, 0) ?? 0)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-[#1A1A1A]/60">Cobros de deuda</p>
-                <p className="font-bold text-lg text-blue-600">
+                <p className="text-xs text-[#1A1A1A]/60 md:text-sm">Cobros de deuda</p>
+                <p className="font-bold text-base text-blue-600 md:text-lg">
                   {formatCurrency(payments?.reduce((sum, p) => sum + p.amount, 0) ?? 0)}
                 </p>
               </div>
@@ -713,7 +713,7 @@ function CustomerMovementsDialog({
           {isLoading && (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full" />
+                <Skeleton key={i} className="h-16 md:h-20 w-full" />
               ))}
             </div>
           )}
@@ -726,10 +726,10 @@ function CustomerMovementsDialog({
 
           {allMovements.map((movement) => (
             <div key={movement.id} className="border rounded-md overflow-hidden">
-              <div className="bg-[#F0F0EC] px-4 py-3 flex items-center justify-between">
+              <div className="bg-[#F0F0EC] px-3 py-2 md:px-4 md:py-3 flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{formatDate(movement.created_at)}</p>
-                  <p className="text-sm text-[#1A1A1A]/60">
+                  <p className="text-sm font-medium md:text-base">{formatDate(movement.created_at)}</p>
+                  <p className="text-xs text-[#1A1A1A]/60 md:text-sm">
                     {movement.type === 'sale'
                       ? `${movement.payment_method} · ${formatCurrency(movement.amount_paid)} pagado`
                       : `Cobro deuda · ${movement.payment_method}`}
@@ -744,18 +744,18 @@ function CustomerMovementsDialog({
                 <div className="text-right">
                   {movement.type === 'sale' ? (
                     <>
-                      <p className="font-bold text-[#E8836B]">{formatCurrency(movement.total)}</p>
-                      {movement.discount > 0 && <p className="text-sm text-[#E8836B]">{movement.discount}% desc.</p>}
+                      <p className="font-bold text-sm text-[#E8836B] md:text-base">{formatCurrency(movement.total)}</p>
+                      {movement.discount > 0 && <p className="text-xs text-[#E8836B] md:text-sm">{movement.discount}% desc.</p>}
                     </>
                   ) : (
-                    <p className="font-bold text-blue-600">+{formatCurrency(movement.amount)}</p>
+                    <p className="font-bold text-sm text-blue-600 md:text-base">+{formatCurrency(movement.amount)}</p>
                   )}
                 </div>
               </div>
               {movement.type === 'sale' && movement.items && (
-                <div className="p-4 space-y-2">
+                <div className="p-3 space-y-2 md:p-4">
                   {movement.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-sm">
+                    <div key={idx} className="flex items-center justify-between text-xs md:text-sm">
                       <span className="flex-1">
                         {item.quantity}x {item.product_name} ({item.variant_label})
                       </span>
@@ -765,7 +765,7 @@ function CustomerMovementsDialog({
                 </div>
               )}
               {movement.type === 'payment' && movement.description && (
-                <div className="px-4 pb-4 text-sm text-[#1A1A1A]/60">
+                <div className="px-3 pb-3 text-xs text-[#1A1A1A]/60 md:px-4 md:pb-4 md:text-sm">
                   Referencia: {movement.description}
                 </div>
               )}
@@ -776,6 +776,83 @@ function CustomerMovementsDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cerrar
           </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Customer Info Dialog
+// ---------------------------------------------------------------------------
+
+function CustomerInfoDialog({
+  open,
+  onOpenChange,
+  customer,
+  onCollectPayment,
+  onViewMovements,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  customer: InPersonCustomer | null;
+  onCollectPayment: (customer: InPersonCustomer) => void;
+  onViewMovements: (customer: InPersonCustomer) => void;
+}) {
+  if (!customer) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{customer.name}</DialogTitle>
+          <DialogDescription>
+            Información del cliente presencial
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-[#1A1A1A]/60">Teléfono</p>
+              <p className="font-medium">{customer.phone || '—'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-[#1A1A1A]/60">Email</p>
+              <p className="font-medium break-all">{customer.email || '—'}</p>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm text-[#1A1A1A]/60">Dirección</p>
+            <p className="font-medium">{customer.address || '—'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-[#1A1A1A]/60">Saldo</p>
+            {customer.balance > 0 ? (
+              <Badge variant="destructive">
+                Deuda: {formatCurrency(customer.balance)}
+              </Badge>
+            ) : customer.balance < 0 ? (
+              <Badge variant="success">
+                A favor: {formatCurrency(Math.abs(customer.balance))}
+              </Badge>
+            ) : (
+              <Badge variant="secondary">$0.00</Badge>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-[#1A1A1A]/60">Cliente desde</p>
+            <p className="font-medium">{formatDate(customer.created_at)}</p>
+          </div>
+        </div>
+        <DialogFooter className="flex gap-2">
+          <Button variant="outline" onClick={() => onViewMovements(customer)}>
+            Movimientos
+          </Button>
+          {customer.balance > 0 && (
+            <Button onClick={() => onCollectPayment(customer)}>
+              Cobrar deuda
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -1247,6 +1324,7 @@ export function InPersonSalesPage() {
   const [createSaleOpen, setCreateSaleOpen] = useState(false);
   const [movementsCustomer, setMovementsCustomer] = useState<InPersonCustomer | null>(null);
   const [collectPaymentCustomer, setCollectPaymentCustomer] = useState<InPersonCustomer | null>(null);
+  const [infoCustomer, setInfoCustomer] = useState<InPersonCustomer | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -1270,6 +1348,10 @@ export function InPersonSalesPage() {
 
   const openCollectPayment = (customer: InPersonCustomer) => {
     setCollectPaymentCustomer(customer);
+  };
+
+  const openInfo = (customer: InPersonCustomer) => {
+    setInfoCustomer(customer);
   };
 
   return (
@@ -1308,17 +1390,17 @@ export function InPersonSalesPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Dirección</TableHead>
+              <TableHead className="hidden md:table-cell">Teléfono</TableHead>
+              <TableHead className="hidden md:table-cell">Email</TableHead>
+              <TableHead className="hidden md:table-cell">Dirección</TableHead>
               <TableHead>Saldo</TableHead>
-              <TableHead>Creado</TableHead>
+              <TableHead className="hidden md:table-cell">Creado</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={7}>
                   <div className="space-y-2 py-4">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Skeleton key={i} className="h-8 w-full" />
@@ -1331,7 +1413,7 @@ export function InPersonSalesPage() {
             {!isLoading && customers && customers.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="py-12 text-center text-[#1A1A1A]/50"
                 >
                   {customerSearch
@@ -1348,13 +1430,13 @@ export function InPersonSalesPage() {
                 className="cursor-pointer hover:bg-[#F0F0EC]"
               >
                 <TableCell className="font-medium">{customer.name}</TableCell>
-                <TableCell className="text-[#1A1A1A]/60">
+                <TableCell className="hidden text-[#1A1A1A]/60 md:table-cell">
                   {customer.phone || '—'}
                 </TableCell>
-                <TableCell className="text-[#1A1A1A]/60">
+                <TableCell className="hidden text-[#1A1A1A]/60 md:table-cell">
                   {customer.email || '—'}
                 </TableCell>
-                <TableCell className="text-[#1A1A1A]/60">
+                <TableCell className="hidden text-[#1A1A1A]/60 md:table-cell">
                   {customer.address || '—'}
                 </TableCell>
                 <TableCell>
@@ -1370,21 +1452,37 @@ export function InPersonSalesPage() {
                     <Badge variant="secondary">$0.00</Badge>
                   )}
                 </TableCell>
-                <TableCell>{formatDate(customer.created_at)}</TableCell>
+                <TableCell className="hidden md:table-cell">{formatDate(customer.created_at)}</TableCell>
                 <TableCell className="text-right">
-                  {customer.balance > 0 && (
+                  <div className="flex items-center justify-end gap-2">
+                    {customer.balance > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCollectPayment(customer);
+                        }}
+                        className="text-green-600 hover:bg-green-50"
+                        aria-label={`Cobrar deuda de ${customer.name}`}
+                      >
+                        <HandCoins className="h-4 w-4 md:mr-2" />
+                        <span className="hidden md:inline">Cobrar</span>
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        openCollectPayment(customer);
+                        openInfo(customer);
                       }}
-                      className="text-green-600 hover:bg-green-50"
+                      aria-label={`Ver información de ${customer.name}`}
                     >
-                      Cobrar
+                      <Eye className="h-4 w-4 md:mr-2" />
+                      <span className="hidden md:inline">Info</span>
                     </Button>
-                  )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -1417,6 +1515,20 @@ export function InPersonSalesPage() {
         onOpenChange={(open) => { if (!open) setCollectPaymentCustomer(null); }}
         customer={collectPaymentCustomer}
         onSuccess={handleSaleCreated}
+      />
+
+      <CustomerInfoDialog
+        open={!!infoCustomer}
+        onOpenChange={(open) => { if (!open) setInfoCustomer(null); }}
+        customer={infoCustomer}
+        onCollectPayment={(customer) => {
+          setInfoCustomer(null);
+          openCollectPayment(customer);
+        }}
+        onViewMovements={(customer) => {
+          setInfoCustomer(null);
+          openMovements(customer);
+        }}
       />
     </div>
   );
