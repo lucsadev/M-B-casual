@@ -325,6 +325,67 @@ function CreateCustomerDialog({
 }
 
 // ---------------------------------------------------------------------------
+// Variant Picker Dialog
+// ---------------------------------------------------------------------------
+
+function VariantPickerDialog({
+  open,
+  onOpenChange,
+  product,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  product: ProductWithVariants | null;
+  onConfirm: (product: ProductWithVariants, variant: ProductWithVariants['variants'][0]) => void;
+}) {
+  if (!product) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Elegí variante para <span className="font-normal">{product.name}</span></DialogTitle>
+          <DialogDescription>
+            Seleccioná talle y color disponibles.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 max-h-60 overflow-y-auto">
+          {product.variants.map((variant) => (
+            <button
+              key={variant.id}
+              type="button"
+              onClick={() => onConfirm(product, variant)}
+              className="w-full p-3 border rounded-md text-left hover:bg-[#F0F0EC] transition-colors flex items-center justify-between"
+            >
+              <div>
+                <div className="font-medium">
+                  {variant.size || 'Único'} {variant.color ? '· ' + variant.color : ''}
+                </div>
+                <div className="text-sm text-[#1A1A1A]/60">
+                  Stock: {variant.stock} {variant.discount > 0 ? ' · ' + variant.discount + '% desc.' : ''}
+                </div>
+              </div>
+              <span className="font-medium">
+                {formatCurrency(product.price * (1 - (variant.discount || 0) / 100))}
+              </span>
+            </button>
+          ))}
+          {product.variants.length === 0 && (
+            <p className="text-center text-[#1A1A1A]/50 py-4">Sin variantes disponibles</p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Create Sale Dialog
 // ---------------------------------------------------------------------------
 
@@ -348,6 +409,7 @@ function CreateSaleDialog({
   const [paymentMethod, setPaymentMethod] = useState<string>('efectivo');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectingVariants, setSelectingVariants] = useState<ProductWithVariants | null>(null);
 
   const { data: products, isLoading: loadingProducts } = useQuery({
     queryKey: ['admin', 'products', 'search', productSearch],
@@ -361,19 +423,22 @@ function CreateSaleDialog({
   const remaining = finalTotal - amountPaid - balanceUsed;
 
   const handleAddProduct = (product: ProductWithVariants) => {
-    // Default to first variant if exists, otherwise no variant
-    const variant = product.variants[0];
-    const variantLabel = variant
-      ? `${variant.size || ''} ${variant.color || ''}`.trim() || 'Sin variante'
-      : 'Sin variante';
-    const price = variant ? product.price * (1 - (variant.discount || 0) / 100) : product.price;
+    // If product has variants, open variant picker
+    if (product.variants.length > 0) {
+      setSelectingVariants(product);
+      setProductSearch('');
+      return;
+    }
+    // No variants, add directly
+    const variantLabel = 'Sin variante';
+    const price = product.price;
 
     setItems((prev) => [
       ...prev,
       {
         productId: product.id,
         productName: product.name,
-        variantId: variant?.id || null,
+        variantId: null,
         variantLabel,
         quantity: 1,
         unitPrice: price,
@@ -417,6 +482,28 @@ function CreateSaleDialog({
       const maxBalance = Math.min(selectedCustomer.balance, finalTotal);
       setBalanceUsed(maxBalance);
     }
+  };
+
+  const handleConfirmVariant = (product: ProductWithVariants, variant: ProductWithVariants['variants'][0]) => {
+    const variantLabel = variant
+      ? `${variant.size || ''} ${variant.color || ''}`.trim() || 'Sin variante'
+      : 'Sin variante';
+    const price = variant ? product.price * (1 - (variant.discount || 0) / 100) : product.price;
+
+    setItems((prev) => [
+      ...prev,
+      {
+        productId: product.id,
+        productName: product.name,
+        variantId: variant?.id || null,
+        variantLabel,
+        quantity: 1,
+        unitPrice: price,
+        discount: 0,
+        subtotal: price,
+      },
+    ]);
+    setSelectingVariants(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -703,6 +790,12 @@ function CreateSaleDialog({
           </DialogFooter>
         </form>
       </DialogContent>
+      <VariantPickerDialog
+        open={!!selectingVariants}
+        onOpenChange={(open) => { if (!open) setSelectingVariants(null); }}
+        product={selectingVariants}
+        onConfirm={handleConfirmVariant}
+      />
     </Dialog>
   );
 }
