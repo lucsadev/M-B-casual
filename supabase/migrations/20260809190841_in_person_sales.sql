@@ -123,6 +123,28 @@ create trigger trg_decrement_stock_in_person_sale
   execute function decrement_stock_on_in_person_sale();
 
 -- -----------------------------------------------------------------------------
+-- 4b. TRIGGER: Stock increment on sale item delete
+-- BEFORE DELETE - returns stock to product_variants when item removed from sale
+-- Handles: user removes item before completing sale, or sale cancelled/deleted
+-- -----------------------------------------------------------------------------
+create or replace function increment_stock_on_in_person_sale_delete()
+returns trigger as $$
+begin
+  if OLD.variant_id is not null then
+    update product_variants
+    set stock = stock + OLD.quantity
+    where id = OLD.variant_id;
+  end if;
+  return OLD;
+end;
+$$ language plpgsql;
+
+create trigger trg_increment_stock_in_person_sale_delete
+  before delete on in_person_sale_items
+  for each row
+  execute function increment_stock_on_in_person_sale_delete();
+
+-- -----------------------------------------------------------------------------
 -- 5. TRIGGER: Cash movement on sale insert
 -- AFTER INSERT - create cash_movement for accounting
 -- -----------------------------------------------------------------------------
