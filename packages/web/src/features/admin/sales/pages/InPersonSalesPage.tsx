@@ -447,6 +447,8 @@ function CreateSaleDialog({
   const total = items.reduce((sum, item) => sum + item.subtotal, 0);
   const finalTotal = total * (1 - discount / 100);
   const remaining = finalTotal - amountPaid - balanceUsed;
+  // Projected balance after this sale: existing balance + what's left to pay in this transaction
+  const projectedBalance = (selectedCustomer?.balance ?? 0) + remaining;
 
   const handleAddProduct = (product: ProductWithVariants) => {
     // If product has variants, open variant picker
@@ -784,8 +786,14 @@ function CreateSaleDialog({
             </div>
             {remaining > 0 && (
               <div className="flex justify-between text-[#E8836B] font-medium">
-                <span>Queda debiendo:</span>
+                <span>Queda debiendo en esta venta:</span>
                 <span>{formatCurrency(remaining)}</span>
+              </div>
+            )}
+            {projectedBalance > 0 && (
+              <div className="flex justify-between text-[#E8836B] font-bold text-lg">
+                <span>Deuda total después de la venta:</span>
+                <span>{formatCurrency(projectedBalance)}</span>
               </div>
             )}
             {remaining < 0 && (
