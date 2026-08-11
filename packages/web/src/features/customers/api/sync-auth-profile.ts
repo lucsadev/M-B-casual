@@ -100,7 +100,7 @@ export async function syncAuthProfileToCustomer(user: User): Promise<void> {
     first_name: customer.first_name?.trim() || firstName,
     last_name: customer.last_name?.trim() || lastName,
     phone: customer.phone?.trim() || phone || null,
-    address: customer.address ?? address,
+    address: (customer.address ?? address) as CustomerContactFields['address'],
   };
 
   if (

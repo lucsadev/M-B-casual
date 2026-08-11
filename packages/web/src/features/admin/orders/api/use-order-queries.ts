@@ -63,7 +63,7 @@ async function fetchAdminOrders(
     .select('*, order_items(count)', { count: 'exact' });
 
   if (filters.status && filters.status !== 'all') {
-    query = query.eq('status', filters.status);
+    query = query.eq('status', filters.status as Database['public']['Enums']['order_status']);
   }
 
   if (filters.search) {
@@ -102,6 +102,10 @@ async function fetchAdminOrders(
     updated_at: row.updated_at,
     customer_name: row.customer_name ?? 'Cuenta eliminada',
     item_count: row.order_items?.length ?? 0,
+    whatsapp_pending_notification_status: row.whatsapp_pending_notification_status ?? 'not_sent',
+    whatsapp_pending_notification_attempted_at: row.whatsapp_pending_notification_attempted_at ?? null,
+    whatsapp_pending_notified_at: row.whatsapp_pending_notified_at ?? null,
+    whatsapp_pending_notification_error: row.whatsapp_pending_notification_error ?? null,
   }));
 
   return buildPaginatedResponse(orders, count ?? 0, pagination);
