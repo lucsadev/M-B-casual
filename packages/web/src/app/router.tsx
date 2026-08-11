@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { RootLayout } from './layouts/root-layout.js';
 import { AdminLayout } from './layouts/admin-layout.js';
 import { HomePage } from '@/features/catalog/pages/home-page.js';
@@ -14,6 +14,7 @@ import { CustomerDetailPage } from '@/features/admin/customers/pages/CustomerDet
 import { OrderDetailPage } from '@/features/admin/orders/pages/OrderDetailPage.js';
 import { QuestionsPage } from '@/features/admin/questions/pages/QuestionsPage.js';
 import { ShippingSettingsPage } from '@/features/admin/shipping/pages/ShippingSettingsPage.js';
+import { ConfiguracionPage } from '@/features/admin/configuracion/pages/configuracion-page.js';
 import { NotFoundPage } from './pages/not-found.js';
 import { AdminGuard } from '@/features/admin/guards/AdminGuard.js';
 import { ProductListPage } from '@/features/admin/products/pages/ProductListPage.js';
@@ -125,7 +126,8 @@ export const router = createBrowserRouter([
       { path: 'clientes', element: <AdminCustomersPage /> },
       { path: 'clientes/:id', element: <CustomerDetailPage /> },
       { path: 'preguntas', element: <QuestionsPage /> },
-      { path: 'envios', element: <ShippingSettingsPage /> },
+      { path: 'configuracion', element: <ConfiguracionPage /> },
+      { path: 'envios', element: <Navigate to="/admin/configuracion" replace /> },
       // Finance routes (PR 3)
       { path: 'compras', element: <PurchasesPage /> },
       { path: 'gastos', element: <ExpensesPage /> },

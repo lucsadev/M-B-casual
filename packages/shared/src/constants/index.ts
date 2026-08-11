@@ -12,4 +12,6 @@ export { SORT_OPTIONS } from './sort-options.ts';
 export type { SortOption } from './sort-options.ts';
 export { calculateTotal, DEFAULT_SHIPPING_SETTINGS } from './shipping.ts';
 export type { ShippingSettings } from './shipping.ts';
+export { DEFAULT_BANK_TRANSFER_SETTINGS, hasTransferSettings } from './bank-transfer.ts';
+export type { BankTransferSettings } from './bank-transfer.ts';
 export * from './payment.ts';

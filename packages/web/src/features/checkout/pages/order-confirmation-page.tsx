@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { formatPrice, ORDER_STATUS } from '@mbt/shared';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useBankTransferSettings } from '@/features/shipping/hooks/use-bank-transfer-settings';
 
 interface OrderRow {
   id: string;
@@ -97,6 +98,7 @@ function getStatusDescription(status: string): string {
 export function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useOrder(id ?? '');
+  const transferSettings = useBankTransferSettings();
 
   // Loading state
   if (isLoading) {
@@ -208,7 +210,7 @@ export function OrderConfirmationPage() {
         </h2>
 
         <div className="divide-y divide-[#E2E2DC]">
-          {items.map((item: OrderItemRow & { product?: { name: string; images: string[] } }) => (
+          {items.map((item: OrderItemRow & { product?: { name: string; images: string[] | null } }) => (
             <div key={item.id} className="flex items-start gap-3 py-3">
               <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-[#F0F0EC]">
                 <img
@@ -275,6 +277,55 @@ export function OrderConfirmationPage() {
           </div>
         </div>
       </div>
+
+      {/* Bank transfer instructions */}
+      {order.payment_method === 'transferencia' &&
+        (transferSettings.alias || transferSettings.cbu) &&
+        (transferSettings.titular || transferSettings.banco) && (
+          <div className="mb-8 rounded-lg border border-[#E8836B]/30 bg-[#E8836B]/5 p-6">
+            <h2 className="mb-3 text-base font-bold text-[#1A1A1A]">
+              Datos de transferencia
+            </h2>
+            <p className="mb-4 text-sm text-[#1A1A1A]/60">
+              Realizá una transferencia por <strong>{formatPrice(orderTotal)}</strong> a la siguiente cuenta:
+            </p>
+            <div className="space-y-2 rounded-md bg-white p-4 text-sm">
+              {transferSettings.banco && (
+                <div className="flex justify-between">
+                  <span className="text-[#1A1A1A]/60">Banco</span>
+                  <span className="font-medium text-[#1A1A1A]">{transferSettings.banco}</span>
+                </div>
+              )}
+              {transferSettings.titular && (
+                <div className="flex justify-between">
+                  <span className="text-[#1A1A1A]/60">Titular</span>
+                  <span className="font-medium text-[#1A1A1A]">{transferSettings.titular}</span>
+                </div>
+              )}
+              {transferSettings.alias && (
+                <div className="flex justify-between">
+                  <span className="text-[#1A1A1A]/60">Alias</span>
+                  <span className="font-mono font-medium text-[#1A1A1A]">{transferSettings.alias}</span>
+                </div>
+              )}
+              {transferSettings.cbu && (
+                <div className="flex justify-between">
+                  <span className="text-[#1A1A1A]/60">CBU / CVU</span>
+                  <span className="font-mono font-medium text-[#1A1A1A]">{transferSettings.cbu}</span>
+                </div>
+              )}
+            </div>
+            {transferSettings.extraInfo && (
+              <p className="mt-3 text-xs text-[#1A1A1A]/50">
+                {transferSettings.extraInfo}
+              </p>
+            )}
+            <p className="mt-3 text-xs text-[#1A1A1A]/50">
+              También te enviamos estos datos como mensaje. Los podés ver en
+              tu casilla de mensajes.
+            </p>
+          </div>
+        )}
 
       {/* CTA */}
       <div className="text-center">
