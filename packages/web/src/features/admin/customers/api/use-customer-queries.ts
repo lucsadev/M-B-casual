@@ -119,7 +119,7 @@ async function fetchCustomers(
     first_name: c.first_name,
     last_name: c.last_name,
     phone: c.phone,
-    address: c.address,
+    address: c.address as Record<string, unknown> | null,
     created_at: c.created_at,
     total_orders: statsMap[c.id]?.total_orders ?? 0,
     total_spent: statsMap[c.id]?.total_spent ?? 0,

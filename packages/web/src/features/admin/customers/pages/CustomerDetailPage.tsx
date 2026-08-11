@@ -184,7 +184,7 @@ export function CustomerDetailPage() {
               <div className="flex justify-between gap-6 border-b border-[#E2E2DC] pb-2">
                 <span className="text-sm text-[#1A1A1A]/60">Domicilio</span>
                 <span className="max-w-sm text-right text-sm font-medium">
-                  {formatAddress(customer.address)}
+                  {formatAddress(customer.address as Record<string, unknown> | null)}
                 </span>
               </div>
               <div className="flex justify-between border-b border-[#E2E2DC] pb-2">

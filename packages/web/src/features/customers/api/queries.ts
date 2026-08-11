@@ -29,7 +29,7 @@ function mapCustomer(row: CustomerRow, email: string): CustomerProfile {
     firstName: row.first_name,
     lastName: row.last_name,
     phone: row.phone,
-    address: row.address,
+    address: row.address as Record<string, unknown> | null,
     email,
     createdAt: row.created_at,
   };

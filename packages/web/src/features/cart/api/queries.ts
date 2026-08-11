@@ -36,7 +36,7 @@ interface CartItemJoined {
   product: {
     name: string;
     slug: string;
-    images: string[];
+    images: string[] | null;
     price: number;
   } | null;
   product_variant: {
@@ -65,7 +65,7 @@ function mapCartItem(row: CartItemJoined): CartItem {
     quantity: row.quantity,
     product_name: row.product?.name ?? '',
     product_slug: row.product?.slug ?? '',
-    product_image: row.product?.images[0] ?? null,
+    product_image: row.product?.images?.[0] ?? null,
     variant_label: row.product_variant
       ? [row.product_variant.size, row.product_variant.color]
           .filter(Boolean)
