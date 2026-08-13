@@ -13,8 +13,13 @@ export interface Product {
   slug: string;
   /** Short product description */
   description?: string;
-  /** Current selling price in ARS */
+  /** Current selling price in ARS (pack total when packUnits != null) */
   price: number;
+  /**
+   * Pack size: number of variants the buyer must pick for the single pack
+   * price. NULL = not a pack (standard unit product). 2 | 3 in v1.
+   */
+  packUnits?: number | null;
   /** Purchase price from supplier (used to compute margins). Optional. */
   cost?: number;
   /** Original price before discount (for showing savings). Computed from variant discounts: equals product.price when any variant has a discount. */

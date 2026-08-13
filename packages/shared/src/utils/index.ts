@@ -11,3 +11,4 @@ export {
   resolveNextSizeOnColorChange,
   resolveNextSizeOnSizeTap,
 } from './variants.ts';
+export { splitPackPrice, type SplitPackPriceInput, type SplitPackPriceResult } from './pack.ts';
