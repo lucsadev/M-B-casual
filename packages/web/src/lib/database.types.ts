@@ -863,6 +863,7 @@ export type Database = {
           images: string[] | null
           is_active: boolean
           name: string
+          pack_units: number | null
           price: number
           slug: string
           tags: string[] | null
@@ -877,6 +878,7 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean
           name: string
+          pack_units?: number | null
           price: number
           slug: string
           tags?: string[] | null
@@ -891,6 +893,7 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean
           name?: string
+          pack_units?: number | null
           price?: number
           slug?: string
           tags?: string[] | null

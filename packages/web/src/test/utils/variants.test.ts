@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
   getAvailableSizes,
   getAvailableColors,
+  getAllSizes,
+  getAllColors,
+  hasStockFor,
   getFirstInStockSize,
   resolveInStockVariantId,
   resolveDefaultSelection,
@@ -89,6 +92,74 @@ describe('getAvailableSizes', () => {
 describe('getAvailableColors', () => {
   it('returns only colors that have at least one in-stock variant', () => {
     expect(getAvailableColors(variants)).toEqual(['Negro', 'Blanco', 'Marfil']);
+  });
+});
+
+describe('getAllSizes', () => {
+  it('returns all distinct sizes including out-of-stock, sorted canonically', () => {
+    // L (stock 0 in Negro) and XL (stock 0 in Blanco) are included.
+    expect(getAllSizes(variants)).toEqual(['S', 'M', 'L', 'XL', 'Único', 'unico']);
+  });
+
+  it('scopes to the selected color including its out-of-stock sizes', () => {
+    expect(getAllSizes(variants, 'Negro')).toEqual(['S', 'M', 'L']);
+    expect(getAllSizes(variants, 'Blanco')).toEqual(['M', 'XL']);
+    expect(getAllSizes(variants, 'Marfil')).toEqual(['Único', 'unico']);
+  });
+
+  it('does not leak sizes that exist only in another color', () => {
+    expect(getAllSizes(variants, 'Blanco')).not.toContain('S');
+  });
+
+  it('returns an empty array for an unknown color or empty variants', () => {
+    expect(getAllSizes(variants, 'Inexistente')).toEqual([]);
+    expect(getAllSizes([])).toEqual([]);
+  });
+});
+
+describe('getAllColors', () => {
+  it('returns all distinct colors including colors whose every variant has stock 0', () => {
+    expect(getAllColors(variants)).toEqual(['Negro', 'Blanco', 'Marfil']);
+    // Rojo only exists with stock 0 (edgeVariants) but is still present.
+    expect(getAllColors(edgeVariants)).toEqual(['Negro', 'Blanco', 'Rojo']);
+  });
+
+  it('returns an empty array for empty variants', () => {
+    expect(getAllColors([])).toEqual([]);
+  });
+});
+
+describe('hasStockFor', () => {
+  it('returns true when a variant with the size+color has stock', () => {
+    expect(hasStockFor(variants, 'M', 'Negro')).toBe(true);
+    expect(hasStockFor(variants, 'M', 'Blanco')).toBe(true);
+  });
+
+  it('returns false when the matching variant has stock 0', () => {
+    expect(hasStockFor(variants, 'L', 'Negro')).toBe(false);
+    expect(hasStockFor(variants, 'XL', 'Blanco')).toBe(false);
+  });
+
+  it('returns false when the size+color combo does not exist', () => {
+    expect(hasStockFor(variants, 'S', 'Blanco')).toBe(false);
+  });
+
+  it('supports size-only checks across any color', () => {
+    // XXL has stock 0 in Negro but stock 2 in Blanco — any color wins.
+    expect(hasStockFor(edgeVariants, 'XXL', null)).toBe(true);
+    // S only exists with stock 0 (Rojo).
+    expect(hasStockFor(edgeVariants, 'S', null)).toBe(false);
+  });
+
+  it('supports color-only checks across any size', () => {
+    expect(hasStockFor(variants, null, 'Negro')).toBe(true);
+    expect(hasStockFor(edgeVariants, null, 'Rojo')).toBe(false);
+  });
+
+  it('treats undefined and null identically', () => {
+    expect(hasStockFor(variants, undefined, 'Negro')).toBe(
+      hasStockFor(variants, null, 'Negro'),
+    );
   });
 });
 

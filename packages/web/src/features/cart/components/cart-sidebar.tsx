@@ -8,11 +8,12 @@
  * Implemented as a fixed overlay panel that slides in from the right.
  * Uses CSS transitions for the slide animation.
  */
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartContext } from '../context/CartContext';
 import { useUpdateQty, useRemoveItem } from '../hooks/use-cart';
 import { CartItemRow } from './cart-item-row';
+import { CartPackGroup } from './cart-pack-group';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@mbt/shared';
@@ -57,6 +58,30 @@ export function CartSidebar({ open, onClose }: CartSidebarProps) {
     },
     [updateQty],
   );
+
+  // Group items: pack rows (pack_units != null) share a product_id and are
+  // rendered via CartPackGroup; non-pack items render normally.
+  const { packGroups, soloItems } = useMemo(() => {
+    const packMap = new Map<string, { packUnits: number; items: typeof items }>();
+    const solo: typeof items = [];
+
+    for (const item of items) {
+      if (item.pack_units != null && item.pack_units >= 2) {
+        const existing = packMap.get(item.product_id);
+        if (existing) {
+          existing.items.push(item);
+        } else {
+          packMap.set(item.product_id, {
+            packUnits: item.pack_units,
+            items: [item],
+          });
+        }
+      } else {
+        solo.push(item);
+      }
+    }
+    return { packGroups: packMap, soloItems: solo };
+  }, [items]);
 
   return (
     <>
@@ -150,7 +175,21 @@ export function CartSidebar({ open, onClose }: CartSidebarProps) {
           ) : (
             /* Items list */
             <div className="divide-y divide-[#E2E2DC]">
-              {items.map((item) => (
+              {Array.from(packGroups.entries()).map(
+                ([productId, { packUnits, items: packItems }]) => (
+                  <CartPackGroup
+                    key={`pack-${productId}`}
+                    items={packItems}
+                    packUnits={packUnits}
+                    variant="compact"
+                    onIncrement={handleIncrement}
+                    onDecrement={handleDecrement}
+                    onRemove={(itemId) => removeItem(itemId)}
+                    isUpdating={isUpdating || isRemoving}
+                  />
+                ),
+              )}
+              {soloItems.map((item) => (
                 <CartItemRow
                   key={item.id}
                   item={item}

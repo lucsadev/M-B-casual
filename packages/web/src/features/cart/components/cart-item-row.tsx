@@ -19,6 +19,10 @@ interface CartItemRowProps {
   item: CartItem;
   /** Compact mode (for sidebar) vs full mode (for cart page) */
   variant?: 'compact' | 'full';
+  /** Override displayed unit price (used for pack split display) */
+  displayUnitPrice?: number;
+  /** Override computed line total (used for pack split subtotals with remainder) */
+  lineTotal?: number;
   onIncrement: () => void;
   onDecrement: () => void;
   onRemove: () => void;
@@ -28,12 +32,14 @@ interface CartItemRowProps {
 export function CartItemRow({
   item,
   variant = 'compact',
+  displayUnitPrice,
+  lineTotal: lineTotalProp,
   onIncrement,
   onDecrement,
   onRemove,
   isUpdating,
 }: CartItemRowProps) {
-  const lineTotal = item.unit_price * item.quantity;
+  const lineTotal = lineTotalProp ?? item.unit_price * item.quantity;
   const imageUrl = item.product_image ?? '/placeholder-product.svg';
 
   return (
@@ -62,7 +68,14 @@ export function CartItemRow({
               {item.product_name}
             </h3>
             {item.variant_label && (
-              <p className="text-xs text-[#1A1A1A]/50">{item.variant_label}</p>
+              <p className="text-xs text-[#1A1A1A]/50">
+                {item.variant_label}
+                {displayUnitPrice != null && (
+                  <span className="ml-1 text-[#1A1A1A]/40">
+                    ({formatPrice(displayUnitPrice)} c/u)
+                  </span>
+                )}
+              </p>
             )}
           </div>
 
