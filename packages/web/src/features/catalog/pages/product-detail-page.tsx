@@ -18,14 +18,17 @@ import {
   formatPrice,
   getAvailableSizes,
   getAvailableColors,
+  getInStockVariants,
   resolveInStockVariantId,
   resolveDefaultSelection,
   resolveNextSizeOnColorChange,
   resolveNextSizeOnSizeTap,
+  splitPackPrice,
 } from '@mbt/shared';
 import { useProduct } from '../hooks/use-product';
 import { useCategories } from '../hooks/use-categories';
 import { useImageDrag } from '../hooks/use-image-drag';
+import type { ProductVariant } from '@mbt/shared';
 import { useCartContext } from '@/features/cart/context/CartContext';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ProductQuestions } from '../components/product-questions';
@@ -44,11 +47,15 @@ export function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
+  // Pack builder state: array of {size, color} per slot, length = packUnits
+  const [packSlots, setPackSlots] = useState<Array<{ size: string | null; color: string | null }>>([]);
+
   // Reset selection when product (slug) changes
   useEffect(() => {
     setSelectedImageIndex(0);
     setSelectedSize(null);
     setSelectedColor(null);
+    setPackSlots([]);
   }, [slug]);
 
   // Pre-select a default in-stock variant so the user starts with a valid
@@ -159,6 +166,17 @@ export function ProductDetailPage() {
 
   const { addToCart, isAddingToCart } = useCartContext();
 
+  // Derived pack flag
+  const isPack = product.packUnits != null && product.packUnits >= 2;
+  const packUnits = isPack ? (product.packUnits as number) : 0;
+
+  // Initialize pack slots when product loads as a pack
+  useEffect(() => {
+    if (isPack && packUnits > 0 && packSlots.length !== packUnits) {
+      setPackSlots(Array.from({ length: packUnits }, () => ({ size: null, color: null })));
+    }
+  }, [isPack, packUnits]);
+
   // Filter variants with stock
   const sizes = getAvailableSizes(product.variants, selectedColor);
   const colors = getAvailableColors(product.variants);
@@ -181,6 +199,41 @@ export function ProductDetailPage() {
     variantDiscount > 0
       ? Math.round(product.price * (1 - variantDiscount / 100) * 100) / 100
       : product.price;
+
+  // Pack builder: repeat-aware stock. `pickedCounts` maps each variant id to
+  // how many pack slots currently demand it. A variant stays pickable in a
+  // slot while the total demand across all slots does not exceed its stock
+  // (repeats allowed while stock permits — design 5.2).
+  const pickedCounts = isPack
+    ? packSlots.reduce((counts, slot) => {
+        if (!slot.size || !slot.color) return counts;
+        const vid = resolveInStockVariantId(
+          product.variants,
+          slot.size,
+          slot.color,
+        );
+        if (vid) counts.set(vid, (counts.get(vid) ?? 0) + 1);
+        return counts;
+      }, new Map<string, number>())
+    : new Map<string, number>();
+
+  // A slot is valid when it resolves to an in-stock variant and the total
+  // demand (including this slot) stays within the variant's stock.
+  const isPackSlotValid = (slot: {
+    size: string | null;
+    color: string | null;
+  }): boolean => {
+    if (!slot.size || !slot.color) return false;
+    const vid = resolveInStockVariantId(
+      product.variants,
+      slot.size,
+      slot.color,
+    );
+    if (!vid) return false;
+    const variant = product.variants.find((v) => v.id === vid);
+    if (!variant) return false;
+    return variant.stock >= (pickedCounts.get(vid) ?? 0);
+  };
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-4 md:py-6">
@@ -347,7 +400,14 @@ export function ProductDetailPage() {
             </h1>
 
             <div className="mt-3">
-              {variantDiscount > 0 && (
+              {isPack && (
+                <div className="mb-1 flex items-center gap-2">
+                  <Badge variant="default" className="bg-[#1A1A1A] text-white">
+                    Pack x{packUnits}
+                  </Badge>
+                </div>
+              )}
+              {!isPack && variantDiscount > 0 && (
                 <div className="mb-1 flex items-center gap-2">
                   <span className="text-xs font-medium text-[#1A1A1A]/40">Antes</span>
                   <span className="text-sm text-[#1A1A1A]/40 line-through">
@@ -357,8 +417,13 @@ export function ProductDetailPage() {
                 </div>
               )}
               <span className="text-3xl font-bold text-[#1A1A1A]">
-                {formatPrice(effectivePrice)}
+                {formatPrice(isPack ? product.price : effectivePrice)}
               </span>
+              {isPack && (
+                <p className="mt-1 text-xs text-[#1A1A1A]/50">
+                  Precio total del pack
+                </p>
+              )}
             </div>
           </div>
 
@@ -391,64 +456,227 @@ export function ProductDetailPage() {
             </div>
           )}
 
-          {/* Size selector */}
-          {sizes.length > 0 && (
-            <div>
-              <h2 className="mb-2 text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide">
-                Talle
+          {/* Variant selector — pack builder or single selector */}
+          {isPack ? (
+            /* ---- Pack builder: N slot pickers (repeats allowed while stock permits) ---- */
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide">
+                Elegí las variantes del pack
               </h2>
-              <div className="flex flex-wrap gap-2">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => {
-                      // Same no-toggle semantics as mobile: tapping the
-                      // already-selected size keeps it selected.
-                      const next = resolveNextSizeOnSizeTap(
-                        product.variants,
-                        selectedSize,
-                        size,
-                        selectedColor,
-                      );
-                      if (next !== null) setSelectedSize(next);
-                    }}
-                    className={cn(
-                      'min-w-[3rem] rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
-                      selectedSize === size
-                        ? 'border-[#E8836B] bg-[#E8836B] text-white'
-                        : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
-                    )}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+              {packSlots.map((slot, slotIdx) => {
+                const slotSizes = getAvailableSizes(product.variants, slot.color);
+                const slotColors = getAvailableColors(product.variants);
+                const slotVariantId =
+                  slot.size && slot.color
+                    ? resolveInStockVariantId(product.variants, slot.size, slot.color)
+                    : null;
+                const slotVariant = slotVariantId
+                  ? product.variants.find((v) => v.id === slotVariantId)
+                  : null;
+                const slotValid =
+                  slotVariant != null &&
+                  slotVariant.stock >= (pickedCounts.get(slotVariant.id) ?? 0);
+                const slotUnitPrice = slotVariantId
+                  ? splitPackPrice({
+                      total: product.price,
+                      packUnits,
+                      rowIndex: slotIdx + 1,
+                      rowCount: packUnits,
+                    }).unitPrice
+                  : null;
+                // A size/color chip is exhausted when EVERY in-stock variant
+                // it resolves to is already fully committed by other slots.
+                const isChipExhausted = (candidates: ProductVariant[]): boolean =>
+                  candidates.every((v) => {
+                    const pickedElsewhere =
+                      (pickedCounts.get(v.id) ?? 0) -
+                      (slotVariantId === v.id ? 1 : 0);
+                    return v.stock - pickedElsewhere <= 0;
+                  });
 
-          {/* Color selector */}
-          {colors.length > 0 && (
-            <div>
-              <h2 className="mb-2 text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide">
-                Color
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
-                      selectedColor === color
-                        ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
-                        : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
-                    )}
+                return (
+                  <div
+                    key={slotIdx}
+                    data-testid={`pack-slot-${slotIdx + 1}`}
+                    className="rounded-md border border-[#E2E2DC] p-3 space-y-2"
                   >
-                    {color}
-                  </button>
-                ))}
-              </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-[#1A1A1A]/60 uppercase">
+                        Unidad {slotIdx + 1} / {packUnits}
+                      </span>
+                      {slotUnitPrice != null && (
+                        <span className="text-xs font-medium text-[#E8836B]">
+                          {formatPrice(slotUnitPrice)}
+                        </span>
+                      )}
+                    </div>
+                    {/* Size chips */}
+                    {slotSizes.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {slotSizes.map((size) => {
+                          const candidates = getInStockVariants(
+                            product.variants,
+                          ).filter(
+                            (v) =>
+                              v.size === size &&
+                              (!slot.color || v.color === slot.color),
+                          );
+                          const exhausted = isChipExhausted(candidates);
+                          return (
+                            <button
+                              key={size}
+                              type="button"
+                              disabled={exhausted}
+                              onClick={() => {
+                                const newSlots = [...packSlots];
+                                const newColor = newSlots[slotIdx].color;
+                                newSlots[slotIdx] = { size, color: newColor };
+                                // Auto-select color if none picked and size is
+                                // available in exactly one in-stock color
+                                if (!newColor) {
+                                  const inStock = getInStockVariants(
+                                    product.variants,
+                                  ).filter((v) => v.size === size);
+                                  if (inStock.length === 1) {
+                                    newSlots[slotIdx].color = inStock[0].color ?? null;
+                                  }
+                                }
+                                setPackSlots(newSlots);
+                              }}
+                              className={cn(
+                                'min-w-[2.5rem] rounded-md border px-2 py-1 text-xs font-medium transition-colors',
+                                slot.size === size
+                                  ? 'border-[#E8836B] bg-[#E8836B] text-white'
+                                  : exhausted
+                                    ? 'cursor-not-allowed border-[#E2E2DC] bg-[#F0F0EC] text-[#1A1A1A]/30'
+                                    : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
+                              )}
+                            >
+                              {size}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {/* Color chips */}
+                    {slotColors.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {slotColors.map((color) => {
+                          const candidates = getInStockVariants(
+                            product.variants,
+                          ).filter(
+                            (v) =>
+                              v.color === color &&
+                              (!slot.size || v.size === slot.size),
+                          );
+                          const exhausted = isChipExhausted(candidates);
+                          return (
+                            <button
+                              key={color}
+                              type="button"
+                              disabled={exhausted}
+                              onClick={() => {
+                                const newSlots = [...packSlots];
+                                const newSize = newSlots[slotIdx].size;
+                                newSlots[slotIdx] = { size: newSize, color };
+                                // Auto-select size if none picked and color has
+                                // exactly one in-stock size
+                                if (!newSize) {
+                                  const inStock = getInStockVariants(
+                                    product.variants,
+                                  ).filter((v) => v.color === color);
+                                  if (inStock.length === 1) {
+                                    newSlots[slotIdx].size = inStock[0].size ?? null;
+                                  }
+                                }
+                                setPackSlots(newSlots);
+                              }}
+                              className={cn(
+                                'flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition-colors',
+                                slot.color === color
+                                  ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
+                                  : exhausted
+                                    ? 'cursor-not-allowed border-[#E2E2DC] bg-[#F0F0EC] text-[#1A1A1A]/30'
+                                    : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
+                              )}
+                            >
+                              {color}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {/* Insufficient stock state for this slot */}
+                    {slot.size && slot.color && !slotValid && (
+                      <p className="text-xs font-medium text-red-500">
+                        Sin stock para esta variante
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          ) : (
+            /* ---- Single product selector ---- */
+            <>
+              {/* Size selector */}
+              {sizes.length > 0 && (
+                <div>
+                  <h2 className="mb-2 text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide">
+                    Talle
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          const next = resolveNextSizeOnSizeTap(
+                            product.variants,
+                            selectedSize,
+                            size,
+                            selectedColor,
+                          );
+                          if (next !== null) setSelectedSize(next);
+                        }}
+                        className={cn(
+                          'min-w-[3rem] rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+                          selectedSize === size
+                            ? 'border-[#E8836B] bg-[#E8836B] text-white'
+                            : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
+                        )}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Color selector */}
+              {colors.length > 0 && (
+                <div>
+                  <h2 className="mb-2 text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide">
+                    Color
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={cn(
+                          'flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+                          selectedColor === color
+                            ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
+                            : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
+                        )}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Stock indicator */}
@@ -473,18 +701,40 @@ export function ProductDetailPage() {
           {/* Add to cart button */}
           <Button
             size="lg"
-            disabled={totalStock === 0 || isAddingToCart || !selectedVariantId}
+            disabled={
+              isPack
+                ? totalStock === 0 ||
+                  isAddingToCart ||
+                  packSlots.length !== packUnits ||
+                  packSlots.some((s) => !isPackSlotValid(s))
+                : totalStock === 0 || isAddingToCart || !selectedVariantId
+            }
             onClick={() => {
-              // Defense-in-depth: never call addToCart without a resolved
-              // in-stock variant. The disabled prop is the primary guard; this
-              // covers race conditions where the selection cleared between the
-              // render and the click.
-              if (!selectedVariantId) return;
-              addToCart({
-                product_id: product.id,
-                variant_id: selectedVariantId,
-                quantity: 1,
-              });
+              if (isPack) {
+                // Collapse pack slots → Map<variantId, qty>, then add each entry
+                const variantQtyMap = new Map<string, number>();
+                for (const slot of packSlots) {
+                  if (!slot.size || !slot.color) return;
+                  const vid = resolveInStockVariantId(product.variants, slot.size, slot.color);
+                  if (!vid) return;
+                  variantQtyMap.set(vid, (variantQtyMap.get(vid) ?? 0) + 1);
+                }
+                // Add each distinct variant as a separate cart row (upsert accumulates qty)
+                for (const [variantId, qty] of variantQtyMap) {
+                  addToCart({
+                    product_id: product.id,
+                    variant_id: variantId,
+                    quantity: qty,
+                  });
+                }
+              } else {
+                if (!selectedVariantId) return;
+                addToCart({
+                  product_id: product.id,
+                  variant_id: selectedVariantId,
+                  quantity: 1,
+                });
+              }
             }}
             className="w-full bg-[#E8836B] text-white hover:bg-[#E8836B]/90 sm:w-auto disabled:opacity-50"
           >
