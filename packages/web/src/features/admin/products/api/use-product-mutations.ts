@@ -34,6 +34,7 @@ interface CreateProductInput {
     category_id: string;
     price: number;
     cost?: number;
+    pack_units?: number | null;
     images?: string[];
     tags?: string[];
     is_active?: boolean;
@@ -143,6 +144,7 @@ interface UpdateProductInput {
     category_id?: string;
     price?: number;
     cost?: number;
+    pack_units?: number | null;
     images?: string[];
     tags?: string[];
     is_active?: boolean;
