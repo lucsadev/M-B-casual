@@ -3,7 +3,8 @@
  *
  * Covers the color-scoped size list wiring and the auto-select behavior:
  * - Mount preselect picks the first in-stock variant.
- * - Size list swaps to the selected color's in-stock sizes on color change.
+ * - Size list swaps to the selected color's full size set, with 0-stock chips
+ *   rendered disabled instead of hidden (Agotado feature).
  * - When the current size is unavailable in the newly selected color, the
  *   first in-stock size of that color is selected automatically.
  * - No-deselect: tapping the already-selected color or size chip is a no-op —
@@ -127,9 +128,11 @@ describe('ProductDetailPage variant selector', () => {
     fireEvent.click(blancoButton);
 
     await waitFor(() => {
-      // Blanco only has M in stock (XL is stock 0) — S must disappear.
+      // Blanco has M in stock and XL with stock 0 — the size list now shows ALL
+      // Blanco sizes, rendering the 0-stock XL disabled instead of hidden. S
+      // stays absent entirely (it does not exist as a Blanco variant).
       expect(screen.queryByRole('button', { name: 'S' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'XL' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'XL' })).toBeDisabled();
       expect(screen.getByRole('button', { name: 'M' })).toBeInTheDocument();
     });
   });
@@ -147,8 +150,10 @@ describe('ProductDetailPage variant selector', () => {
         'bg-[#E8836B]',
       );
     });
-    // The old size chip is gone entirely (size list is scoped to Blanco).
+    // The size list is scoped to Blanco: S (only a Negro size) is gone entirely;
+    // XL (0-stock in Blanco) renders but disabled.
     expect(screen.queryByRole('button', { name: 'S' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'XL' })).toBeDisabled();
   });
 
   it('keeps the current size when it is still available in the new color', async () => {
@@ -282,7 +287,8 @@ describe('ProductDetailPage variant selector', () => {
     );
 
     // The dead color is repaired to the only remaining in-stock option:
-    // Blanco chip highlighted, M size chip highlighted, Negro chip gone.
+    // Blanco chip highlighted, M size chip highlighted, Negro chip disabled
+    // (still rendered, now with no stock).
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Blanco' })).toHaveClass(
         'bg-[#E8836B]/10',
@@ -291,7 +297,7 @@ describe('ProductDetailPage variant selector', () => {
         'bg-[#E8836B]',
       );
     });
-    expect(screen.queryByRole('button', { name: 'Negro' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Negro' })).toBeDisabled();
   });
 });
 

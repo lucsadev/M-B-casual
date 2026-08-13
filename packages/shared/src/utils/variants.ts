@@ -48,6 +48,64 @@ export function getAvailableColors(variants: ProductVariant[]): string[] {
 }
 
 /**
+ * Unique sizes present in the data (INCLUDING stock = 0 variants), optionally
+ * scoped to a single color. When no color is selected, sizes are computed
+ * across all variants. Sorted in the canonical S/M/L/XL/XXL/Único order.
+ *
+ * Used to render out-of-stock size chips as disabled instead of hidden.
+ *
+ * @param variants - All product variants
+ * @param selectedColor - Color name to scope sizes to (optional)
+ * @returns Sorted unique size labels present for the color (or all variants)
+ */
+export function getAllSizes(
+  variants: ProductVariant[],
+  selectedColor?: string | null,
+): string[] {
+  const scoped = selectedColor
+    ? variants.filter((v) => v.color === selectedColor)
+    : variants;
+  const sizes = [...new Set(scoped.map((v) => v.size).filter(Boolean))] as string[];
+  return sizes.sort((a, b) => SIZE_ORDER.indexOf(a) - SIZE_ORDER.indexOf(b));
+}
+
+/**
+ * Unique colors present in the data (INCLUDING colors whose every variant has
+ * stock = 0).
+ *
+ * Used to render out-of-stock color chips as disabled instead of hidden.
+ *
+ * @param variants - All product variants
+ * @returns Unique color names present in the data
+ */
+export function getAllColors(variants: ProductVariant[]): string[] {
+  return [...new Set(variants.map((v) => v.color).filter(Boolean))] as string[];
+}
+
+/**
+ * Whether any variant matching the given size and/or color has stock > 0.
+ * An absent (null/undefined/empty) size or color does not constrain the match,
+ * mirroring `resolveInStockVariantId` semantics.
+ *
+ * @param variants - All product variants
+ * @param size - Size label to require, or null to match any size
+ * @param color - Color name to require, or null to match any color
+ * @returns True when a matching variant with stock > 0 exists
+ */
+export function hasStockFor(
+  variants: ProductVariant[],
+  size: string | null | undefined,
+  color: string | null | undefined,
+): boolean {
+  return variants.some(
+    (v) =>
+      v.stock > 0 &&
+      (!size || v.size === size) &&
+      (!color || v.color === color),
+  );
+}
+
+/**
  * First size with stock > 0 for the given color, or across all colors when
  * no color is given. Honors the canonical S/M/L/XL/XXL/Único order used by
  * `getAvailableSizes`.

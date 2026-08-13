@@ -40,7 +40,7 @@ function mapCategory(row: CategoryRow): Category {
   };
 }
 
-function mapProduct(row: ProductRow): Product {
+function mapProduct(row: ProductRow, totalStock?: number): Product {
   return {
     id: row.id,
     categoryId: row.category_id,
@@ -49,9 +49,11 @@ function mapProduct(row: ProductRow): Product {
     description: row.description ?? undefined,
     price: row.price,
     cost: row.cost ?? undefined,
+    packUnits: row.pack_units ?? null,
     images: row.images ?? [],
     tags: row.tags ?? [],
     isActive: row.is_active,
+    totalStock,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -88,6 +90,32 @@ function mapVariant(row: VariantRow): ProductVariant {
     sku: row.sku ?? undefined,
     createdAt: row.created_at,
   };
+}
+
+/**
+ * Sum `product_variants.stock` per product for the given product ids.
+ *
+ * Uses the same client-side aggregation pattern as the admin product list:
+ * the product query itself stays untouched (exact count semantics preserved)
+ * and stock is summed in a second query with `in(product_id, ...)`.
+ *
+ * @param productIds - Product ids to aggregate stock for
+ * @returns Map of product_id → total stock across its variants
+ */
+async function fetchStockTotals(
+  productIds: string[],
+): Promise<Record<string, number>> {
+  const totals: Record<string, number> = {};
+  if (productIds.length === 0) return totals;
+  const { data, error } = await supabase
+    .from('product_variants')
+    .select('product_id, stock')
+    .in('product_id', productIds);
+  if (error) throw error;
+  for (const row of data ?? []) {
+    totals[row.product_id] = (totals[row.product_id] ?? 0) + row.stock;
+  }
+  return totals;
 }
 
 // ---------------------------------------------------------------------------
@@ -175,7 +203,11 @@ export async function getProducts(
 
   if (error) throw error;
 
-  const products = (data ?? []).map(mapProduct);
+  const rows = data ?? [];
+  const stockTotals = await fetchStockTotals(rows.map((row) => row.id));
+  const products = rows.map((row) =>
+    mapProduct(row, stockTotals[row.id] ?? 0),
+  );
   return buildPaginatedResponse(products, count ?? 0, pagination);
 }
 
@@ -266,7 +298,7 @@ interface DiscountedProductRow {
   max_discount: number | null;
 }
 
-function mapDiscountedProduct(row: DiscountedProductRow): Product {
+function mapDiscountedProduct(row: DiscountedProductRow, totalStock?: number): Product {
   return {
     id: row.id ?? '',
     categoryId: row.category_id ?? '',
@@ -282,6 +314,7 @@ function mapDiscountedProduct(row: DiscountedProductRow): Product {
     updatedAt: row.updated_at ?? '',
     effectivePrice: row.effective_price ?? undefined,
     variantDiscountPercent: row.max_discount ?? undefined,
+    totalStock,
   };
 }
 
@@ -302,6 +335,14 @@ export async function getDiscountedProducts(
     .limit(limit);
 
   if (error) throw error;
-  return (data ?? []).map(mapDiscountedProduct);
+
+  const rows = data ?? [];
+  const ids = rows
+    .map((row) => row.id)
+    .filter((id): id is string => id != null);
+  const stockTotals = await fetchStockTotals(ids);
+  return rows.map((row) =>
+    mapDiscountedProduct(row, stockTotals[row.id ?? ''] ?? 0),
+  );
 }
 

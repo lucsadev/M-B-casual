@@ -18,6 +18,9 @@ import {
   formatPrice,
   getAvailableSizes,
   getAvailableColors,
+  getAllSizes,
+  getAllColors,
+  hasStockFor,
   getInStockVariants,
   resolveInStockVariantId,
   resolveDefaultSelection,
@@ -120,7 +123,19 @@ export function ProductDetailPage() {
     onIndexChange: setSelectedImageIndex,
   });
 
-  // SEO title — moved to <SEO /> component in the JSX below
+  // useCartContext must be BEFORE early returns to satisfy React's Rules of Hooks.
+  const { addToCart, isAddingToCart } = useCartContext();
+
+  // Derived pack flag
+  const isPack = product?.packUnits != null && product.packUnits >= 2;
+  const packUnits = isPack ? (product?.packUnits as number) : 0;
+
+  // Initialize pack slots when product loads as a pack
+  useEffect(() => {
+    if (isPack && packUnits > 0 && packSlots.length !== packUnits) {
+      setPackSlots(Array.from({ length: packUnits }, () => ({ size: null, color: null })));
+    }
+  }, [isPack, packUnits]);
 
   // Loading state
   if (isLoading) {
@@ -164,22 +179,11 @@ export function ProductDetailPage() {
   // Resolve category name for breadcrumb
   const category = categories?.find((c) => c.id === product.categoryId);
 
-  const { addToCart, isAddingToCart } = useCartContext();
-
-  // Derived pack flag
-  const isPack = product.packUnits != null && product.packUnits >= 2;
-  const packUnits = isPack ? (product.packUnits as number) : 0;
-
-  // Initialize pack slots when product loads as a pack
-  useEffect(() => {
-    if (isPack && packUnits > 0 && packSlots.length !== packUnits) {
-      setPackSlots(Array.from({ length: packUnits }, () => ({ size: null, color: null })));
-    }
-  }, [isPack, packUnits]);
-
-  // Filter variants with stock
-  const sizes = getAvailableSizes(product.variants, selectedColor);
-  const colors = getAvailableColors(product.variants);
+  // All sizes/colors present in the data (INCLUDING stock = 0 variants), scoped
+  // to the selected color for sizes. 0-stock chips render disabled instead of
+  // being hidden, so the user sees the full catalog of variants.
+  const sizes = getAllSizes(product.variants, selectedColor);
+  const colors = getAllColors(product.variants);
 
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 
@@ -626,28 +630,42 @@ export function ProductDetailPage() {
                     Talle
                   </h2>
                   <div className="flex flex-wrap gap-2">
-                    {sizes.map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => {
-                          const next = resolveNextSizeOnSizeTap(
-                            product.variants,
-                            selectedSize,
-                            size,
-                            selectedColor,
-                          );
-                          if (next !== null) setSelectedSize(next);
-                        }}
-                        className={cn(
-                          'min-w-[3rem] rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
-                          selectedSize === size
-                            ? 'border-[#E8836B] bg-[#E8836B] text-white'
-                            : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
-                        )}
-                      >
-                        {size}
-                      </button>
-                    ))}
+                    {sizes.map((size) => {
+                      // A size chip is enabled when an in-stock variant exists
+                      // for that size in the selected color (0-stock disabled).
+                      const inStock = hasStockFor(
+                        product.variants,
+                        size,
+                        selectedColor,
+                      );
+                      const selected = selectedSize === size;
+                      return (
+                        <button
+                          key={size}
+                          type="button"
+                          disabled={!inStock}
+                          onClick={() => {
+                            const next = resolveNextSizeOnSizeTap(
+                              product.variants,
+                              selectedSize,
+                              size,
+                              selectedColor,
+                            );
+                            if (next !== null) setSelectedSize(next);
+                          }}
+                          className={cn(
+                            'min-w-[3rem] rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+                            selected
+                              ? 'border-[#E8836B] bg-[#E8836B] text-white'
+                              : inStock
+                                ? 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]'
+                                : 'cursor-not-allowed border-[#E2E2DC] bg-[#F0F0EC] text-[#1A1A1A]/30',
+                          )}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -659,20 +677,34 @@ export function ProductDetailPage() {
                     Color
                   </h2>
                   <div className="flex flex-wrap gap-2">
-                    {colors.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={cn(
-                          'flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
-                          selectedColor === color
-                            ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
-                            : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
-                        )}
-                      >
-                        {color}
-                      </button>
-                    ))}
+                    {colors.map((color) => {
+                      // A color chip is enabled when any in-stock variant exists
+                      // in that color (0-stock colors render disabled).
+                      const inStock = hasStockFor(
+                        product.variants,
+                        null,
+                        color,
+                      );
+                      const selected = selectedColor === color;
+                      return (
+                        <button
+                          key={color}
+                          type="button"
+                          disabled={!inStock}
+                          onClick={() => setSelectedColor(color)}
+                          className={cn(
+                            'flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+                            selected
+                              ? 'border-[#E8836B] bg-[#E8836B]/10 text-[#E8836B]'
+                              : inStock
+                                ? 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]'
+                                : 'cursor-not-allowed border-[#E2E2DC] bg-[#F0F0EC] text-[#1A1A1A]/30',
+                          )}
+                        >
+                          {color}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

@@ -8,7 +8,7 @@
  * - Balance tracking for partial payments
  * - Pack product support: N-slot picker with split pricing (design 5.4)
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -522,12 +522,19 @@ function PackVariantPickerDialog({
   ) => void;
   itemsInSale?: SaleItem[];
 }) {
-  if (!product || !product.pack_units) return null;
-
-  const packUnits = product.pack_units;
+  const packUnits = product?.pack_units ?? 0;
   const [slots, setSlots] = useState<Array<{ variantId: string | null }>>(
-    () => Array.from({ length: packUnits }, () => ({ variantId: null })),
+    () => Array.from({ length: packUnits || 2 }, () => ({ variantId: null })),
   );
+
+  // Re-initialize slots when packUnits changes (e.g. different product)
+  useEffect(() => {
+    if (packUnits >= 2) {
+      setSlots(Array.from({ length: packUnits }, () => ({ variantId: null })));
+    }
+  }, [packUnits]);
+
+  if (!product || !product.pack_units || product.pack_units < 2) return null;
 
   // Available variants with stock (considering items already in sale)
   const getAvailableStock = (variantId: string) => {

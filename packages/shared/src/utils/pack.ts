@@ -70,3 +70,44 @@ export function splitPackPrice(input: SplitPackPriceInput): SplitPackPriceResult
     subtotal: subtotalCents / 100,
   };
 }
+
+/** Minimal shape required to compute a pack-aware cart subtotal. */
+export interface CartSubtotalItem {
+  product_id: string;
+  /** products.pack_units — null for non-pack items */
+  pack_units: number | null;
+  /** Full (possibly discounted) price per unit as stored in the cart query */
+  unit_price: number;
+  quantity: number;
+  /** products.price — the pack total (used once per pack group) */
+  product_price: number;
+}
+
+/**
+ * Compute a pack-aware cart subtotal.
+ *
+ * For pack products the published price covers ALL N variant units, so the
+ * group contributes `product_price` exactly ONCE regardless of how the pack
+ * rows are split or collapsed in the cart. Non-pack items contribute
+ * `unit_price * quantity` as usual.
+ *
+ * Mirrors the authoritative create_order_from_cart RPC: for every pack group
+ * the charged total equals products.price.
+ */
+export function computeCartSubtotal(items: CartSubtotalItem[]): number {
+  const countedPacks = new Set<string>();
+  let subtotal = 0;
+
+  for (const item of items) {
+    if (item.pack_units != null && item.pack_units >= 2) {
+      if (!countedPacks.has(item.product_id)) {
+        countedPacks.add(item.product_id);
+        subtotal += item.product_price;
+      }
+    } else {
+      subtotal += item.unit_price * item.quantity;
+    }
+  }
+
+  return Math.round(subtotal * 100) / 100;
+}
