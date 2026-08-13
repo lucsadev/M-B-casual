@@ -546,6 +546,10 @@ comment on function public.get_admin_users is 'Returns list of admin users. Only
 -- ---------------------------------------------------------------------------
 -- 5.7  create_order_from_cart(jsonb, text) — atomic checkout RPC
 --      Considers variant-level discount when computing unit_price and total.
+--      Pack-aware split pricing (00007): floor cents per unit, last row
+--      of each pack group absorbs the remainder so subtotals sum to
+--      products.price EXACTLY. Non-pack products are unaffected.
+--      Reconciled from 00004 (shipping settings + bank transfer message).
 -- ---------------------------------------------------------------------------
 create or replace function public.create_order_from_cart(
   p_shipping_address jsonb,
@@ -557,12 +561,21 @@ security definer
 set search_path = public
 as $$
 declare
-  v_user_id      uuid;
-  v_customer_id  uuid;
-  v_order_id     uuid;
-  v_total        numeric(10,2);
-  v_shipping_cost numeric(10,2) := 0;
-  v_cart_count   int;
+  v_user_id          uuid;
+  v_customer_id      uuid;
+  v_order_id         uuid;
+  v_total            numeric(10,2);
+  v_free_shipping_min numeric(10,2) := 0;
+  v_shipping_cost    numeric(10,2) := 0;
+  v_cart_count       int;
+  v_order_number     text;
+  -- Transfer settings
+  v_alias            text;
+  v_cbu              text;
+  v_titular          text;
+  v_banco            text;
+  v_extra_info       text;
+  v_message_body     text;
 begin
   -- 1. Authenticate
   v_user_id := auth.uid();
@@ -588,17 +601,51 @@ begin
     raise exception 'El carrito está vacío';
   end if;
 
-  -- 4. Calculate total with variant discount
+  -- 4. Calculate total using pack-aware split CTE
+  --    For pack products (pack_units NOT NULL): floor cents per unit, last row absorbs remainder
+  --    For non-pack products: identical to previous behavior (unit_price = discounted price)
+  with priced as (
+    select
+      ci.id,
+      ci.product_id,
+      ci.variant_id,
+      ci.quantity,
+      p.pack_units,
+      round(p.price * (1 - coalesce(pv.discount, 0)::numeric / 100), 2) as base,
+      row_number() over (partition by ci.product_id order by ci.created_at, ci.id) as rn,
+      count(*) over (partition by ci.product_id) as cnt
+    from cart_items ci
+    join products p on p.id = ci.product_id
+    left join product_variants pv on pv.id = ci.variant_id
+    where ci.user_id = v_user_id
+  ),
+  split as (
+    select
+      *,
+      case when pack_units is not null
+           then floor(base * 100 / pack_units) / 100
+           else base end as unit_price,
+      case when pack_units is not null
+           then mod((base * 100)::int, pack_units) / 100
+           else 0 end as remainder
+    from priced
+  )
   select coalesce(sum(
-    round(
-      (p.price * (1 - coalesce(pv.discount, 0)::numeric / 100)) * ci.quantity
-    , 2)
+    unit_price * quantity
+    + case when pack_units is not null and rn = cnt then remainder else 0 end
   ), 0)
   into v_total
-  from cart_items ci
-  join products p on p.id = ci.product_id
-  left join product_variants pv on pv.id = ci.variant_id
-  where ci.user_id = v_user_id;
+  from split;
+
+  -- 4b. Load shipping settings (fallback: free shipping)
+  select coalesce(free_shipping_min, 0), coalesce(shipping_cost, 0)
+  into v_free_shipping_min, v_shipping_cost
+  from shipping_settings
+  where id = true;
+
+  if v_total >= v_free_shipping_min then
+    v_shipping_cost := 0;
+  end if;
 
   -- 5. Insert order
   insert into orders (
@@ -620,33 +667,105 @@ begin
   )
   returning id into v_order_id;
 
-  -- 6. Insert order_items with variant-discounted unit_price
+  -- 5b. Generate short order number for display (first 8 chars of uuid)
+  v_order_number := left(v_order_id::text, 8);
+
+  -- 6. Insert order_items with pack-aware split pricing
+  --    Re-define the priced/split CTEs (CTEs are statement-scoped in PostgreSQL)
+  with priced as (
+    select
+      ci.id,
+      ci.product_id,
+      ci.variant_id,
+      ci.quantity,
+      p.pack_units,
+      round(p.price * (1 - coalesce(pv.discount, 0)::numeric / 100), 2) as base,
+      row_number() over (partition by ci.product_id order by ci.created_at, ci.id) as rn,
+      count(*) over (partition by ci.product_id) as cnt
+    from cart_items ci
+    join products p on p.id = ci.product_id
+    left join product_variants pv on pv.id = ci.variant_id
+    where ci.user_id = v_user_id
+  ),
+  split as (
+    select
+      *,
+      case when pack_units is not null
+           then floor(base * 100 / pack_units) / 100
+           else base end as unit_price,
+      case when pack_units is not null
+           then mod((base * 100)::int, pack_units) / 100
+           else 0 end as remainder
+    from priced
+  )
   insert into order_items (
     order_id, product_id, variant_id, quantity, unit_price, subtotal
   )
   select
     v_order_id,
-    ci.product_id,
-    ci.variant_id,
-    ci.quantity,
-    round(p.price * (1 - coalesce(pv.discount, 0)::numeric / 100), 2),
-    round((p.price * (1 - coalesce(pv.discount, 0)::numeric / 100)) * ci.quantity, 2)
-  from cart_items ci
-  join products p on p.id = ci.product_id
-  left join product_variants pv on pv.id = ci.variant_id
-  where ci.user_id = v_user_id;
+    product_id,
+    variant_id,
+    quantity,
+    unit_price,
+    unit_price * quantity
+    + case when pack_units is not null and rn = cnt then remainder else 0 end
+  from split;
 
   -- 7. Clear cart
   delete from cart_items
   where user_id = v_user_id;
 
-  -- 8. Return the new order id
+  -- 8. Auto-message: transfer instructions when payment is transferencia
+  if p_payment_method = 'transferencia' then
+    -- Read bank transfer settings
+    select alias, cbu, titular, banco, extra_info
+    into v_alias, v_cbu, v_titular, v_banco, v_extra_info
+    from bank_transfer_settings
+    where id = true;
+
+    -- Only send message if transfer details are configured
+    if (v_alias <> '' or v_cbu <> '') and (v_titular <> '' or v_banco <> '') then
+      v_message_body := 'Para confirmar tu pedido #' || v_order_number
+        || ', realizá una transferencia por $' || trim(to_char(v_total + v_shipping_cost, 'FM999G999G999D99'))
+        || ' a la siguiente cuenta:'
+        || E'\n\n';
+
+      if v_banco <> '' then
+        v_message_body := v_message_body || 'Banco: ' || v_banco || E'\n';
+      end if;
+      if v_titular <> '' then
+        v_message_body := v_message_body || 'Titular: ' || v_titular || E'\n';
+      end if;
+      if v_alias <> '' then
+        v_message_body := v_message_body || 'Alias: ' || v_alias || E'\n';
+      end if;
+      if v_cbu <> '' then
+        v_message_body := v_message_body || 'CBU/CVU: ' || v_cbu || E'\n';
+      end if;
+      if v_extra_info <> '' then
+        v_message_body := v_message_body || E'\n' || v_extra_info;
+      end if;
+
+      insert into messages (customer_id, order_id, type, title, body, is_read, created_at)
+      values (
+        v_customer_id,
+        v_order_id,
+        'payment_status',
+        'Datos de transferencia bancaria',
+        v_message_body,
+        false,
+        now()
+      );
+    end if;
+  end if;
+
+  -- 9. Return the new order id
   return v_order_id;
 end;
 $$;
 
 comment on function public.create_order_from_cart is
-  'Creates an order from the current user''s cart items. Considers variant-level discount when calculating unit_price. Returns the new order UUID.';
+  'Creates an order from the current user''s cart items. Pack-aware split pricing: floor cents per unit, last row absorbs remainder. Considers variant-level discount. Auto-sends transfer instructions on transferencia payment.';
 
 -- ---------------------------------------------------------------------------
 -- 5.8  update_stock_from_purchase(uuid) — stock increment helper (manual RPC)
