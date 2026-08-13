@@ -6,8 +6,9 @@
  * - Create new customers
  * - Create new sales with products, discounts, and payment tracking
  * - Balance tracking for partial payments
+ * - Pack product support: N-slot picker with split pricing (design 5.4)
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Plus, Search, ShoppingCart, UserPlus, Edit, X, Eye, HandCoins } from 'lucide-react';
+import { formatPrice, splitPackPrice, getAvailableSizes, getAvailableColors, getInStockVariants, resolveInStockVariantId } from '@mbt/shared';
+import { cn } from '@/lib/utils';
 import type { Database } from '@/lib/database.types';
 
 // ---------------------------------------------------------------------------
@@ -194,6 +197,7 @@ interface ProductWithVariants {
   id: string;
   name: string;
   price: number;
+  pack_units: number | null;
   variants: Array<{
     id: string;
     size: string | null;
@@ -206,7 +210,7 @@ interface ProductWithVariants {
 async function fetchProducts(search: string): Promise<ProductWithVariants[]> {
   let query = supabase
     .from('products')
-    .select('id, name, price, variants:product_variants(id, size, color, discount, stock)')
+    .select('id, name, price, pack_units, variants:product_variants(id, size, color, discount, stock)')
     .eq('is_active', true)
     .order('name', { ascending: true });
 
@@ -487,6 +491,213 @@ function VariantPickerDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Pack Variant Picker Dialog (design 5.4 — in-person pack support)
+// ---------------------------------------------------------------------------
+
+function PackVariantPickerDialog({
+  open,
+  onOpenChange,
+  product,
+  onConfirmPack,
+  itemsInSale = [],
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  product: ProductWithVariants | null;
+  onConfirmPack: (
+    product: ProductWithVariants,
+    packItems: Array<{
+      variant: ProductWithVariants['variants'][0];
+      unitPrice: number;
+      subtotal: number;
+    }>,
+  ) => void;
+  itemsInSale?: SaleItem[];
+}) {
+  const packUnits = product?.pack_units ?? 0;
+  const [slots, setSlots] = useState<Array<{ variantId: string | null }>>(
+    () => Array.from({ length: packUnits || 2 }, () => ({ variantId: null })),
+  );
+
+  // Re-initialize slots when packUnits changes (e.g. different product)
+  useEffect(() => {
+    if (packUnits >= 2) {
+      setSlots(Array.from({ length: packUnits }, () => ({ variantId: null })));
+    }
+  }, [packUnits]);
+
+  if (!product || !product.pack_units || product.pack_units < 2) return null;
+
+  // Available variants with stock (considering items already in sale)
+  const getAvailableStock = (variantId: string) => {
+    const variant = product.variants.find((v) => v.id === variantId);
+    if (!variant) return 0;
+    const alreadyInSale = itemsInSale
+      .filter((item) => item.variantId === variantId)
+      .reduce((sum, item) => sum + item.quantity, 0);
+    return variant.stock - alreadyInSale;
+  };
+
+  // Repeat-aware pick counts across slots
+  const pickedCounts = new Map<string, number>();
+  for (const slot of slots) {
+    if (slot.variantId) {
+      pickedCounts.set(slot.variantId, (pickedCounts.get(slot.variantId) ?? 0) + 1);
+    }
+  }
+
+  const allSlotsFilled = slots.every((s) => s.variantId !== null);
+  const allSlotsValid = slots.every((s) => {
+    if (!s.variantId) return false;
+    const stock = getAvailableStock(s.variantId);
+    const demand = pickedCounts.get(s.variantId) ?? 0;
+    return stock >= demand;
+  });
+
+  const handleConfirm = () => {
+    if (!allSlotsFilled || !allSlotsValid) return;
+
+    const packItems = slots.map((slot, idx) => {
+      const variant = product.variants.find((v) => v.id === slot.variantId)!;
+      const sp = splitPackPrice({
+        total: product.price,
+        packUnits,
+        quantity: 1,
+        rowIndex: idx + 1,
+        rowCount: packUnits,
+      });
+      return {
+        variant,
+        unitPrice: sp.unitPrice,
+        subtotal: sp.subtotal,
+      };
+    });
+
+    onConfirmPack(product, packItems);
+    setSlots(Array.from({ length: packUnits }, () => ({ variantId: null })));
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) {
+          setSlots(Array.from({ length: packUnits }, () => ({ variantId: null })));
+        }
+        onOpenChange(o);
+      }}
+    >
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            Pack x{packUnits} —{' '}
+            <span className="font-normal">{product.name}</span>
+          </DialogTitle>
+          <DialogDescription>
+            Elegí {packUnits} variantes. Repeticiones permitidas si hay stock.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-[#1A1A1A]">
+            Precio total del pack: {formatCurrency(product.price)}
+          </p>
+
+          {slots.map((slot, slotIdx) => {
+            const selectedVariant = slot.variantId
+              ? product.variants.find((v) => v.id === slot.variantId)
+              : null;
+            const isValid =
+              selectedVariant &&
+              getAvailableStock(selectedVariant.id) >=
+                (pickedCounts.get(selectedVariant.id) ?? 0);
+
+            return (
+              <div
+                key={slotIdx}
+                className="border rounded-md p-3 space-y-2"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-[#1A1A1A]/60 uppercase">
+                    Unidad {slotIdx + 1} / {packUnits}
+                  </span>
+                  {selectedVariant && isValid && (
+                    <span className="text-xs font-medium text-[#E8836B]">
+                      {formatCurrency(
+                        splitPackPrice({
+                          total: product.price,
+                          packUnits,
+                          rowIndex: slotIdx + 1,
+                          rowCount: packUnits,
+                        }).unitPrice,
+                      )}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {product.variants.map((variant) => {
+                    const stock = getAvailableStock(variant.id);
+                    const demand = pickedCounts.get(variant.id) ?? 0;
+                    const isExhausted = stock - demand <= 0;
+                    const label = `${variant.size || 'Único'}${variant.color ? ' · ' + variant.color : ''}`;
+
+                    return (
+                      <button
+                        key={variant.id}
+                        type="button"
+                        disabled={isExhausted}
+                        onClick={() => {
+                          const newSlots = [...slots];
+                          newSlots[slotIdx] = { variantId: variant.id };
+                          setSlots(newSlots);
+                        }}
+                        className={cn(
+                          'rounded-md border px-2 py-1 text-xs font-medium transition-colors',
+                          slot.variantId === variant.id
+                            ? 'border-[#E8836B] bg-[#E8836B] text-white'
+                            : isExhausted
+                              ? 'cursor-not-allowed border-[#E2E2DC] bg-[#F0F0EC] text-[#1A1A1A]/30'
+                              : 'border-[#E2E2DC] bg-white text-[#1A1A1A] hover:border-[#E8836B]',
+                        )}
+                      >
+                        {label}
+                        {variant.discount > 0 && (
+                          <span className="ml-1 text-[10px] opacity-70">
+                            -{variant.discount}%
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {slot.variantId && !isValid && (
+                  <p className="text-xs text-red-500">
+                    Sin stock para esta variante
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={!allSlotsFilled || !allSlotsValid}
+            onClick={handleConfirm}
+          >
+            Confirmar pack
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -884,6 +1095,7 @@ function CreateSaleDialog({
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectingVariants, setSelectingVariants] = useState<ProductWithVariants | null>(null);
+  const [selectingPackVariants, setSelectingPackVariants] = useState<ProductWithVariants | null>(null);
   const [forceClose, setForceClose] = useState(false);
 
   const { data: products, isLoading: loadingProducts } = useQuery({
@@ -908,7 +1120,13 @@ function CreateSaleDialog({
   const projectedBalanceAfterPayment = (selectedCustomer?.balance ?? 0) + remaining;
 
   const handleAddProduct = (product: ProductWithVariants) => {
-    // If product has variants, open variant picker
+    // Pack products: open the N-slot pack picker
+    if (product.pack_units != null && product.pack_units >= 2) {
+      setSelectingPackVariants(product);
+      setProductSearch('');
+      return;
+    }
+    // If product has variants, open single variant picker
     if (product.variants.length > 0) {
       setSelectingVariants(product);
       setProductSearch('');
@@ -990,6 +1208,29 @@ function CreateSaleDialog({
       },
     ]);
     setSelectingVariants(null);
+  };
+
+  const handleConfirmPack = (
+    product: ProductWithVariants,
+    packItems: Array<{
+      variant: ProductWithVariants['variants'][0];
+      unitPrice: number;
+      subtotal: number;
+    }>,
+  ) => {
+    const newItems: SaleItem[] = packItems.map((pi) => ({
+      productId: product.id,
+      productName: product.name,
+      variantId: pi.variant.id,
+      variantLabel: `${pi.variant.size || ''} ${pi.variant.color || ''}`.trim() || 'Sin variante',
+      quantity: 1,
+      unitPrice: pi.unitPrice,
+      discount: 0,
+      subtotal: pi.subtotal,
+    }));
+
+    setItems((prev) => [...prev, ...newItems]);
+    setSelectingPackVariants(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1089,9 +1330,18 @@ function CreateSaleDialog({
                     onClick={() => handleAddProduct(product)}
                     className="w-full px-3 py-2 text-left hover:bg-[#F0F0EC] transition-colors"
                   >
-                    <div className="font-medium">{product.name}</div>
+                    <div className="font-medium">
+                      {product.name}
+                      {product.pack_units != null && product.pack_units >= 2 && (
+                        <Badge variant="default" className="ml-2 bg-[#1A1A1A] text-[10px] text-white">
+                          Pack x{product.pack_units}
+                        </Badge>
+                      )}
+                    </div>
                     <div className="text-sm text-[#1A1A1A]/60">
-                      {formatCurrency(product.price)}
+                      {product.pack_units != null && product.pack_units >= 2
+                        ? `Precio pack: ${formatCurrency(product.price)}`
+                        : formatCurrency(product.price)}
                       {product.variants.length > 0 && ` · ${product.variants.length} variantes`}
                     </div>
                   </button>
@@ -1308,6 +1558,13 @@ function CreateSaleDialog({
         onOpenChange={(open) => { if (!open) setSelectingVariants(null); }}
         product={selectingVariants}
         onConfirm={handleConfirmVariant}
+        itemsInSale={items}
+      />
+      <PackVariantPickerDialog
+        open={!!selectingPackVariants}
+        onOpenChange={(open) => { if (!open) setSelectingPackVariants(null); }}
+        product={selectingPackVariants}
+        onConfirmPack={handleConfirmPack}
         itemsInSale={items}
       />
     </Dialog>

@@ -18,7 +18,7 @@ import {
 import { useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { CartItem, CartSummary } from '@mbt/shared';
-import { calculateTotal } from '@mbt/shared';
+import { calculateTotal, computeCartSubtotal } from '@mbt/shared';
 import { useShippingSettings } from '@/features/shipping/hooks/use-shipping-settings';
 import {
   getCart,
@@ -85,10 +85,7 @@ export function useCart(): UseCartReturn {
 
   return useMemo(() => {
     const totalItems = rawItems.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = rawItems.reduce(
-      (sum, item) => sum + item.unit_price * item.quantity,
-      0,
-    );
+    const subtotal = computeCartSubtotal(rawItems);
     const { shipping, total } = calculateTotal(subtotal, shippingSettings);
     const summary: CartSummary = {
       subtotal,
@@ -288,10 +285,7 @@ export function useCartSummary(): CartSummary {
   });
 
   const totalItems = data.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = data.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0,
-  );
+  const subtotal = computeCartSubtotal(data);
   const { shipping, total } = calculateTotal(subtotal, shippingSettings);
 
   return {

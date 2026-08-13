@@ -297,6 +297,16 @@ export function useUpdateOrderStatus() {
 // Create order (admin)
 // ---------------------------------------------------------------------------
 
+/**
+ * Guard: pack products (pack_units >= 2) MUST NOT be added to manual admin
+ * orders in v1. Use the in-person sales flow instead (design 5.5).
+ * The picker should filter out products where pack_units IS NOT NULL and
+ * show: "Este producto se vende en pack — usá Ventas en persona por ahora".
+ */
+export function isPackProduct(product: { pack_units: number | null }): boolean {
+  return product.pack_units != null && product.pack_units >= 2;
+}
+
 interface CreateAdminOrderInput {
   customer_id: string;
   status?: string;

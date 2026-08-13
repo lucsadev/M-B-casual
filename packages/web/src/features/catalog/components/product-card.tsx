@@ -65,6 +65,16 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Tags overlay */}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+          {/* Out-of-stock takes priority so it stays clearly visible:
+              other badges (Nuevo/Destacado/-%) still render below it. */}
+          {product.totalStock === 0 && (
+            <Badge
+              variant="secondary"
+              className="bg-[#F0F0EC] text-[#1A1A1A]/60 shadow-sm"
+            >
+              Agotado
+            </Badge>
+          )}
           {product.tags.includes('nuevo') && (
             <Badge
               variant="default"

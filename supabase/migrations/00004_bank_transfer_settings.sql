@@ -132,7 +132,7 @@ begin
            then floor(base * 100 / pack_units) / 100
            else base end as unit_price,
       case when pack_units is not null
-           then mod((base * 100)::int, pack_units) / 100
+           then mod((base * 100)::int, pack_units)::numeric / 100
            else 0 end as remainder
     from priced
   )
@@ -200,7 +200,7 @@ begin
            then floor(base * 100 / pack_units) / 100
            else base end as unit_price,
       case when pack_units is not null
-           then mod((base * 100)::int, pack_units) / 100
+           then mod((base * 100)::int, pack_units)::numeric / 100
            else 0 end as remainder
     from priced
   )

@@ -30,6 +30,11 @@ export interface Product {
   tags: string[];
   /** Whether the product is visible and purchasable */
   isActive: boolean;
+  /**
+   * Total stock summed across all variants (stock is variant-level only).
+   * Populated by web catalog list queries; absent when unknown (e.g. admin).
+   */
+  totalStock?: number;
   /** Lowest price after variant discount (populated by discounted_products view) */
   effectivePrice?: number;
   /** Highest variant discount percentage (populated by discounted_products view) */

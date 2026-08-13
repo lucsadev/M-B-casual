@@ -10,7 +10,7 @@
  * - Edge cases: single row group, large quantities
  */
 import { describe, it, expect } from 'vitest';
-import { splitPackPrice } from '@mbt/shared';
+import { splitPackPrice, computeCartSubtotal } from '@mbt/shared';
 
 describe('splitPackPrice', () => {
   // -------------------------------------------------------------------
@@ -160,5 +160,75 @@ describe('splitPackPrice', () => {
     const r2 = splitPackPrice({ total: 150.5, packUnits: 2, rowIndex: 2, rowCount: 2 });
 
     expect(r1.subtotal + r2.subtotal).toBe(150.5);
+  });
+});
+
+describe('computeCartSubtotal', () => {
+  it('counts a pack group once, using products.price', () => {
+    const items = [
+      // Pack x2 — two cart rows, each with the FULL unit_price
+      {
+        product_id: 'pack-1',
+        pack_units: 2,
+        unit_price: 3500,
+        quantity: 1,
+        product_price: 3500,
+      },
+      {
+        product_id: 'pack-1',
+        pack_units: 2,
+        unit_price: 3500,
+        quantity: 1,
+        product_price: 3500,
+      },
+      // Regular item
+      {
+        product_id: 'solo-1',
+        pack_units: null,
+        unit_price: 1000,
+        quantity: 2,
+        product_price: 1000,
+      },
+    ];
+
+    // 3500 (pack total) + 2000 (solo) = 5500 — NOT 9000
+    expect(computeCartSubtotal(items)).toBe(5500);
+  });
+
+  it('handles a collapsed pack row (repeated variant, quantity > 1)', () => {
+    const items = [
+      {
+        product_id: 'pack-1',
+        pack_units: 2,
+        unit_price: 10000,
+        quantity: 2, // both slots same variant → collapsed
+        product_price: 10000,
+      },
+    ];
+
+    // One pack group → products.price exactly once
+    expect(computeCartSubtotal(items)).toBe(10000);
+  });
+
+  it('handles multiple distinct pack groups', () => {
+    const items = [
+      { product_id: 'p1', pack_units: 2, unit_price: 5000, quantity: 1, product_price: 5000 },
+      { product_id: 'p1', pack_units: 2, unit_price: 5000, quantity: 1, product_price: 5000 },
+      { product_id: 'p2', pack_units: 3, unit_price: 9000, quantity: 1, product_price: 9000 },
+      { product_id: 'p2', pack_units: 3, unit_price: 9000, quantity: 1, product_price: 9000 },
+      { product_id: 'p2', pack_units: 3, unit_price: 9000, quantity: 1, product_price: 9000 },
+    ];
+
+    // 5000 + 9000 = 14000
+    expect(computeCartSubtotal(items)).toBe(14000);
+  });
+
+  it('treats items without pack_units as regular line items', () => {
+    const items = [
+      { product_id: 'a', pack_units: null, unit_price: 100, quantity: 3, product_price: 100 },
+      { product_id: 'b', pack_units: null, unit_price: 250, quantity: 1, product_price: 250 },
+    ];
+
+    expect(computeCartSubtotal(items)).toBe(550);
   });
 });

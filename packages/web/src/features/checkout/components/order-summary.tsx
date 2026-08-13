@@ -4,16 +4,63 @@
  * Shows:
  * - List of items with name, variant, quantity, and line total
  * - Subtotal, shipping, and grand total
+ *
+ * Pack-aware: pack products (pack_units != null) are priced with splitPackPrice
+ * so each row shows its share of the pack total, matching the RPC math.
  */
 import type { CartItem, CartSummary } from '@mbt/shared';
-import { formatPrice } from '@mbt/shared';
+import { formatPrice, splitPackPrice } from '@mbt/shared';
 
 interface OrderSummaryProps {
   items: CartItem[];
   summary: CartSummary;
 }
 
+/** Sort comparator matching the RPC's ROW_NUMBER/COUNT ordering (created_at, id). */
+function byCreatedAtAsc(a: CartItem, b: CartItem): number {
+  const t = a.created_at.localeCompare(b.created_at);
+  return t !== 0 ? t : a.id.localeCompare(b.id);
+}
+
+/**
+ * Compute per-row display totals for pack products. For every pack group the
+ * rows are sorted by created_at/id (matching the RPC) and each row shows its
+ * split share of products.price. Non-pack items are not included.
+ */
+function computePackDisplayTotals(
+  items: CartItem[],
+): Map<string, { unitPrice: number; lineTotal: number }> {
+  const packGroups = new Map<string, CartItem[]>();
+  for (const item of items) {
+    if (item.pack_units != null && item.pack_units >= 2) {
+      const group = packGroups.get(item.product_id) ?? [];
+      group.push(item);
+      packGroups.set(item.product_id, group);
+    }
+  }
+
+  const result = new Map<string, { unitPrice: number; lineTotal: number }>();
+  for (const group of packGroups.values()) {
+    const sorted = [...group].sort(byCreatedAtAsc);
+    const packUnits = sorted[0]?.pack_units ?? 2;
+    const productPrice = sorted[0]?.product_price ?? 0;
+    sorted.forEach((item, idx) => {
+      const sp = splitPackPrice({
+        total: productPrice,
+        packUnits,
+        quantity: item.quantity,
+        rowIndex: idx + 1,
+        rowCount: sorted.length,
+      });
+      result.set(item.id, { unitPrice: sp.unitPrice, lineTotal: sp.subtotal });
+    });
+  }
+  return result;
+}
+
 export function OrderSummary({ items, summary }: OrderSummaryProps) {
+  const packDisplay = computePackDisplayTotals(items);
+
   return (
     <div className="rounded-lg border border-[#E2E2DC] bg-white p-6">
       <h2 className="mb-4 text-lg font-bold text-[#1A1A1A]">
@@ -22,7 +69,12 @@ export function OrderSummary({ items, summary }: OrderSummaryProps) {
 
       {/* Items list */}
       <div className="divide-y divide-[#E2E2DC]">
-        {items.map((item) => (
+        {items.map((item) => {
+          const packRow = packDisplay.get(item.id);
+          const lineTotal = packRow?.lineTotal ?? item.unit_price * item.quantity;
+          const unitPrice = packRow?.unitPrice ?? item.unit_price;
+
+          return (
           <div key={item.id} className="flex items-start gap-3 py-3">
             {/* Thumbnail */}
             <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-[#F0F0EC]">
@@ -45,15 +97,22 @@ export function OrderSummary({ items, summary }: OrderSummaryProps) {
               )}
               <div className="flex items-center justify-between">
                 <span className="text-xs text-[#1A1A1A]/60">
-                  x{item.quantity}
+                  {packRow ? (
+                    <>
+                      x{item.quantity} · {formatPrice(unitPrice)} c/u
+                    </>
+                  ) : (
+                    <>x{item.quantity}</>
+                  )}
                 </span>
                 <span className="text-sm font-medium text-[#1A1A1A]">
-                  {formatPrice(item.unit_price * item.quantity)}
+                  {formatPrice(lineTotal)}
                 </span>
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Totals */}
