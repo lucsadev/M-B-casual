@@ -5,9 +5,19 @@ export {
   getInStockVariants,
   getAvailableSizes,
   getAvailableColors,
+  getAllSizes,
+  getAllColors,
+  hasStockFor,
   getFirstInStockSize,
   resolveInStockVariantId,
   resolveDefaultSelection,
   resolveNextSizeOnColorChange,
   resolveNextSizeOnSizeTap,
 } from './variants.ts';
+export {
+  splitPackPrice,
+  computeCartSubtotal,
+  type SplitPackPriceInput,
+  type SplitPackPriceResult,
+  type CartSubtotalItem,
+} from './pack.ts';
