@@ -66,6 +66,8 @@ comment on table categories is 'Product categories (Mujer, Hombre, Accesorios)';
 -- 3.2  PRODUCTS
 -- compare_price was dropped (00013): the compare/crossed-out price is now
 -- derived from variant discounts via the discounted_products view.
+-- pack_units (00007): NULL = not a pack; 2|3 = x2/x3 pack size. When
+-- non-NULL, products.price is the TOTAL pack price covering N variant units.
 -- ---------------------------------------------------------------------------
 create table products (
   id            uuid primary key default uuid_generate_v4(),
@@ -74,14 +76,19 @@ create table products (
   slug          text not null unique,
   description   text,
   price         numeric(10,2) not null,
+  pack_units    smallint,
   images        text[],
   tags          text[],
   is_active     boolean not null default true,
   created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
+  updated_at    timestamptz not null default now(),
+
+  constraint products_pack_units_check check (pack_units is null or pack_units >= 2)
 );
 
 comment on table products is 'Product catalog — all items with pricing and metadata';
+comment on column products.pack_units is
+  'Pack size (x2/x3): number of variants the buyer must pick for the single pack price. NULL = not a pack.';
 
 -- ---------------------------------------------------------------------------
 -- 3.3  PRODUCT VARIANTS (size + color per product, with discount %)
