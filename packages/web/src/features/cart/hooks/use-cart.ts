@@ -170,6 +170,8 @@ export function useAddToCart() {
             product_name: '',
             product_slug: '',
             product_image: null,
+            product_price: 0,
+            pack_units: null,
             variant_label: null,
             unit_price: 0,
             created_at: new Date().toISOString(),

@@ -7,6 +7,10 @@ export interface CartItem {
   product_name: string;
   product_slug: string;
   product_image: string | null;
+  /** products.price — the original (pre-discount) product price */
+  product_price: number;
+  /** products.pack_units — null = not a pack; 2|3 = pack x2/x3 */
+  pack_units: number | null;
   variant_label: string | null;
   unit_price: number;
   created_at: string;

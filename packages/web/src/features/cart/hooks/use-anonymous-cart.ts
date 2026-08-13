@@ -217,6 +217,8 @@ export function useAnonymousCart() {
       product_name: item.product_name,
       product_slug: '',
       product_image: item.product_image,
+      product_price: item.unit_price,
+      pack_units: null,
       variant_label: null,
       unit_price: item.unit_price,
       created_at: new Date().toISOString(),

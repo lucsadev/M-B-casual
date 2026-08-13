@@ -7,11 +7,12 @@
  * - "Iniciar checkout" button
  * - Empty state with link to catalog
  */
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartContext } from '../context/CartContext';
 import { useUpdateQty, useRemoveItem } from '../hooks/use-cart';
 import { CartItemRow } from '../components/cart-item-row';
+import { CartPackGroup } from '../components/cart-pack-group';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatPrice } from '@mbt/shared';
@@ -37,6 +38,30 @@ export function CartPage() {
     },
     [updateQty],
   );
+
+  // Group items: pack rows share a product_id and render via CartPackGroup;
+  // non-pack items render individually.
+  const { packGroups, soloItems } = useMemo(() => {
+    const packMap = new Map<string, { packUnits: number; items: typeof items }>();
+    const solo: typeof items = [];
+
+    for (const item of items) {
+      if (item.pack_units != null && item.pack_units >= 2) {
+        const existing = packMap.get(item.product_id);
+        if (existing) {
+          existing.items.push(item);
+        } else {
+          packMap.set(item.product_id, {
+            packUnits: item.pack_units,
+            items: [item],
+          });
+        }
+      } else {
+        solo.push(item);
+      }
+    }
+    return { packGroups: packMap, soloItems: solo };
+  }, [items]);
 
   // Loading state
   if (isLoading) {
@@ -124,7 +149,21 @@ export function CartPage() {
             </div>
 
             <div className="divide-y divide-[#E2E2DC] px-4">
-              {items.map((item) => (
+              {Array.from(packGroups.entries()).map(
+                ([productId, { packUnits, items: packItems }]) => (
+                  <CartPackGroup
+                    key={`pack-${productId}`}
+                    items={packItems}
+                    packUnits={packUnits}
+                    variant="full"
+                    onIncrement={handleIncrement}
+                    onDecrement={handleDecrement}
+                    onRemove={(itemId) => removeItem(itemId)}
+                    isUpdating={busy}
+                  />
+                ),
+              )}
+              {soloItems.map((item) => (
                 <CartItemRow
                   key={item.id}
                   item={item}
