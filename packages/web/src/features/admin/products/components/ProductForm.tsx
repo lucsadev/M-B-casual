@@ -49,6 +49,7 @@ const productFormSchema = z.object({
     .number()
     .min(0, 'El costo debe ser mayor o igual a 0')
     .optional(),
+  packUnits: z.coerce.number().int().min(2).nullable().default(null),
   tags: z.string().optional(),
   isActive: z.boolean().default(true),
   images: z.array(z.string()).default([]),
@@ -108,6 +109,7 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
     supplierIds: [],
     price: product?.price ?? 0,
     cost: product?.cost ?? undefined,
+    packUnits: product?.packUnits ?? null,
     tags: product?.tags?.join(', ') ?? '',
     isActive: product?.isActive ?? true,
     images: product?.images ?? [],
@@ -294,6 +296,54 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
               )}
             </div>
 
+          </div>
+
+          {/* Pack mode toggle */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="packToggle"
+                checked={!!watch('packUnits')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setValue('packUnits', 2, { shouldValidate: true });
+                  } else {
+                    setValue('packUnits', null, { shouldValidate: true });
+                  }
+                }}
+                className="h-4 w-4 rounded border-[#E2E2DC] accent-[#1A1A1A]"
+              />
+              <Label htmlFor="packToggle" className="cursor-pointer">
+                Venta en pack
+              </Label>
+            </div>
+            {watch('packUnits') !== null && (
+              <div className="ml-7 space-y-1">
+                <Label htmlFor="packUnits">Tamaño del pack</Label>
+                <Controller
+                  name="packUnits"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Select
+                      value={String(field.value ?? 2)}
+                      onValueChange={(val) => field.onChange(Number(val))}
+                    >
+                      <SelectTrigger id="packUnits" className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2">x2 unidades</SelectItem>
+                        <SelectItem value="3">x3 unidades</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="text-xs text-[#1A1A1A]/50">
+                  El precio ingresado es el total del pack.
+                </p>
+              </div>
+            )}
           </div>
         </section>
 
