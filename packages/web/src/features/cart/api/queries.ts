@@ -38,6 +38,7 @@ interface CartItemJoined {
     slug: string;
     images: string[] | null;
     price: number;
+    pack_units: number | null;
   } | null;
   product_variant: {
     size: string | null;
@@ -66,6 +67,8 @@ function mapCartItem(row: CartItemJoined): CartItem {
     product_name: row.product?.name ?? '',
     product_slug: row.product?.slug ?? '',
     product_image: row.product?.images?.[0] ?? null,
+    product_price: row.product?.price ?? 0,
+    pack_units: row.product?.pack_units ?? null,
     variant_label: row.product_variant
       ? [row.product_variant.size, row.product_variant.color]
           .filter(Boolean)
@@ -98,7 +101,8 @@ export async function getCart(userId: string): Promise<CartItem[]> {
         name,
         slug,
         images,
-        price
+        price,
+        pack_units
       ),
       product_variant:variant_id (
         size,
