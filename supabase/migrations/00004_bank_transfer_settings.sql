@@ -107,17 +107,41 @@ begin
     raise exception 'El carrito está vacío';
   end if;
 
-  -- 4. Calculate total with variant discount
+  -- 4. Calculate total using pack-aware split CTE
+  --    For pack products (pack_units NOT NULL): floor cents per unit, last row absorbs remainder
+  --    For non-pack products: identical to previous behavior (unit_price = discounted price)
+  with priced as (
+    select
+      ci.id,
+      ci.product_id,
+      ci.variant_id,
+      ci.quantity,
+      p.pack_units,
+      round(p.price * (1 - coalesce(pv.discount, 0)::numeric / 100), 2) as base,
+      row_number() over (partition by ci.product_id order by ci.created_at, ci.id) as rn,
+      count(*) over (partition by ci.product_id) as cnt
+    from cart_items ci
+    join products p on p.id = ci.product_id
+    left join product_variants pv on pv.id = ci.variant_id
+    where ci.user_id = v_user_id
+  ),
+  split as (
+    select
+      *,
+      case when pack_units is not null
+           then floor(base * 100 / pack_units) / 100
+           else base end as unit_price,
+      case when pack_units is not null
+           then mod((base * 100)::int, pack_units) / 100
+           else 0 end as remainder
+    from priced
+  )
   select coalesce(sum(
-    round(
-      (p.price * (1 - coalesce(pv.discount, 0)::numeric / 100)) * ci.quantity
-    , 2)
+    unit_price * quantity
+    + case when pack_units is not null and rn = cnt then remainder else 0 end
   ), 0)
   into v_total
-  from cart_items ci
-  join products p on p.id = ci.product_id
-  left join product_variants pv on pv.id = ci.variant_id
-  where ci.user_id = v_user_id;
+  from split;
 
   -- 4b. Load shipping settings (fallback: free shipping)
   select coalesce(free_shipping_min, 0), coalesce(shipping_cost, 0)
@@ -152,21 +176,46 @@ begin
   -- 5b. Generate short order number for display (first 8 chars of uuid)
   v_order_number := left(v_order_id::text, 8);
 
-  -- 6. Insert order_items with variant-discounted unit_price
+  -- 6. Insert order_items with pack-aware split pricing
+  --    Re-define the priced/split CTEs (CTEs are statement-scoped in PostgreSQL)
+  with priced as (
+    select
+      ci.id,
+      ci.product_id,
+      ci.variant_id,
+      ci.quantity,
+      p.pack_units,
+      round(p.price * (1 - coalesce(pv.discount, 0)::numeric / 100), 2) as base,
+      row_number() over (partition by ci.product_id order by ci.created_at, ci.id) as rn,
+      count(*) over (partition by ci.product_id) as cnt
+    from cart_items ci
+    join products p on p.id = ci.product_id
+    left join product_variants pv on pv.id = ci.variant_id
+    where ci.user_id = v_user_id
+  ),
+  split as (
+    select
+      *,
+      case when pack_units is not null
+           then floor(base * 100 / pack_units) / 100
+           else base end as unit_price,
+      case when pack_units is not null
+           then mod((base * 100)::int, pack_units) / 100
+           else 0 end as remainder
+    from priced
+  )
   insert into order_items (
     order_id, product_id, variant_id, quantity, unit_price, subtotal
   )
   select
     v_order_id,
-    ci.product_id,
-    ci.variant_id,
-    ci.quantity,
-    round(p.price * (1 - coalesce(pv.discount, 0)::numeric / 100), 2),
-    round((p.price * (1 - coalesce(pv.discount, 0)::numeric / 100)) * ci.quantity, 2)
-  from cart_items ci
-  join products p on p.id = ci.product_id
-  left join product_variants pv on pv.id = ci.variant_id
-  where ci.user_id = v_user_id;
+    product_id,
+    variant_id,
+    quantity,
+    unit_price,
+    unit_price * quantity
+    + case when pack_units is not null and rn = cnt then remainder else 0 end
+  from split;
 
   -- 7. Clear cart
   delete from cart_items
