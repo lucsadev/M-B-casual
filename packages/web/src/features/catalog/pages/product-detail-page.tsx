@@ -364,7 +364,7 @@ export function ProductDetailPage() {
             )}
 
             {totalStock === 0 && (
-              <div className="absolute -right-12 top-6 z-10 rotate-45 bg-rose-600 text-center text-[10px] font-bold uppercase text-white py-1 w-36">
+              <div className="absolute -right-12 top-6 z-10 rotate-45 bg-rose-600/50 text-center text-[10px] font-bold uppercase text-white py-1 px-6 w-36">
                 Agotado
               </div>
             )}

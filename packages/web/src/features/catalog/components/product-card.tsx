@@ -64,7 +64,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
         {product.totalStock === 0 && (
-          <div className="absolute -right-12 top-6 z-10 rotate-45 bg-rose-600 text-center text-[10px] font-bold uppercase text-white py-1 w-36">
+          <div className="absolute -right-12 top-6 z-10 rotate-45 bg-rose-600/50 text-center text-[10px] font-bold uppercase text-white py-1 px-6 w-36">
             Agotado
           </div>
         )}
