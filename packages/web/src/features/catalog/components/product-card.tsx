@@ -63,18 +63,14 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
+        {product.totalStock === 0 && (
+          <div className="absolute -right-12 top-6 z-10 rotate-45 bg-rose-600 text-center text-[10px] font-bold uppercase text-white py-1 w-36">
+            Agotado
+          </div>
+        )}
+
         {/* Tags overlay */}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-          {/* Out-of-stock takes priority so it stays clearly visible:
-              other badges (Nuevo/Destacado/-%) still render below it. */}
-          {product.totalStock === 0 && (
-            <Badge
-              variant="secondary"
-              className="bg-[#F0F0EC] text-[#1A1A1A]/60 shadow-sm"
-            >
-              Agotado
-            </Badge>
-          )}
           {product.tags.includes('nuevo') && (
             <Badge
               variant="default"
