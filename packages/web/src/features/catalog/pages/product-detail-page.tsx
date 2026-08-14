@@ -363,6 +363,12 @@ export function ProductDetailPage() {
               />
             )}
 
+            {totalStock === 0 && (
+              <div className="absolute -right-12 top-6 z-10 rotate-45 bg-rose-600/50 text-center text-[10px] font-bold uppercase text-white py-1 px-6 w-36">
+                Agotado
+              </div>
+            )}
+
             {/* Image counter */}
             {productImages.length > 1 && (
               <span className="absolute right-3 bottom-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white">
