@@ -36,8 +36,8 @@ function EnviosTab() {
   const settings = useShippingSettings();
   const { mutate, isPending } = useUpdateShippingSettings();
 
-  const [freeShippingMin, setFreeShippingMin] = useState('0');
-  const [shippingCost, setShippingCost] = useState('0');
+  const [freeShippingMin, setFreeShippingMin] = useState('');
+  const [shippingCost, setShippingCost] = useState('');
 
   useEffect(() => {
     setFreeShippingMin(String(settings.freeShippingMin ?? 0));
