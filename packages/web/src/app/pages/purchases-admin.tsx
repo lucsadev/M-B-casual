@@ -83,6 +83,21 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
+function formatDate(iso: string): string {
+  // Parse date-only strings (YYYY-MM-DD) as LOCAL dates to avoid timezone shift
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (m) {
+    return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).toLocaleDateString('es-AR');
+  }
+  return new Date(iso).toLocaleDateString('es-AR');
+}
+
+function todayISO(): string {
+  // Local date (NOT toISOString, which is UTC-based and shifts near midnight)
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
 // ---------------------------------------------------------------------------
 // Hooks
 // ---------------------------------------------------------------------------
@@ -175,7 +190,7 @@ export function AdminPurchasesPage() {
     supplierName: '',
     invoiceNumber: '',
     notes: '',
-    purchaseDate: new Date().toISOString().split('T')[0],
+    purchaseDate: todayISO(),
   });
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
@@ -246,7 +261,7 @@ export function AdminPurchasesPage() {
       supplierName: '',
       invoiceNumber: '',
       notes: '',
-      purchaseDate: new Date().toISOString().split('T')[0],
+      purchaseDate: todayISO(),
     });
     setLineItems([]);
   }
@@ -329,7 +344,7 @@ export function AdminPurchasesPage() {
             {data?.data.map((purchase) => (
               <TableRow key={purchase.id}>
                 <TableCell className="text-sm text-[#1A1A1A]/60">
-                  {new Date(purchase.purchase_date).toLocaleDateString('es-AR')}
+                  {formatDate(purchase.purchase_date)}
                 </TableCell>
                 <TableCell className="font-medium">
                   {purchase.supplier_name}

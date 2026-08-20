@@ -23,7 +23,8 @@ import type { DateRange } from '../components/date-range-filter';
 function currentMonthRange(): DateRange {
   const now = new Date();
   const from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-  const to = now.toISOString().split('T')[0];
+  // Local date (NOT toISOString, which is UTC-based and shifts near midnight)
+  const to = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   return { from, to };
 }
 
