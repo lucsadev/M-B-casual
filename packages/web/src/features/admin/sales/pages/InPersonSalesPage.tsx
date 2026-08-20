@@ -40,7 +40,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Plus, Search, ShoppingCart, UserPlus, Edit, X, Eye, HandCoins, Trash2 } from 'lucide-react';
+import { Plus, Minus, Check, Search, ShoppingCart, UserPlus, Edit, X, Eye, HandCoins, Trash2 } from 'lucide-react';
 import { formatPrice, splitPackPrice, getAvailableSizes, getAvailableColors, getInStockVariants, resolveInStockVariantId } from '@mbt/shared';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/lib/database.types';
@@ -618,78 +618,166 @@ function DeleteCustomerDialog({
 }
 
 // ---------------------------------------------------------------------------
-// Variant Picker Dialog
+// Multi-Product Variant Picker Dialog
 // ---------------------------------------------------------------------------
 
-function VariantPickerDialog({
+function MultiVariantPickerDialog({
   open,
   onOpenChange,
-  product,
+  products,
   onConfirm,
   itemsInSale = [],
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product: ProductWithVariants | null;
-  onConfirm: (product: ProductWithVariants, variant: ProductWithVariants['variants'][0]) => void;
+  products: ProductWithVariants[];
+  onConfirm: (
+    adds: Array<{
+      product: ProductWithVariants;
+      variant: ProductWithVariants['variants'][0];
+      quantity: number;
+    }>,
+  ) => void;
   itemsInSale?: SaleItem[];
 }) {
-  if (!product) return null;
+  const [picks, setPicks] = useState<Record<string, number>>({});
 
-  // Calculate available stock for each variant considering items already in sale
-  const getAvailableStock = (variantId: string) => {
-    const variant = product.variants.find(v => v.id === variantId);
-    if (!variant) return 0;
-    const alreadyInSale = itemsInSale
-      .filter(item => item.variantId === variantId)
+  // Reset pending picks each time the dialog opens
+  useEffect(() => {
+    if (open) setPicks({});
+  }, [open]);
+
+  // Quantity of this variant already committed to the sale
+  const soldQty = (variantId: string) =>
+    itemsInSale
+      .filter((item) => item.variantId === variantId)
       .reduce((sum, item) => sum + item.quantity, 0);
-    return variant.stock - alreadyInSale;
+
+  // Stock still available considering sale items AND pending picks
+  const getAvailableStock = (variantId: string) => {
+    for (const product of products) {
+      const variant = product.variants.find((v) => v.id === variantId);
+      if (variant) return variant.stock - soldQty(variantId);
+    }
+    return 0;
   };
 
-  const availableVariants = product.variants.filter(v => getAvailableStock(v.id) > 0);
+  const inc = (variantId: string) => {
+    if ((picks[variantId] || 0) >= getAvailableStock(variantId)) return;
+    setPicks((p) => ({ ...p, [variantId]: (p[variantId] || 0) + 1 }));
+  };
+
+  const dec = (variantId: string) => {
+    setPicks((p) => {
+      const next = { ...p };
+      const q = (next[variantId] || 0) - 1;
+      if (q <= 0) delete next[variantId];
+      else next[variantId] = q;
+      return next;
+    });
+  };
+
+  const totalUnits = Object.values(picks).reduce((sum, q) => sum + q, 0);
+
+  const handleConfirm = () => {
+    const adds: Array<{
+      product: ProductWithVariants;
+      variant: ProductWithVariants['variants'][0];
+      quantity: number;
+    }> = [];
+    for (const product of products) {
+      for (const variant of product.variants) {
+        const qty = picks[variant.id];
+        if (qty && qty > 0) adds.push({ product, variant, quantity: qty });
+      }
+    }
+    if (adds.length === 0) return;
+    onConfirm(adds);
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Elegí variante para <span className="font-normal">{product.name}</span></DialogTitle>
+          <DialogTitle>Elegí variantes</DialogTitle>
           <DialogDescription>
-            Seleccioná talle y color disponibles.
+            Sumá unidades de cada variante. Se agregan todas juntas al confirmar.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3 max-h-60 overflow-y-auto">
-          {availableVariants.map((variant) => {
-            const availableStock = getAvailableStock(variant.id);
-            return (
-              <button
-                key={variant.id}
-                type="button"
-                onClick={() => onConfirm(product, variant)}
-                className="w-full p-3 border rounded-md text-left hover:bg-[#F0F0EC] transition-colors flex items-center justify-between"
-              >
-                <div>
-                  <div className="font-medium">
-                    {variant.size || 'Único'} {variant.color ? '· ' + variant.color : ''}
-                  </div>
-                  <div className="text-sm text-[#1A1A1A]/60">
-                    Stock disponible: {availableStock} {variant.discount > 0 ? ' · ' + variant.discount + '% desc.' : ''}
-                  </div>
-                </div>
-                <span className="font-medium">
-                  {formatCurrency(product.price * (1 - (variant.discount || 0) / 100))}
+        <div className="space-y-4">
+          {products.map((product) => (
+            <div key={product.id} className="border rounded-md overflow-hidden">
+              <div className="bg-[#F0F0EC] px-3 py-2 flex items-center justify-between">
+                <span className="font-medium text-sm">{product.name}</span>
+                <span className="text-xs text-[#1A1A1A]/60">
+                  {formatCurrency(product.price)}
                 </span>
-              </button>
-            );
-          })}
-          {availableVariants.length === 0 && (
-            <p className="text-center text-[#E8836B] py-4">
-              Sin stock disponible en ninguna variante
-            </p>
-          )}
+              </div>
+              <div className="p-2 space-y-2">
+                {product.variants.map((variant) => {
+                  const available = getAvailableStock(variant.id);
+                  const qty = picks[variant.id] || 0;
+                  const label = `${variant.size || 'Único'}${variant.color ? ' · ' + variant.color : ''}`;
+                  return (
+                    <div
+                      key={variant.id}
+                      className={cn(
+                        'flex items-center justify-between gap-2 rounded-md border px-3 py-2',
+                        qty > 0 ? 'border-[#E8836B]' : 'border-[#E2E2DC]',
+                      )}
+                    >
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm truncate">{label}</div>
+                        <div className="text-xs text-[#1A1A1A]/60">
+                          Stock: {available - qty}
+                          {variant.discount > 0 && ` · ${variant.discount}% desc.`}
+                          {' · '}
+                          {formatCurrency(product.price * (1 - (variant.discount || 0) / 100))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7"
+                          disabled={qty === 0}
+                          onClick={() => dec(variant.id)}
+                          aria-label={`Quitar una unidad de ${label}`}
+                        >
+                          <Minus className="h-3.5 w-3.5" />
+                        </Button>
+                        <span className={cn('w-7 text-center text-sm font-medium', qty > 0 && 'text-[#E8836B]')}>
+                          {qty}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7"
+                          disabled={available - qty <= 0}
+                          onClick={() => inc(variant.id)}
+                          aria-label={`Sumar una unidad de ${label}`}
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
+          </Button>
+          <Button disabled={totalUnits === 0} onClick={handleConfirm}>
+            {totalUnits === 0
+              ? 'Elegí variantes'
+              : `Agregar ${totalUnits} ${totalUnits === 1 ? 'unidad' : 'unidades'}`}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1308,7 +1396,8 @@ function CreateSaleDialog({
   const [paymentMethod, setPaymentMethod] = useState<string>('efectivo');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectingVariants, setSelectingVariants] = useState<ProductWithVariants | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<ProductWithVariants[]>([]);
+  const [variantPickerOpen, setVariantPickerOpen] = useState(false);
   const [selectingPackVariants, setSelectingPackVariants] = useState<ProductWithVariants | null>(null);
   const [forceClose, setForceClose] = useState(false);
 
@@ -1320,6 +1409,8 @@ function CreateSaleDialog({
 
   const handleForceClose = () => {
     setForceClose(true);
+    setSelectedProducts([]);
+    setVariantPickerOpen(false);
     onOpenChange(false);
     setForceClose(false);
   };
@@ -1333,37 +1424,74 @@ function CreateSaleDialog({
   // Projected balance AFTER payment
   const projectedBalanceAfterPayment = (selectedCustomer?.balance ?? 0) + remaining;
 
-  const handleAddProduct = (product: ProductWithVariants) => {
-    // Pack products: open the N-slot pack picker
+  const isProductSelected = (id: string) => selectedProducts.some((p) => p.id === id);
+
+  const handleToggleProduct = (product: ProductWithVariants) => {
+    // Pack products keep their dedicated N-slot picker flow (not multi-selectable)
     if (product.pack_units != null && product.pack_units >= 2) {
       setSelectingPackVariants(product);
       setProductSearch('');
       return;
     }
-    // If product has variants, open single variant picker
-    if (product.variants.length > 0) {
-      setSelectingVariants(product);
-      setProductSearch('');
-      return;
-    }
-    // No variants, add directly
-    const variantLabel = 'Sin variante';
-    const price = product.price;
+    setSelectedProducts((prev) =>
+      prev.some((p) => p.id === product.id)
+        ? prev.filter((p) => p.id !== product.id)
+        : [...prev, product],
+    );
+  };
 
+  const handleContinueSelection = () => {
+    if (selectedProducts.length === 0) return;
+    // Products without variants are added directly
+    const noVariant = selectedProducts.filter((p) => p.variants.length === 0);
+    if (noVariant.length > 0) {
+      setItems((prev) => [
+        ...prev,
+        ...noVariant.map((product) => ({
+          productId: product.id,
+          productName: product.name,
+          variantId: null,
+          variantLabel: 'Sin variante',
+          quantity: 1,
+          unitPrice: product.price,
+          discount: 0,
+          subtotal: product.price,
+        })),
+      ]);
+    }
+    const withVariants = selectedProducts.filter((p) => p.variants.length > 0);
+    setProductSearch('');
+    if (withVariants.length > 0) {
+      setVariantPickerOpen(true);
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const handleConfirmMultiVariants = (
+    adds: Array<{
+      product: ProductWithVariants;
+      variant: ProductWithVariants['variants'][0];
+      quantity: number;
+    }>,
+  ) => {
     setItems((prev) => [
       ...prev,
-      {
-        productId: product.id,
-        productName: product.name,
-        variantId: null,
-        variantLabel,
-        quantity: 1,
-        unitPrice: price,
-        discount: 0,
-        subtotal: price,
-      },
+      ...adds.map(({ product, variant, quantity }) => {
+        const price = product.price * (1 - (variant.discount || 0) / 100);
+        return {
+          productId: product.id,
+          productName: product.name,
+          variantId: variant.id,
+          variantLabel: `${variant.size || ''} ${variant.color || ''}`.trim() || 'Sin variante',
+          quantity,
+          unitPrice: price,
+          discount: 0,
+          subtotal: price * quantity,
+        };
+      }),
     ]);
-    setProductSearch('');
+    setSelectedProducts([]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -1400,28 +1528,6 @@ function CreateSaleDialog({
       const maxCredit = Math.min(Math.abs(selectedCustomer.balance), finalTotal);
       setBalanceUsed(maxCredit);
     }
-  };
-
-  const handleConfirmVariant = (product: ProductWithVariants, variant: ProductWithVariants['variants'][0]) => {
-    const variantLabel = variant
-      ? `${variant.size || ''} ${variant.color || ''}`.trim() || 'Sin variante'
-      : 'Sin variante';
-    const price = variant ? product.price * (1 - (variant.discount || 0) / 100) : product.price;
-
-    setItems((prev) => [
-      ...prev,
-      {
-        productId: product.id,
-        productName: product.name,
-        variantId: variant?.id || null,
-        variantLabel,
-        quantity: 1,
-        unitPrice: price,
-        discount: 0,
-        subtotal: price,
-      },
-    ]);
-    setSelectingVariants(null);
   };
 
   const handleConfirmPack = (
@@ -1471,6 +1577,8 @@ function CreateSaleDialog({
       // Reset form
       setCustomerId('');
       setItems([]);
+      setSelectedProducts([]);
+      setVariantPickerOpen(false);
       setDiscount('');
       setAmountPaid('');
       setBalanceUsed('');
@@ -1537,32 +1645,73 @@ function CreateSaleDialog({
             {loadingProducts && <Skeleton className="h-10 w-full mt-2" />}
             {products && products.length > 0 && (
               <div className="mt-2 border rounded-md divide-y max-h-40 overflow-y-auto">
-                {products.map((product) => (
-                  <button
-                    key={product.id}
-                    type="button"
-                    onClick={() => handleAddProduct(product)}
-                    className="w-full px-3 py-2 text-left hover:bg-[#F0F0EC] transition-colors"
-                  >
-                    <div className="font-medium">
-                      {product.name}
-                      {product.pack_units != null && product.pack_units >= 2 && (
-                        <Badge variant="default" className="ml-2 bg-[#1A1A1A] text-[10px] text-white">
-                          Pack x{product.pack_units}
-                        </Badge>
+                {products.map((product) => {
+                  const isSelected = isProductSelected(product.id);
+                  return (
+                    <button
+                      key={product.id}
+                      type="button"
+                      onClick={() => handleToggleProduct(product)}
+                      className={cn(
+                        'w-full px-3 py-2 text-left transition-colors flex items-start gap-2',
+                        isSelected ? 'bg-[#FCE8E4]' : 'hover:bg-[#F0F0EC]',
                       )}
-                    </div>
-                    <div className="text-sm text-[#1A1A1A]/60">
-                      {product.pack_units != null && product.pack_units >= 2
-                        ? `Precio pack: ${formatCurrency(product.price)}`
-                        : formatCurrency(product.price)}
-                      {product.variants.length > 0 && ` · ${product.variants.length} variantes`}
-                    </div>
-                  </button>
-                ))}
+                    >
+                      <span
+                        className={cn(
+                          'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                          isSelected
+                            ? 'border-[#E8836B] bg-[#E8836B] text-white'
+                            : 'border-[#C8C8C0] bg-white',
+                        )}
+                        aria-hidden="true"
+                      >
+                        {isSelected && <Check className="h-3 w-3" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-medium">
+                          {product.name}
+                          {product.pack_units != null && product.pack_units >= 2 && (
+                            <Badge variant="default" className="ml-2 bg-[#1A1A1A] text-[10px] text-white">
+                              Pack x{product.pack_units}
+                            </Badge>
+                          )}
+                        </span>
+                        <span className="block text-sm text-[#1A1A1A]/60">
+                          {product.pack_units != null && product.pack_units >= 2
+                            ? `Precio pack: ${formatCurrency(product.price)}`
+                            : formatCurrency(product.price)}
+                          {product.variants.length > 0 && ` · ${product.variants.length} variantes`}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
+
+          {/* Selected products chips + continue */}
+          {selectedProducts.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {selectedProducts.map((p) => (
+                <Badge key={p.id} variant="secondary" className="gap-1 pr-1">
+                  {p.name}
+                  <button
+                    type="button"
+                    onClick={() => handleToggleProduct(p)}
+                    className="ml-1 rounded-full p-0.5 hover:bg-[#E2E2DC]"
+                    aria-label={`Quitar ${p.name}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              <Button type="button" size="sm" onClick={handleContinueSelection}>
+                Continuar ({selectedProducts.length})
+              </Button>
+            </div>
+          )}
 
           {/* Items list */}
           {items.length > 0 && (
@@ -1767,11 +1916,11 @@ function CreateSaleDialog({
           </DialogFooter>
         </form>
       </DialogContent>
-      <VariantPickerDialog
-        open={!!selectingVariants}
-        onOpenChange={(open) => { if (!open) setSelectingVariants(null); }}
-        product={selectingVariants}
-        onConfirm={handleConfirmVariant}
+      <MultiVariantPickerDialog
+        open={variantPickerOpen}
+        onOpenChange={setVariantPickerOpen}
+        products={selectedProducts.filter((p) => p.variants.length > 0)}
+        onConfirm={handleConfirmMultiVariants}
         itemsInSale={items}
       />
       <PackVariantPickerDialog
