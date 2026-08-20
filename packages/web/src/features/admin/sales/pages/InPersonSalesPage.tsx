@@ -1407,6 +1407,15 @@ function CreateSaleDialog({
     enabled: open && productSearch.length >= 2,
   });
 
+  // Clear product search every time the dialog opens
+  useEffect(() => {
+    if (open) {
+      setProductSearch('');
+      setSelectedProducts([]);
+      setVariantPickerOpen(false);
+    }
+  }, [open]);
+
   const handleForceClose = () => {
     setForceClose(true);
     setSelectedProducts([]);
