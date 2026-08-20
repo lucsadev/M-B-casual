@@ -28,7 +28,9 @@ export interface DateRange {
 // ---------------------------------------------------------------------------
 
 function todayISO(): string {
-  return new Date().toISOString().split('T')[0];
+  // Local date (NOT toISOString, which is UTC-based and shifts near midnight)
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
 function firstOfMonth(year: number, month: number): string {
@@ -36,7 +38,13 @@ function firstOfMonth(year: number, month: number): string {
 }
 
 function lastOfMonth(year: number, month: number): string {
-  return new Date(year, month + 1, 0).toISOString().split('T')[0];
+  // Local date arithmetic to avoid timezone shift
+  const d = new Date(year, month + 1, 0);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function localDateISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 interface Preset {
@@ -74,7 +82,7 @@ const PRESETS: Preset[] = [
       const now = new Date();
       const from = new Date(now.getFullYear(), now.getMonth() - 2, 1);
       return {
-        from: from.toISOString().split('T')[0],
+        from: localDateISO(from),
         to: todayISO(),
       };
     },
@@ -85,7 +93,7 @@ const PRESETS: Preset[] = [
       const now = new Date();
       const from = new Date(now.getFullYear(), now.getMonth() - 5, 1);
       return {
-        from: from.toISOString().split('T')[0],
+        from: localDateISO(from),
         to: todayISO(),
       };
     },

@@ -74,11 +74,19 @@ function formatPrice(price: number): string {
 }
 
 function formatDate(iso: string): string {
+  // Parse date-only strings (YYYY-MM-DD) as LOCAL dates to avoid timezone shift
+  // (new Date("2026-08-20") parses as UTC midnight → shows previous day in UTC-3)
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (m) {
+    return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).toLocaleDateString('es-AR');
+  }
   return new Date(iso).toLocaleDateString('es-AR');
 }
 
 function todayISO(): string {
-  return new Date().toISOString().split('T')[0];
+  // Local date (NOT toISOString, which is UTC-based and shifts near midnight)
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
 // ---------------------------------------------------------------------------

@@ -56,6 +56,21 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
+function formatDate(iso: string): string {
+  // Parse date-only strings (YYYY-MM-DD) as LOCAL dates to avoid timezone shift
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (m) {
+    return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).toLocaleDateString('es-AR');
+  }
+  return new Date(iso).toLocaleDateString('es-AR');
+}
+
+function todayISO(): string {
+  // Local date (NOT toISOString, which is UTC-based and shifts near midnight)
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
 export function AdminExpensesPage() {
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(1);
@@ -64,7 +79,7 @@ export function AdminExpensesPage() {
     description: '',
     amount: '',
     expenseCategory: 'varios',
-    expenseDate: new Date().toISOString().split('T')[0],
+    expenseDate: todayISO(),
   });
 
   const { data, isLoading } = useExpenses({ category: category || undefined, page, pageSize: 25 });
@@ -84,7 +99,7 @@ export function AdminExpensesPage() {
       description: '',
       amount: '',
       expenseCategory: 'varios',
-      expenseDate: new Date().toISOString().split('T')[0],
+      expenseDate: todayISO(),
     });
   }
 
@@ -161,7 +176,7 @@ export function AdminExpensesPage() {
             {data?.data.map((expense) => (
               <TableRow key={expense.id}>
                 <TableCell className="text-sm text-[#1A1A1A]/60">
-                  {new Date(expense.expense_date).toLocaleDateString('es-AR')}
+                  {formatDate(expense.expense_date)}
                 </TableCell>
                 <TableCell className="font-medium">{expense.description}</TableCell>
                 <TableCell>
