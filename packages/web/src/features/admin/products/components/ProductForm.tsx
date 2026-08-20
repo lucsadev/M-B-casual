@@ -107,7 +107,7 @@ export function ProductForm({ product, onSubmit, isSubmitting }: ProductFormProp
     description: product?.description ?? '',
     categoryId: product?.categoryId ?? '',
     supplierIds: [],
-    price: product?.price ?? 0,
+    price: product?.price ?? undefined,
     cost: product?.cost ?? undefined,
     packUnits: product?.packUnits ?? null,
     tags: product?.tags?.join(', ') ?? '',

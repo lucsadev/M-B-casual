@@ -24,8 +24,8 @@ export function ShippingSettingsPage() {
   const settings = useShippingSettings();
   const { mutate, isPending } = useUpdateShippingSettings();
 
-  const [freeShippingMin, setFreeShippingMin] = useState('0');
-  const [shippingCost, setShippingCost] = useState('0');
+  const [freeShippingMin, setFreeShippingMin] = useState('');
+  const [shippingCost, setShippingCost] = useState('');
 
   // Sync local state once settings load / change
   useEffect(() => {

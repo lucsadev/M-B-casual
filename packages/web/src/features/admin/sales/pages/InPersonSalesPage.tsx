@@ -40,7 +40,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Plus, Search, ShoppingCart, UserPlus, Edit, X, Eye, HandCoins } from 'lucide-react';
+import { Plus, Search, ShoppingCart, UserPlus, Edit, X, Eye, HandCoins, Trash2 } from 'lucide-react';
 import { formatPrice, splitPackPrice, getAvailableSizes, getAvailableColors, getInStockVariants, resolveInStockVariantId } from '@mbt/shared';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/lib/database.types';
@@ -246,6 +246,27 @@ async function createCustomer(input: {
   return data;
 }
 
+async function deleteCustomer(id: string): Promise<{ deleted: boolean; hasSales: boolean }> {
+  // Check for existing sales first
+  const { count, error: countError } = await supabase
+    .from('in_person_sales')
+    .select('id', { count: 'exact', head: true })
+    .eq('customer_id', id);
+
+  if (countError) throw countError;
+  if (count && count > 0) {
+    return { deleted: false, hasSales: true };
+  }
+
+  const { error } = await supabase
+    .from('in_person_customers')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return { deleted: true, hasSales: false };
+}
+
 async function createSale(input: {
   customerId: string | null;
   items: SaleItem[];
@@ -413,6 +434,184 @@ function CreateCustomerDialog({
             </Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Edit Sale Dialog
+// ---------------------------------------------------------------------------
+
+function EditSaleDialog({
+  open,
+  onOpenChange,
+  sale,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  sale: CustomerSale | null;
+  onSuccess: () => void;
+}) {
+  const [discount, setDiscount] = useState<number | ''>('');
+  const [amountPaid, setAmountPaid] = useState<number | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState('efectivo');
+  const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (sale) {
+      setDiscount(sale.discount || '');
+      setAmountPaid(sale.amount_paid || '');
+      setPaymentMethod(sale.payment_method || 'efectivo');
+      setNotes('');
+    }
+  }, [sale]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sale) return;
+    setLoading(true);
+    try {
+      const newDiscount = Number(discount) || 0;
+      // NOTE: total stays as the original items subtotal (no discount applied).
+      // The DB trigger calculates: discount_amount = total * (discount / 100)
+      // and then: balance_change = total - discount_amount - amount_paid - balance_used
+      const { error } = await supabase
+        .from('in_person_sales')
+        .update({
+          discount: newDiscount,
+          amount_paid: Number(amountPaid) || 0,
+          payment_method: paymentMethod,
+          ...(notes.trim() ? { notes: notes.trim() } : {}),
+        })
+        .eq('id', sale.id);
+
+      if (error) throw error;
+      toast.success('Venta actualizada correctamente');
+      onSuccess();
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(`Error al actualizar venta: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!sale) return null;
+  const newDiscount = Number(discount) || 0;
+  const newTotal = sale.items.reduce((sum, item) => sum + item.subtotal, 0) * (1 - newDiscount / 100);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Editar venta</DialogTitle>
+          <DialogDescription>Modificá los datos de la venta del {formatDate(sale.created_at)}.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <p className="text-sm text-[#1A1A1A]/60">Subtotal original</p>
+            <p className="font-medium">{formatCurrency(sale.items.reduce((sum, item) => sum + item.subtotal, 0))}</p>
+          </div>
+          <div>
+            <Label htmlFor="edit-sale-discount">Descuento (%)</Label>
+            <Input id="edit-sale-discount" type="number" min="0" max="100" value={discount} onChange={(e) => setDiscount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0)} />
+          </div>
+          <div>
+            <p className="text-sm text-[#1A1A1A]/60">Total con descuento</p>
+            <p className="font-bold text-[#E8836B]">{formatCurrency(newTotal)}</p>
+          </div>
+          <div>
+            <Label htmlFor="edit-sale-paid">Monto pagado</Label>
+            <Input id="edit-sale-paid" type="number" min="0" step="0.01" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value === '' ? '' : parseFloat(e.target.value) || 0)} />
+          </div>
+          <div>
+            <Label>Método de pago</Label>
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="efectivo">Efectivo</SelectItem>
+                <SelectItem value="tarjeta">Tarjeta</SelectItem>
+                <SelectItem value="transferencia">Transferencia</SelectItem>
+                <SelectItem value="mixto">Mixto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="edit-sale-notes">Notas (opcional)</Label>
+            <Input id="edit-sale-notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Agregar notas a la venta..." />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar cambios'}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Delete Customer Dialog
+// ---------------------------------------------------------------------------
+
+function DeleteCustomerDialog({
+  open,
+  onOpenChange,
+  customer,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  customer: InPersonCustomer | null;
+  onSuccess: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    if (!customer) return;
+    setLoading(true);
+    try {
+      const result = await deleteCustomer(customer.id);
+      if (result.hasSales) {
+        toast.error('No se puede eliminar: el cliente tiene ventas asociadas.');
+        onOpenChange(false);
+        return;
+      }
+      toast.success('Cliente eliminado correctamente');
+      onSuccess();
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(`Error al eliminar cliente: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Eliminar cliente</DialogTitle>
+          <DialogDescription>Esta acción no se puede deshacer.</DialogDescription>
+        </DialogHeader>
+        <p className="text-sm text-[#1A1A1A]/70">
+          ¿Estás seguro de eliminar al cliente{' '}
+          <strong className="text-[#1A1A1A]">{customer?.name}</strong>?
+          {customer && customer.balance > 0 && (
+            <span className="block mt-2 text-amber-600 font-medium">
+              Este cliente tiene una deuda de {formatCurrency(customer.balance)}.
+            </span>
+          )}
+        </p>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+            {loading ? 'Eliminando...' : 'Eliminar'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -720,7 +919,7 @@ function CollectPaymentDialog({
   customer: InPersonCustomer | null;
   onSuccess: () => void;
 }) {
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number | ''>('');
   const [paymentMethod, setPaymentMethod] = useState<string>('efectivo');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -764,7 +963,7 @@ function CollectPaymentDialog({
       toast.success('Pago registrado correctamente');
       onSuccess();
       onOpenChange(false);
-      setAmount(0);
+      setAmount('');
       setNotes('');
       setPaymentMethod('efectivo');
     },
@@ -786,7 +985,7 @@ function CollectPaymentDialog({
             Deuda actual: <strong>{formatCurrency(customer.balance)}</strong>
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={(e) => { e.preventDefault(); collectMutation.mutate({ customerId: customer.id, amount, paymentMethod, notes: notes.trim() || undefined }); }} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); collectMutation.mutate({ customerId: customer.id, amount: Number(amount) || 0, paymentMethod, notes: notes.trim() || undefined }); }} className="space-y-4">
           <div>
             <Label htmlFor="amount">Monto a cobrar *</Label>
             <Input
@@ -796,7 +995,7 @@ function CollectPaymentDialog({
               max={customer.balance}
               step="0.01"
               value={amount}
-              onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+              onChange={(e) => setAmount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
               placeholder="0.00"
               required
             />
@@ -831,8 +1030,8 @@ function CollectPaymentDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading || amount <= 0 || amount > customer.balance}>
-              {loading ? 'Registrando...' : `Cobrar ${formatCurrency(amount)}`}
+            <Button type="submit" disabled={loading || (Number(amount) || 0) <= 0 || (Number(amount) || 0) > customer.balance}>
+              {loading ? 'Registrando...' : `Cobrar ${formatCurrency(Number(amount) || 0)}`}
             </Button>
           </DialogFooter>
         </form>
@@ -848,10 +1047,12 @@ function CustomerMovementsDialog({
   open,
   onOpenChange,
   customer,
+  onEditSale,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   customer: InPersonCustomer | null;
+  onEditSale: (sale: CustomerSale) => void;
 }) {
   const { data: sales, isLoading: salesLoading } = useQuery({
     queryKey: ['admin', 'customer-sales', customer?.id],
@@ -952,15 +1153,28 @@ function CustomerMovementsDialog({
                     )}
                   </p>
                 </div>
-                <div className="text-right">
-                  {movement.type === 'sale' ? (
-                    <>
-                      <p className="font-bold text-sm text-[#E8836B] md:text-base">{formatCurrency(movement.total)}</p>
-                      {movement.discount > 0 && <p className="text-xs text-[#E8836B] md:text-sm">{movement.discount}% desc.</p>}
-                    </>
-                  ) : (
-                    <p className="font-bold text-sm text-blue-600 md:text-base">+{formatCurrency(movement.amount)}</p>
+                <div className="flex items-center gap-2">
+                  {movement.type === 'sale' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEditSale(movement)}
+                      className="h-8 w-8 text-[#1A1A1A]/60 hover:text-[#1A1A1A]"
+                      aria-label="Editar venta"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                   )}
+                  <div className="text-right">
+                    {movement.type === 'sale' ? (
+                      <>
+                        <p className="font-bold text-sm text-[#E8836B] md:text-base">{formatCurrency(movement.total)}</p>
+                        {movement.discount > 0 && <p className="text-xs text-[#E8836B] md:text-sm">{movement.discount}% desc.</p>}
+                      </>
+                    ) : (
+                      <p className="font-bold text-sm text-blue-600 md:text-base">+{formatCurrency(movement.amount)}</p>
+                    )}
+                  </div>
                 </div>
               </div>
               {movement.type === 'sale' && movement.items && (
@@ -1088,9 +1302,9 @@ function CreateSaleDialog({
   const [customerId, setCustomerId] = useState<string>('');
   const [productSearch, setProductSearch] = useState('');
   const [items, setItems] = useState<SaleItem[]>([]);
-  const [discount, setDiscount] = useState(0);
-  const [amountPaid, setAmountPaid] = useState(0);
-  const [balanceUsed, setBalanceUsed] = useState(0);
+  const [discount, setDiscount] = useState<number | ''>('');
+  const [amountPaid, setAmountPaid] = useState<number | ''>('');
+  const [balanceUsed, setBalanceUsed] = useState<number | ''>('');
   const [paymentMethod, setPaymentMethod] = useState<string>('efectivo');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -1112,8 +1326,8 @@ function CreateSaleDialog({
 
   const selectedCustomer = customers.find((c) => c.id === customerId);
   const total = items.reduce((sum, item) => sum + item.subtotal, 0);
-  const finalTotal = total * (1 - discount / 100);
-  const remaining = finalTotal - amountPaid - balanceUsed;
+  const finalTotal = total * (1 - (Number(discount) || 0) / 100);
+  const remaining = finalTotal - (Number(amountPaid) || 0) - (Number(balanceUsed) || 0);
   // Projected balance BEFORE any payment in this transaction
   const projectedBalanceBeforePayment = (selectedCustomer?.balance ?? 0) + finalTotal;
   // Projected balance AFTER payment
@@ -1245,9 +1459,9 @@ function CreateSaleDialog({
       await createSale({
         customerId: customerId || null,
         items,
-        discount,
-        amountPaid,
-        balanceUsed,
+        discount: Number(discount) || 0,
+        amountPaid: Number(amountPaid) || 0,
+        balanceUsed: Number(balanceUsed) || 0,
         paymentMethod,
         notes: notes.trim() || undefined,
       });
@@ -1257,9 +1471,9 @@ function CreateSaleDialog({
       // Reset form
       setCustomerId('');
       setItems([]);
-      setDiscount(0);
-      setAmountPaid(0);
-      setBalanceUsed(0);
+      setDiscount('');
+      setAmountPaid('');
+      setBalanceUsed('');
       setPaymentMethod('efectivo');
       setNotes('');
     } catch (error: any) {
@@ -1453,7 +1667,7 @@ function CreateSaleDialog({
                   min="0"
                   max="100"
                   value={discount}
-                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setDiscount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                   className="w-32"
                 />
                 <span className="text-[#1A1A1A]/60">%</span>
@@ -1472,7 +1686,7 @@ function CreateSaleDialog({
                     min="0"
                     max={Math.min(Math.abs(selectedCustomer.balance), finalTotal)}
                     value={balanceUsed}
-                    onChange={(e) => setBalanceUsed(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setBalanceUsed(e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                     className="w-32"
                   />
                   <Button type="button" variant="outline" size="sm" onClick={handleUseBalance}>
@@ -1487,7 +1701,7 @@ function CreateSaleDialog({
                 type="number"
                 min="0"
                 value={amountPaid}
-                onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setAmountPaid(e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                 className="w-32"
               />
             </div>
@@ -1582,6 +1796,8 @@ export function InPersonSalesPage() {
   const [movementsCustomer, setMovementsCustomer] = useState<InPersonCustomer | null>(null);
   const [collectPaymentCustomer, setCollectPaymentCustomer] = useState<InPersonCustomer | null>(null);
   const [infoCustomer, setInfoCustomer] = useState<InPersonCustomer | null>(null);
+  const [deletingCustomer, setDeletingCustomer] = useState<InPersonCustomer | null>(null);
+  const [editingSale, setEditingSale] = useState<CustomerSale | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -1715,7 +1931,7 @@ export function InPersonSalesPage() {
                     {customer.balance > 0 && (
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
                           openCollectPayment(customer);
@@ -1723,21 +1939,31 @@ export function InPersonSalesPage() {
                         className="text-green-600 hover:bg-green-50"
                         aria-label={`Cobrar deuda de ${customer.name}`}
                       >
-                        <HandCoins className="h-4 w-4 md:mr-2" />
-                        <span className="hidden md:inline">Cobrar</span>
+                        <HandCoins className="h-4 w-4" />
                       </Button>
                     )}
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
                         openInfo(customer);
                       }}
                       aria-label={`Ver información de ${customer.name}`}
                     >
-                      <Eye className="h-4 w-4 md:mr-2" />
-                      <span className="hidden md:inline">Info</span>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletingCustomer(customer);
+                      }}
+                      className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                      aria-label={`Eliminar ${customer.name}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
@@ -1765,6 +1991,10 @@ export function InPersonSalesPage() {
         open={!!movementsCustomer}
         onOpenChange={(open) => { if (!open) setMovementsCustomer(null); }}
         customer={movementsCustomer}
+        onEditSale={(sale) => {
+          setMovementsCustomer(null);
+          setEditingSale(sale);
+        }}
       />
 
       <CollectPaymentDialog
@@ -1785,6 +2015,27 @@ export function InPersonSalesPage() {
         onViewMovements={(customer) => {
           setInfoCustomer(null);
           openMovements(customer);
+        }}
+      />
+
+      <EditSaleDialog
+        open={!!editingSale}
+        onOpenChange={(open) => { if (!open) setEditingSale(null); }}
+        sale={editingSale}
+        onSuccess={() => {
+          setEditingSale(null);
+          queryClient.invalidateQueries({ queryKey: ['admin', 'customer-sales'] });
+          queryClient.invalidateQueries({ queryKey: ['admin', 'in-person-customers'] });
+        }}
+      />
+
+      <DeleteCustomerDialog
+        open={!!deletingCustomer}
+        onOpenChange={(open) => { if (!open) setDeletingCustomer(null); }}
+        customer={deletingCustomer}
+        onSuccess={() => {
+          setDeletingCustomer(null);
+          queryClient.invalidateQueries({ queryKey: ['admin', 'in-person-customers'] });
         }}
       />
     </div>

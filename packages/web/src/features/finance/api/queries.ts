@@ -212,6 +212,22 @@ export interface ExpenseFilters {
 }
 
 /**
+ * Map raw Supabase expense row (snake_case) to Expense type (camelCase).
+ */
+function mapExpenseRow(row: Record<string, unknown>): Expense {
+  return {
+    id: row.id as string,
+    description: row.description as string,
+    amount: row.amount as number,
+    category: row.category as ExpenseCategory,
+    expenseDate: row.expense_date as string,
+    receiptUrl: (row.receipt_url as string) ?? null,
+    createdBy: (row.created_by as string) ?? null,
+    createdAt: row.created_at as string,
+  };
+}
+
+/**
  * Fetch paginated expenses with optional date range and category filter.
  */
 export async function getExpenses(
@@ -236,7 +252,7 @@ export async function getExpenses(
 
   if (error) throw error;
 
-  return (data ?? []) as unknown as Expense[];
+  return (data ?? []).map(mapExpenseRow);
 }
 
 /**
@@ -254,7 +270,7 @@ export async function getExpenseById(id: string): Promise<Expense | null> {
     throw error;
   }
 
-  return data as unknown as Expense;
+  return mapExpenseRow(data as Record<string, unknown>);
 }
 
 /** Input shape for creating an expense */

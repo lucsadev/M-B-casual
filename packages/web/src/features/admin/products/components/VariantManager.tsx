@@ -98,8 +98,8 @@ export function VariantManager() {
           append({
             size: '',
             color: '',
-            discount: 0,
-            stock: 0,
+            discount: undefined,
+            stock: undefined,
           })
         }
       >
