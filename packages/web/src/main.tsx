@@ -7,7 +7,10 @@ import { queryClient } from './lib/query-client.js';
 import { router } from './app/router.js';
 import { Toaster } from '@/components/ui/toaster.js';
 import { registerServiceWorker } from './lib/register-service-worker.js';
+import { disableNumberInputStepping } from './lib/disable-number-input-stepping.js';
 import './app/globals.css';
+
+disableNumberInputStepping();
 
 const root = document.getElementById('root');
 
